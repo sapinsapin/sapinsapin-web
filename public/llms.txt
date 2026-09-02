@@ -1,0 +1,30 @@
+# SapinSapin AI
+
+> An open initiative building corpora, benchmarks, and models for Philippine-language AI — speech recognition, text-to-speech, and natural language processing across 10+ languages, including Filipino, Cebuano, Ilocano, Hiligaynon, Bikol, Pangasinan, Kapampangan, Tausug, and Waray.
+
+Every dataset and model is openly published on Hugging Face. Figures on sapinsapin.ai are synced from the Hub at build time — the Hub itself is the source of record for counts, licenses, and gated status.
+
+## Datasets
+
+- [Philippine Language Dataset (PLD)](https://huggingface.co/datasets/sapinsapin/pld): 334,268 utterances across 10 languages, 448+ hours of prompted 16 kHz speech
+- [Filipino Speech Corpus](https://huggingface.co/datasets/sapinsapin/filipinospeechcorpus): 305,246 segments, 65+ hours of Filipino/Tagalog speech, MIT license
+- [BantayWika](https://huggingface.co/datasets/sapinsapin/BantayWika): 6.09M verified tokens of Filipino, Cebuano, and Ilocano text
+- [halohalo](https://huggingface.co/datasets/sapinsapin/halohalo): 45,536 rows of cleaned Philippine-language web data
+
+## Models
+
+28 public models on the Hub, spanning speech recognition (Whisper fine-tunes), text-to-speech (SpeechT5 fine-tunes), voice conversion, and text generation (Llama 3.1 and GPT-oss-20b continued pretraining). Full catalog: https://huggingface.co/sapinsapin
+
+## Live demo
+
+- [halohalo Space](https://huggingface.co/spaces/sapinsapin/halohalo-dashboard): transcribe, synthesize, and convert voice in Philippine languages, callable directly from the browser
+
+## Links
+
+- [Hugging Face organization](https://huggingface.co/sapinsapin)
+- [GitHub](https://github.com/sapinsapin)
+- [Contribute / contact](https://github.com/sapinsapin/halohalo/issues)
+
+## Notes for automated use
+
+Licenses are dataset-specific — MIT and the UP-DSP research license both appear in the current catalog. Check the individual Hugging Face dataset card before reuse, especially for commercial use. Figures reported as "downloads" on sapinsapin.ai are the Hub's 30-day download count, not lifetime totals.

@@ -3,15 +3,41 @@
 
 User-agent: *
 Allow: /
-Disallow: /assets/
-Crawl-delay: 1
-
-# Prevent indexing of Vite build artifacts
-User-agent: *
 Disallow: /*.js.map$
 Disallow: /*.css.map$
 
-# Host
-Host: https://sapinsapin.ai
+# Explicit allows for AI crawlers and assistants. This is an open research
+# initiative — the datasets, models, and this site exist to be found and
+# used, so unlike sites that block AI training bots by default, these are
+# named deliberately rather than left to the wildcard rule above.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
 
 Sitemap: https://sapinsapin.ai/sitemap.xml
