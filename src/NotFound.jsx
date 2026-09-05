@@ -35,12 +35,12 @@ const destinations = [
   {
     id: 'work', kind: 'section', title: 'Data collections', href: '/#work',
     blurb: 'Every dataset in the catalog with its size, license, and 30-day downloads.',
-    keywords: ['datasets', 'data', 'corpus', 'corpora', 'collections', 'pld', 'bantaywika', 'filipinospeechcorpus', 'philippine language dataset', 'download'],
+    keywords: ['datasets', 'data', 'corpus', 'corpora', 'collections', 'pld', 'bantaywika', 'filipinospeechcorpus', 'philippine language dataset', 'download', 'halohalo', 'halo', 'text', 'tokens', 'pretraining'],
   },
   {
     id: 'models', kind: 'section', title: 'Models', href: '/#models',
     blurb: 'The public catalog — speech recognition, text-to-speech, voice conversion, and language models.',
-    keywords: ['models', 'model card', 'whisper', 'speecht5', 'llama', 'gpt oss', 'weights', 'checkpoints', 'finetune'],
+    keywords: ['models', 'model card', 'whisper', 'speecht5', 'llama', 'gpt oss', 'weights', 'checkpoints', 'finetune', 'balitanlp', 'bikollm', 'bikol llm', 'qwen', 'llm', 'text generation', 'language model'],
   },
   {
     id: 'open', kind: 'section', title: 'Why open', href: '/#open',

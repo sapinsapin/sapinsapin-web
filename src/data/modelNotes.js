@@ -37,9 +37,9 @@ const baseNotes = {
 
 const dataNotes = {
   'sapinsapin/pld':
-    'Philippine Language Dataset — prompted 16 kHz speech recorded across ten Philippine languages.',
+    'Philippine Language Dataset — prompted 16 kHz speech recorded across nine Philippine languages and English.',
   'sapinsapin/filipinospeechcorpus':
-    'The UP-DSP Filipino Speech Corpus, cut into sentence-level 16 kHz segments.',
+    'The Filipino Speech Corpus (Sagum), cut into 16 kHz segments — mostly isolated word tokens, not sentences.',
   'LanceBunag/BalitaNLP':
     'BalitaNLP — about 352,000 Filipino news articles with their images.',
   'CohereLabs/aya_dataset':

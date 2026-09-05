@@ -1,6 +1,6 @@
 # SapinSapin AI
 
-> An open initiative building corpora, benchmarks, and models for Philippine-language AI — speech recognition, text-to-speech, and natural language processing across 10+ languages, including Filipino, Cebuano, Ilocano, Hiligaynon, Bikol, Pangasinan, Kapampangan, Tausug, and Waray.
+> An open initiative building corpora, benchmarks, and models for Philippine-language AI — speech recognition, text-to-speech, language models, and pretraining text corpora across 10+ languages, including Filipino, Cebuano, Ilocano, Hiligaynon, Bikol, Pangasinan, Kapampangan, Tausug, and Waray.
 
 Every dataset and model is openly published on Hugging Face. Figures on sapinsapin.ai are synced from the Hub at build time — the Hub itself is the source of record for counts, licenses, and gated status.
 
@@ -8,7 +8,7 @@ Every dataset and model is openly published on Hugging Face. Figures on sapinsap
 
 - [Philippine Language Dataset (PLD)](https://huggingface.co/datasets/sapinsapin/pld): 334,268 utterances across 10 languages, 448+ hours of prompted 16 kHz speech
 - [Filipino Speech Corpus](https://huggingface.co/datasets/sapinsapin/filipinospeechcorpus): 305,246 segments, 65+ hours of Filipino/Tagalog speech, MIT license
-- [BantayWika](https://huggingface.co/datasets/sapinsapin/BantayWika): 6.09M verified tokens of Filipino, Cebuano, and Ilocano text
+- [BantayWika](https://huggingface.co/datasets/sapinsapin/BantayWika): 6.09M tokens of Filipino, Cebuano, and Ilocano text
 - [halohalo](https://huggingface.co/datasets/sapinsapin/halohalo): 45,536 rows of cleaned Philippine-language web data
 
 ## Models
@@ -18,6 +18,8 @@ Every dataset and model is openly published on Hugging Face. Figures on sapinsap
 ## Live demo
 
 - [halohalo Space](https://huggingface.co/spaces/sapinsapin/halohalo-dashboard): transcribe, synthesize, and convert voice in Philippine languages, callable directly from the browser
+
+The demo covers the speech models only. The text and language models (BalitaNLP continued-pretraining checkpoints, bikoLLM) are on the Hub rather than in the demo.
 
 ## Links
 

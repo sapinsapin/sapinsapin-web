@@ -7,6 +7,7 @@ import PhilippinesMap from './components/PhilippinesMap'
 import { useTheme } from './lib/theme'
 import { describeModel } from './data/modelNotes'
 import { languages as demoLanguages } from './data/spaceManifest'
+import { languageAnchors } from './data/philippinesMapPaths'
 
 const hub = 'https://huggingface.co/sapinsapin'
 const github = 'https://github.com/sapinsapin'
@@ -401,7 +402,7 @@ function Hero() {
           <a href="#demo" className="btn btn-ghost">Try the live demo <ArrowDown className="h-4 w-4" /></a>
         </div>
         <div className="hero-evidence hero-rise hero-rise-4 mt-10">
-          <span><b><CountUp value={totals.datasets} format={{ minimumIntegerDigits: 2 }} /></b> data collections</span><span><b><CountUp value={totals.models} /></b> public models</span><span><b><CountUp value={10} /></b> language layers</span>
+          <span><b><CountUp value={totals.datasets} format={{ minimumIntegerDigits: 2 }} /></b> data collections</span><span><b><CountUp value={totals.models} /></b> public models</span><span><b><CountUp value={languageAnchors.length} /></b> language layers</span>
         </div>
       </div>
       <div className="relative z-10 mx-auto w-full max-w-[580px] lg:ml-auto"><PhilippinesMap /></div>
@@ -466,7 +467,7 @@ function Demo() {
         <div>
           <Eyebrow>Try it in the browser</Eyebrow>
           <h2 className="mt-5 font-display text-[clamp(2.25rem,4vw,3.6rem)] font-medium leading-[1.02] tracking-[-.055em] text-ink">Hear the models <em className="text-ube">work.</em></h2>
-          <p className="mt-6 max-w-xl text-[1.03rem] leading-7 text-ink/70">These run the org’s own speech models for ten Philippine languages — no install, no account. Everything below calls the halohalo Space directly from this page.</p>
+          <p className="mt-6 max-w-xl text-[1.03rem] leading-7 text-ink/70">These run the org’s own speech models for nine Philippine languages and English — no install, no account. Everything below calls the halohalo Space directly from this page. The catalog also carries text-generation models, which the demo does not run — they are under <a className="font-medium text-ube underline decoration-ube/30 underline-offset-[3px] transition-colors hover:decoration-ube" href="#models">Text generation</a> in the model table below.</p>
           {/* Said once, up front, rather than discovered at second twenty. The
               Space is on free shared CPU, and pretending otherwise would make
               a working demo look broken. */}
@@ -507,13 +508,13 @@ function Demo() {
 
 function Problem() {
   const points = [
-    ['01', 'The default is not neutral.', <>Speech technology is overwhelmingly trained on languages with abundant data. That shapes who gets understood — and who gets left out.<Cite source="blasi" /></>],
+    ['01', 'The default is not neutral.', <>Language technology is overwhelmingly trained on languages with abundant data. That shapes who gets understood — and who gets left out.<Cite source="blasi" /></>],
     ['02', 'Language is local knowledge.', <>The Philippines has more than 170 living indigenous languages, each carrying distinct histories, communities, and ways of seeing.<Cite source="ethnologue" /> A useful AI must be grounded in that reality.</>],
     ['03', 'The foundation has to be open.', 'Open datasets make it possible for researchers, developers, and institutions to inspect, build, and improve together.'],
   ]
   return <section className="section-shell pt-20 sm:pt-36">
     <div className="grid gap-12 lg:grid-cols-[.78fr_1.22fr] lg:gap-24">
-      <SectionHeading eyebrow="The work begins with data" title={<>AI should understand<br />the Philippines <em className="text-ube">as spoken.</em></>}>Philippine languages remain underrepresented in the datasets that shape modern AI.<Cite source="joshi" /> The work of inclusion starts long before a model is trained.</SectionHeading>
+      <SectionHeading eyebrow="The work begins with data" title={<>AI should understand<br />the Philippines <em className="text-ube">in its own words.</em></>}>Philippine languages remain underrepresented in the datasets that shape modern AI.<Cite source="joshi" /> The work of inclusion starts long before a model is trained.</SectionHeading>
       <Reveal className="divide-y divide-ink/10 border-t border-ink/10">{points.map(([number, title, copy]) => <article key={number} className="grid gap-4 py-8 sm:grid-cols-[60px_1fr] sm:gap-6"><p className="text-xs font-semibold tracking-[.16em] text-ube">{number}</p><div><h3 className="text-xl font-semibold tracking-[-.045em] text-ink">{title}</h3><p className="mt-3 max-w-lg leading-7 text-ink/68">{copy}</p></div></article>)}</Reveal>
     </div>
   </section>
@@ -521,12 +522,12 @@ function Problem() {
 
 function Impact() {
   const stats = [
-    { value: 513.3, format: { minimumFractionDigits: 1, maximumFractionDigits: 1 }, label: 'verified speech hours', source: 'PLD + Filipino Speech Corpus' },
-    { value: 639514, label: 'verified utterances', source: 'PLD + Filipino Speech Corpus' },
-    { value: 10, label: 'Philippine languages', source: 'in the PLD collection' },
+    { value: 513.3, format: { minimumFractionDigits: 1, maximumFractionDigits: 1 }, label: 'documented speech hours', source: 'PLD + Filipino Speech Corpus' },
+    { value: 25265710, label: 'tokens of pretraining text', source: 'BantayWika + halohalo' },
+    { value: 10, label: 'languages in the collection', source: 'PLD — nine Philippine, plus English' },
     { value: totals.datasets, label: 'datasets in the catalog', source: `Hub sync · ${catalogSnapshot}` },
   ]
-  return <section className="section-shell pt-20 sm:pt-36"><div className="layer-band"><div className="mb-11 flex flex-col justify-between gap-5 md:flex-row md:items-end"><SectionHeading eyebrow="Impact, made inspectable" title={<>Built in public.<br />Measured honestly.</>} /><p className="max-w-sm text-sm leading-6 text-ink/65">Counts are taken from the public Hub cards and dataset documentation. “Verified” deliberately excludes access-controlled collections whose totals are not public.</p></div><Reveal as="dl" className="grid divide-y divide-ink/10 border-y border-ink/10 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">{stats.map(({ value, format, label, source }) => <div className="px-0 py-7 sm:px-6 lg:px-7" key={label}><dt className="font-display text-4xl tracking-[-.06em] text-ube sm:text-5xl"><CountUp value={value} format={format} /></dt><dd className="mt-2 text-sm font-semibold tracking-[-.02em] text-ink">{label}</dd><dd className="mt-1 text-xs leading-5 text-ink/60">{source}</dd></div>)}</Reveal></div></section>
+  return <section className="section-shell pt-20 sm:pt-36"><div className="layer-band"><div className="mb-11 flex flex-col justify-between gap-5 md:flex-row md:items-end"><SectionHeading eyebrow="Impact, made inspectable" title={<>Built in public.<br />Measured honestly.</>} /><p className="max-w-sm text-sm leading-6 text-ink/65">Counts are taken from the public Hub cards and dataset documentation. “Documented” means the figure is stated on a public dataset card; access-controlled collections whose totals are not public are excluded, and a stated figure is not an independently verified one.</p></div><Reveal as="dl" className="grid divide-y divide-ink/10 border-y border-ink/10 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">{stats.map(({ value, format, label, source }) => <div className="px-0 py-7 sm:px-6 lg:px-7" key={label}><dt className="font-display text-4xl tracking-[-.06em] text-ube sm:text-5xl"><CountUp value={value} format={format} /></dt><dd className="mt-2 text-sm font-semibold tracking-[-.02em] text-ink">{label}</dd><dd className="mt-1 text-xs leading-5 text-ink/60">{source}</dd></div>)}</Reveal></div></section>
 }
 
 function DatasetCard({ item, index }) {
@@ -757,7 +758,7 @@ function Models() {
             <span className="hidden text-xs text-ink/60 xl:block">{model.trainingData}</span>
             <span className="hidden text-right text-xs text-ink/60 sm:block">
               <span className="block font-semibold tabular-nums text-ink/80">{model.downloads}</span>
-              <span className="model-bar" aria-hidden="true"><i style={{ transform: `scaleX(${Math.max(0.02, (Number(model.downloads) || 0) / peak)})` }} /></span>
+              <span className="model-bar" aria-hidden="true"><i style={{ transform: `scaleX(${Math.max(0.02, Math.sqrt((Number(model.downloads) || 0) / peak))})` }} /></span>
               <small className="mt-1 block text-[10px] text-ink/60">Updated {model.updated}</small>
             </span>
             <ArrowUpRight className="h-4 w-4 text-ink/60 transition group-hover:text-ube" />
@@ -876,7 +877,7 @@ function BackToTop() {
 }
 
 function Footer() {
-  return <footer className="site-footer mt-20 sm:mt-40"><div className="section-shell py-14 sm:py-20"><div className="grid gap-12 lg:grid-cols-[1.25fr_.75fr_.75fr]"><div><div className="flex items-center gap-2.5"><Mark className="h-[2.1rem] w-[2.3rem]" /><p className="font-semibold tracking-[-.04em]">SapinSapin AI</p></div><p className="footer-body mt-5 max-w-sm text-sm leading-6">Open foundations for Philippine-language AI. Built with care for the layers that make a language live.</p></div><div><p className="footer-label">Find us</p><div className="footer-links"><ExternalLink href={github}>GitHub <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href={hub}>Hugging Face <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href="https://github.com/sapinsapin/halohalo/issues">Contact / contribute <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href="https://github.com/faeldon/philippines-json-maps">Map attribution <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink></div></div><div><p className="footer-label">Licensing</p><p className="footer-body mt-4 text-sm leading-6">No single project-wide license is implied. Individual datasets and models have their own terms, including MIT and other licenses. Check each linked card before use.</p></div></div><div className="footer-rule mt-14 flex flex-col justify-between gap-3 pt-5 text-[11px] sm:flex-row"><p>© 2026 SapinSapin AI</p><p>Catalog data verified {catalogSnapshot} · Designed for open research</p></div></div></footer>
+  return <footer className="site-footer mt-20 sm:mt-40"><div className="section-shell py-14 sm:py-20"><div className="grid gap-12 lg:grid-cols-[1.25fr_.75fr_.75fr]"><div><div className="flex items-center gap-2.5"><Mark className="h-[2.1rem] w-[2.3rem]" /><p className="font-semibold tracking-[-.04em]">SapinSapin AI</p></div><p className="footer-body mt-5 max-w-sm text-sm leading-6">Open foundations for Philippine-language AI. Built with care for the layers that make a language live.</p></div><div><p className="footer-label">Find us</p><div className="footer-links"><ExternalLink href={github}>GitHub <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href={hub}>Hugging Face <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href="https://github.com/sapinsapin/halohalo/issues">Contact / contribute <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href="https://github.com/faeldon/philippines-json-maps">Map attribution <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink></div></div><div><p className="footer-label">Licensing</p><p className="footer-body mt-4 text-sm leading-6">No single project-wide license is implied. Individual datasets and models have their own terms, including MIT and other licenses. Check each linked card before use.</p></div></div><div className="footer-rule mt-14 flex flex-col justify-between gap-3 pt-5 text-[11px] sm:flex-row"><p>© 2026 SapinSapin AI</p><p>Catalog data synced {catalogSnapshot} · Designed for open research</p></div></div></footer>
 }
 
 function App() {
@@ -906,7 +907,7 @@ function App() {
     '@type': 'DataCatalog',
     name: 'SapinSapin AI — Open Philippine Language Dataset Catalog',
     url: `${hub}?tab=datasets`,
-    description: 'A curated catalog of open speech and text datasets for Philippine-language AI research, spanning 10+ languages including Filipino, Cebuano, Ilocano, and Hiligaynon.',
+    description: 'A curated catalog of open speech corpora and pretraining text datasets for Philippine-language AI research, spanning 10+ languages including Filipino, Cebuano, Ilocano, and Hiligaynon.',
     provider: { '@type': 'Organization', name: 'SapinSapin AI', url: 'https://sapinsapin.ai' },
     dateModified: catalogSnapshot,
     inLanguage: ['fil', 'ceb', 'ilo', 'hil', 'bcl', 'pag', 'pam', 'tsg', 'war', 'en'],
