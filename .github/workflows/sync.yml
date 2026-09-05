@@ -62,13 +62,26 @@ jobs:
       - name: Build
         run: npm run build
 
+      # sync-catalog.mjs stamps syncedAt with today's date on every run, so the
+      # file always differs even when the Hub has not moved. Committing on that
+      # alone would deploy the site every single day to change one date string.
+      # Drop the snapshot if syncedAt is the ONLY thing that changed.
+      - name: Discard a date-only change
+        run: |
+          substantive=$(git diff -U0 -- src/data/hubSnapshot.js \
+            | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' | grep -v 'syncedAt' || true)
+          if [ -z "$substantive" ] && ! git diff --quiet -- src/data/hubSnapshot.js; then
+            echo 'Only syncedAt moved — the Hub is unchanged. Discarding.'
+            git checkout -- src/data/hubSnapshot.js
+          fi
+
       - name: Commit the refreshed snapshot
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src/data/hubSnapshot.js src/data/spaceManifest.js
           if git diff --cached --quiet; then
-            echo 'Hub unchanged — nothing to commit.'
+            echo 'Hub unchanged — nothing to commit, nothing to deploy.'
             exit 0
           fi
           git commit -m 'Sync Hub catalog'
