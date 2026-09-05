@@ -1,0 +1,75 @@
+# Keeps the published figures current without anyone remembering to.
+#
+# Why a scheduled commit rather than a Vercel cron: vercel.json's buildCommand is
+# `npm run build`, so a plain rebuild re-bundles the SAME committed snapshot and
+# refreshes nothing. And the Hub API pins access-control-allow-origin to
+# huggingface.co, so the browser cannot fetch it either — build-time sync is the
+# only route. Committing the refreshed snapshot also keeps git as the record of
+# what any given deployment actually showed, which is the property the whole
+# hubSnapshot.js design rests on.
+#
+# The push at the end IS the deploy, so everything that can fail is gated before it.
+
+name: Sync Hub catalog
+
+on:
+  schedule:
+    # 05:17 Manila. Off-the-hour on purpose: GitHub delays :00 schedules under load.
+    - cron: '17 21 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  # The Space deadlocks if two sessions talk to it at once, and two jobs racing
+  # to push the same generated file is a merge conflict waiting to happen.
+  group: hub-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+
+      # Fatal: the Hub is the source of every number on the page.
+      - name: Sync the Hub catalog
+        run: npm run sync:catalog
+
+      # Not fatal: the demo manifest is scaffolding that spaceClient.js refreshes
+      # at runtime, and a sleeping Space must not throw away a good catalog
+      # refresh. But the failure is a real signal — CLAUDE.md: "This script
+      # failing is the signal that the Space's shape changed" — so it is surfaced
+      # as a job warning instead of being swallowed.
+      - name: Sync the Space manifest
+        id: space
+        continue-on-error: true
+        run: npm run sync:space
+      - name: Flag a Space manifest failure
+        if: steps.space.outcome == 'failure'
+        run: echo "::warning title=Space sync failed::sync-space.mjs failed — the Space's shape may have changed. The catalog sync still applied."
+
+      # Gates. Both run BEFORE the push, because the push deploys.
+      - name: Check catalog parity
+        run: npm run check:catalog
+      - name: Build
+        run: npm run build
+
+      - name: Commit the refreshed snapshot
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/data/hubSnapshot.js src/data/spaceManifest.js
+          if git diff --cached --quiet; then
+            echo 'Hub unchanged — nothing to commit.'
+            exit 0
+          fi
+          git commit -m 'Sync Hub catalog'
+          git push
