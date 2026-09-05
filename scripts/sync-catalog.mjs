@@ -24,7 +24,7 @@ const outputPath = resolve('src/data/hubSnapshot.js')
 // on datasets returns HTTP 400.
 const expandFields = {
   models: ['downloads', 'likes', 'lastModified', 'private', 'gated', 'pipeline_tag'],
-  datasets: ['downloads', 'likes', 'lastModified', 'private', 'gated'],
+  datasets: ['downloads', 'likes', 'lastModified', 'private', 'gated', 'tags'],
 }
 
 async function listRepos(kind) {
@@ -36,6 +36,16 @@ async function listRepos(kind) {
 }
 
 const shortName = (id) => id.split('/').pop()
+
+// The Hub carries the license as a `license:<id>` tag. Only some repos set one,
+// and `other` means "not one of the SPDX choices" — which is less informative
+// than the name the dataset card actually uses, so it is reported as null and
+// the editorial value stands.
+const licenseOf = (tags = []) => {
+  const tag = tags.find((t) => t.startsWith('license:'))
+  const value = tag ? tag.slice('license:'.length) : null
+  return value && value !== 'other' ? value : null
+}
 
 // Hub pipeline tags are slugs; a couple are too long to read well as a chip.
 const taskLabels = {
@@ -72,6 +82,7 @@ const datasetRows = datasets
     likes: dataset.likes ?? 0,
     updated: day(dataset.lastModified),
     gated: Boolean(dataset.gated),
+    license: licenseOf(dataset.tags),
   }))
   .sort((a, b) => b.downloads - a.downloads)
 
