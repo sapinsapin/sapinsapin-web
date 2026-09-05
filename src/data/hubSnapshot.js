@@ -2,33 +2,33 @@
 // Live state of https://huggingface.co/sapinsapin, read from the public Hub API.
 // `downloads` is the Hub's 30-day count, matching the org dashboard Space.
 export const syncedAt = "2026-09-05"
-export const hubTotals = {"models":28,"datasets":9,"modelDownloads":10071,"datasetDownloads":1211}
+export const hubTotals = {"models":28,"datasets":9,"modelDownloads":10093,"datasetDownloads":1209}
 export const hubModels = [
   {
     "name": "whisper-small-fsc",
     "task": "Speech recognition",
-    "downloads": 8849,
+    "downloads": 8853,
     "likes": 0,
     "updated": "2026-08-08"
   },
   {
     "name": "speecht5_tts-pld-hil",
     "task": "Text to speech",
-    "downloads": 160,
+    "downloads": 161,
     "likes": 0,
     "updated": "2026-08-08"
   },
   {
     "name": "speecht5_tts-pld-fil",
     "task": "Text to speech",
-    "downloads": 120,
+    "downloads": 121,
     "likes": 0,
     "updated": "2026-08-08"
   },
   {
     "name": "speecht5_tts-pld-ceb",
     "task": "Text to speech",
-    "downloads": 110,
+    "downloads": 111,
     "likes": 0,
     "updated": "2026-08-08"
   },
@@ -40,6 +40,20 @@ export const hubModels = [
     "updated": "2026-08-11"
   },
   {
+    "name": "speecht5_vc-pld",
+    "task": "Audio to audio",
+    "downloads": 61,
+    "likes": 0,
+    "updated": "2026-08-08"
+  },
+  {
+    "name": "speecht5_tts-fsc",
+    "task": "Text to speech",
+    "downloads": 60,
+    "likes": 0,
+    "updated": "2026-08-07"
+  },
+  {
     "name": "speecht5_tts-pld-ilo",
     "task": "Text to speech",
     "downloads": 60,
@@ -47,23 +61,9 @@ export const hubModels = [
     "updated": "2026-08-08"
   },
   {
-    "name": "speecht5_tts-fsc",
-    "task": "Text to speech",
-    "downloads": 59,
-    "likes": 0,
-    "updated": "2026-08-07"
-  },
-  {
-    "name": "speecht5_vc-pld",
-    "task": "Audio to audio",
-    "downloads": 59,
-    "likes": 0,
-    "updated": "2026-08-08"
-  },
-  {
     "name": "speecht5_tts-pld-war",
     "task": "Text to speech",
-    "downloads": 52,
+    "downloads": 56,
     "likes": 0,
     "updated": "2026-08-08"
   },
@@ -75,6 +75,13 @@ export const hubModels = [
     "updated": "2026-08-08"
   },
   {
+    "name": "speecht5_tts-pld-eng",
+    "task": "Text to speech",
+    "downloads": 49,
+    "likes": 0,
+    "updated": "2026-08-08"
+  },
+  {
     "name": "speecht5_tts-pld-tsg",
     "task": "Text to speech",
     "downloads": 48,
@@ -82,23 +89,16 @@ export const hubModels = [
     "updated": "2026-08-08"
   },
   {
-    "name": "speecht5_tts-pld-eng",
-    "task": "Text to speech",
-    "downloads": 46,
-    "likes": 0,
-    "updated": "2026-08-08"
-  },
-  {
     "name": "speecht5_tts-pld-pag",
     "task": "Text to speech",
-    "downloads": 45,
+    "downloads": 47,
     "likes": 0,
     "updated": "2026-08-08"
   },
   {
     "name": "speecht5_tts-pld-pam",
     "task": "Text to speech",
-    "downloads": 43,
+    "downloads": 44,
     "likes": 0,
     "updated": "2026-08-08"
   },
@@ -147,7 +147,7 @@ export const hubModels = [
   {
     "name": "whisper-small-pld-pam",
     "task": "Speech recognition",
-    "downloads": 21,
+    "downloads": 22,
     "likes": 0,
     "updated": "2026-08-11"
   },
@@ -159,14 +159,14 @@ export const hubModels = [
     "updated": "2026-08-11"
   },
   {
-    "name": "whisper-small-pld-pag",
+    "name": "whisper-small-pld-war",
     "task": "Speech recognition",
-    "downloads": 17,
+    "downloads": 18,
     "likes": 0,
     "updated": "2026-08-11"
   },
   {
-    "name": "whisper-small-pld-war",
+    "name": "whisper-small-pld-pag",
     "task": "Speech recognition",
     "downloads": 17,
     "likes": 0,
@@ -212,7 +212,7 @@ export const hubDatasets = [
   },
   {
     "id": "filipinospeechcorpus",
-    "downloads": 310,
+    "downloads": 311,
     "likes": 2,
     "updated": "2026-08-11",
     "gated": false,
@@ -220,19 +220,11 @@ export const hubDatasets = [
   },
   {
     "id": "halo-hil",
-    "downloads": 281,
+    "downloads": 285,
     "likes": 0,
     "updated": "2026-03-27",
     "gated": false,
     "license": "mit"
-  },
-  {
-    "id": "kumu-livestream-segmented",
-    "downloads": 72,
-    "likes": 0,
-    "updated": "2026-08-11",
-    "gated": true,
-    "license": null
   },
   {
     "id": "halo-bcl",
@@ -243,8 +235,16 @@ export const hubDatasets = [
     "license": null
   },
   {
+    "id": "kumu-livestream-segmented",
+    "downloads": 64,
+    "likes": 0,
+    "updated": "2026-08-11",
+    "gated": true,
+    "license": null
+  },
+  {
     "id": "halo-tgl",
-    "downloads": 61,
+    "downloads": 62,
     "likes": 0,
     "updated": "2026-03-27",
     "gated": false,
@@ -252,7 +252,7 @@ export const hubDatasets = [
   },
   {
     "id": "BantayWika",
-    "downloads": 55,
+    "downloads": 56,
     "likes": 0,
     "updated": "2026-03-14",
     "gated": false,
@@ -260,7 +260,7 @@ export const hubDatasets = [
   },
   {
     "id": "halohalo",
-    "downloads": 14,
+    "downloads": 13,
     "likes": 0,
     "updated": "2026-03-28",
     "gated": false,
