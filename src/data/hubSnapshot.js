@@ -2,12 +2,12 @@
 // Live state of https://huggingface.co/sapinsapin, read from the public Hub API.
 // `downloads` is the Hub's 30-day count, matching the org dashboard Space.
 export const syncedAt = "2026-09-06"
-export const hubTotals = {"models":28,"datasets":9,"modelDownloads":10093,"datasetDownloads":1209}
+export const hubTotals = {"models":28,"datasets":9,"modelDownloads":10098,"datasetDownloads":1156}
 export const hubModels = [
   {
     "name": "whisper-small-fsc",
     "task": "Speech recognition",
-    "downloads": 8853,
+    "downloads": 8859,
     "likes": 0,
     "updated": "2026-08-08"
   },
@@ -47,13 +47,6 @@ export const hubModels = [
     "updated": "2026-08-08"
   },
   {
-    "name": "speecht5_tts-fsc",
-    "task": "Text to speech",
-    "downloads": 60,
-    "likes": 0,
-    "updated": "2026-08-07"
-  },
-  {
     "name": "speecht5_tts-pld-ilo",
     "task": "Text to speech",
     "downloads": 60,
@@ -66,6 +59,13 @@ export const hubModels = [
     "downloads": 56,
     "likes": 0,
     "updated": "2026-08-08"
+  },
+  {
+    "name": "speecht5_tts-fsc",
+    "task": "Text to speech",
+    "downloads": 55,
+    "likes": 0,
+    "updated": "2026-08-07"
   },
   {
     "name": "speecht5_tts-pld-bcl",
@@ -105,6 +105,13 @@ export const hubModels = [
   {
     "name": "whisper-small-pld-fil",
     "task": "Speech recognition",
+    "downloads": 38,
+    "likes": 0,
+    "updated": "2026-08-11"
+  },
+  {
+    "name": "whisper-small-pld-ilo",
+    "task": "Speech recognition",
     "downloads": 37,
     "likes": 0,
     "updated": "2026-08-11"
@@ -117,11 +124,11 @@ export const hubModels = [
     "updated": "2026-08-12"
   },
   {
-    "name": "whisper-small-pld-ilo",
-    "task": "Speech recognition",
-    "downloads": 36,
-    "likes": 0,
-    "updated": "2026-08-11"
+    "name": "gpt-oss-20b-balitanlp-cpt",
+    "task": "Text generation",
+    "downloads": 35,
+    "likes": 1,
+    "updated": "2026-04-16"
   },
   {
     "name": "whisper-small-pld-hil",
@@ -129,13 +136,6 @@ export const hubModels = [
     "downloads": 35,
     "likes": 0,
     "updated": "2026-08-11"
-  },
-  {
-    "name": "gpt-oss-20b-balitanlp-cpt",
-    "task": "Text generation",
-    "downloads": 32,
-    "likes": 1,
-    "updated": "2026-04-16"
   },
   {
     "name": "whisper-small-pld-eng",
@@ -182,7 +182,7 @@ export const hubModels = [
   {
     "name": "bikoLLM",
     "task": "Text generation",
-    "downloads": 5,
+    "downloads": 4,
     "likes": 0,
     "updated": "2025-12-28"
   },
@@ -204,7 +204,7 @@ export const hubModels = [
 export const hubDatasets = [
   {
     "id": "pld",
-    "downloads": 345,
+    "downloads": 347,
     "likes": 0,
     "updated": "2026-08-11",
     "gated": false,
@@ -212,7 +212,7 @@ export const hubDatasets = [
   },
   {
     "id": "filipinospeechcorpus",
-    "downloads": 311,
+    "downloads": 293,
     "likes": 2,
     "updated": "2026-08-11",
     "gated": false,
@@ -220,7 +220,7 @@ export const hubDatasets = [
   },
   {
     "id": "halo-hil",
-    "downloads": 285,
+    "downloads": 274,
     "likes": 0,
     "updated": "2026-03-27",
     "gated": false,
@@ -228,23 +228,15 @@ export const hubDatasets = [
   },
   {
     "id": "halo-bcl",
-    "downloads": 65,
+    "downloads": 61,
     "likes": 0,
     "updated": "2026-03-27",
     "gated": false,
     "license": null
   },
   {
-    "id": "kumu-livestream-segmented",
-    "downloads": 64,
-    "likes": 0,
-    "updated": "2026-08-11",
-    "gated": true,
-    "license": null
-  },
-  {
     "id": "halo-tgl",
-    "downloads": 62,
+    "downloads": 60,
     "likes": 0,
     "updated": "2026-03-27",
     "gated": false,
@@ -252,15 +244,23 @@ export const hubDatasets = [
   },
   {
     "id": "BantayWika",
-    "downloads": 56,
+    "downloads": 54,
     "likes": 0,
     "updated": "2026-03-14",
     "gated": false,
     "license": null
   },
   {
+    "id": "kumu-livestream-segmented",
+    "downloads": 50,
+    "likes": 0,
+    "updated": "2026-08-11",
+    "gated": true,
+    "license": null
+  },
+  {
     "id": "halohalo",
-    "downloads": 13,
+    "downloads": 9,
     "likes": 0,
     "updated": "2026-03-28",
     "gated": false,
