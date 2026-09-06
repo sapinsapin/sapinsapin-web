@@ -20,7 +20,7 @@ const datasetCopy = [
   {
     id: 'filipinospeechcorpus', title: 'Filipino Speech Corpus', kicker: 'Speech · open corpus',
     description: 'The Filipino Speech Corpus (Sagum) as segment-level 16 kHz audio. Mostly isolated word tokens rather than sentences — read the card’s limitations before training on it.',
-    languages: 'Filipino · Tagalog', size: '305,246 segments · 65.1 h', license: 'MIT', updated: '11 Aug 2026',
+    languages: 'Filipino · Tagalog', size: '305,246 rows · 65.1 h across 313,322 segments', license: 'MIT', updated: '11 Aug 2026',
     tags: ['speech', 'ASR', 'TTS', 'low-resource'], href: 'https://huggingface.co/datasets/sapinsapin/filipinospeechcorpus', featured: true,
   },
   {

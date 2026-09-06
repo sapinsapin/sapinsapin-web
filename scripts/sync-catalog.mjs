@@ -12,11 +12,12 @@
 // what the org's own dashboard Space labels "Downloads (30d)". Keep that wording
 // wherever the number is shown.
 
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 
 const org = 'sapinsapin'
 const outputPath = resolve('src/data/hubSnapshot.js')
+const sitemapPath = resolve('public/sitemap.xml')
 
 // lastModified and pipeline_tag are only returned when explicitly expanded —
 // without this the list endpoint omits them and every date comes back null.
@@ -104,6 +105,15 @@ export const hubDatasets = ${JSON.stringify(datasetRows, null, 2)}
 
 await mkdir(dirname(outputPath), { recursive: true })
 await writeFile(outputPath, file)
+
+// The sitemap's lastmod was a hand-typed date, so it went stale the moment the
+// figures moved. The page's content changes when this snapshot changes, so the
+// sync is the thing that knows the real date. CI discards both files together
+// when only the date moved, so this does not turn into a daily deploy.
+const today = new Date().toISOString().slice(0, 10)
+const sitemap = await readFile(sitemapPath, 'utf8')
+const restamped = sitemap.replace(/<lastmod>[^<]*<\/lastmod>/, `<lastmod>${today}</lastmod>`)
+if (restamped !== sitemap) await writeFile(sitemapPath, restamped)
 console.log(
   `synced ${totals.models} models (${totals.modelDownloads.toLocaleString()} dl/30d) · ` +
   `${totals.datasets} datasets (${totals.datasetDownloads.toLocaleString()} dl/30d)`,

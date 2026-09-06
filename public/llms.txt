@@ -7,7 +7,7 @@ Every dataset and model is openly published on Hugging Face. Figures on sapinsap
 ## Datasets
 
 - [Philippine Language Dataset (PLD)](https://huggingface.co/datasets/sapinsapin/pld): 334,268 utterances across 10 languages, 448+ hours of prompted 16 kHz speech
-- [Filipino Speech Corpus](https://huggingface.co/datasets/sapinsapin/filipinospeechcorpus): 305,246 segments, 65+ hours of Filipino/Tagalog speech, MIT license
+- [Filipino Speech Corpus](https://huggingface.co/datasets/sapinsapin/filipinospeechcorpus): 305,246 published rows; 65.1 hours across 313,322 transcribed segments, MIT license
 - [BantayWika](https://huggingface.co/datasets/sapinsapin/BantayWika): 6.09M tokens of Filipino, Cebuano, and Ilocano text
 - [halohalo](https://huggingface.co/datasets/sapinsapin/halohalo): 45,536 rows of cleaned Philippine-language web data
 

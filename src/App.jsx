@@ -908,7 +908,7 @@ function App() {
     name: 'SapinSapin AI — Open Philippine Language Dataset Catalog',
     url: `${hub}?tab=datasets`,
     description: 'A curated catalog of open speech corpora and pretraining text datasets for Philippine-language AI research, spanning 10+ languages including Filipino, Cebuano, Ilocano, and Hiligaynon.',
-    provider: { '@type': 'Organization', name: 'SapinSapin AI', url: 'https://sapinsapin.ai' },
+    provider: { '@type': 'Organization', name: 'SapinSapin AI', url: 'https://www.sapinsapin.ai' },
     dateModified: catalogSnapshot,
     inLanguage: ['fil', 'ceb', 'ilo', 'hil', 'bcl', 'pag', 'pam', 'tsg', 'war', 'en'],
     dataset: datasets.map(({ title, description, href, license }) => ({

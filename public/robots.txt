@@ -1,4 +1,4 @@
-# SapinSapin AI — https://sapinsapin.ai
+# SapinSapin AI — https://www.sapinsapin.ai
 # Open foundations for Philippine-language AI
 
 User-agent: *
@@ -40,4 +40,4 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
-Sitemap: https://sapinsapin.ai/sitemap.xml
+Sitemap: https://www.sapinsapin.ai/sitemap.xml

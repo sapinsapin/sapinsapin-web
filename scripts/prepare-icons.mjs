@@ -98,7 +98,14 @@ function toPng(size) {
   ])
 }
 
-for (const [name, size] of [['apple-touch-icon.png', 180], ['favicon-32.png', 32]]) {
+// 192 and 512 are what a web app manifest is expected to offer: Android uses
+// the first for the home screen and the second for the splash screen.
+for (const [name, size] of [
+  ['apple-touch-icon.png', 180],
+  ['favicon-32.png', 32],
+  ['icon-192.png', 192],
+  ['icon-512.png', 512],
+]) {
   const path = resolve('public', name)
   await mkdir(dirname(path), { recursive: true })
   const png = toPng(size)
