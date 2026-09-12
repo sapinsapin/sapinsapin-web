@@ -27,7 +27,7 @@ const navItems = [
   { id: 'work', label: 'Work' },
   { id: 'models', label: 'Models' },
   { id: 'open', label: 'Why open' },
-  { id: 'contribute', label: 'Contribute' },
+  { id: 'contribute', label: 'Join us' },
 ]
 
 /* Sources for the empirical claims on the page. Kept deliberately short — a
@@ -829,7 +829,7 @@ function Contribute() {
     { icon: Code, number: '02', title: 'Contribute code', text: 'Explore the public repositories, open an issue, improve a pipeline, or share a reproducible experiment.', cta: 'Open GitHub', href: github },
     { icon: MarkMono, number: '03', title: 'Contribute data', text: 'If you work with a Philippine language as a researcher, annotator, native speaker, or engineer, start a conversation in a project issue.', cta: 'Start a conversation', href: 'https://github.com/sapinsapin/halohalo/issues' },
   ]
-  return <section id="contribute" className="section-shell scroll-mt-24 pt-20 sm:pt-40"><div className="contribute-intro"><div><Eyebrow>It takes a village</Eyebrow><h2 className="mt-5 max-w-3xl font-display text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[.96] tracking-[-.065em] text-ink">Help make Philippine AI <em className="text-ube">more possible.</em></h2></div><div className="max-w-md"><p className="text-[1.05rem] leading-7 text-ink/70">This work is designed to be used, questioned, and improved in public.</p><CodeBlock /></div></div><Reveal className="mt-4 grid gap-4 md:grid-cols-3">{cards.map(({ icon: Icon, number, title, text, cta, href }) => <article key={title} className="contribute-card"><div className="flex items-center justify-between"><Icon className="h-7 w-7 text-ube" /><span className="text-xs text-ink/60">{number}</span></div><h3 className="mt-12 text-xl font-semibold tracking-[-.045em] text-ink">{title}</h3><p className="mt-3 min-h-[72px] text-sm leading-6 text-ink/68">{text}</p><ExternalLink href={href} className="text-link mt-8" label={cta}>{cta} <ArrowUpRight className="h-4 w-4" /></ExternalLink></article>)}</Reveal></section>
+  return <section id="contribute" className="section-shell scroll-mt-24 pt-20 sm:pt-40"><div className="contribute-intro"><div><Eyebrow>It takes a village</Eyebrow><h2 className="mt-5 max-w-3xl font-display text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[.96] tracking-[-.065em] text-ink">Help make Philippine AI <em className="text-ube">more possible.</em></h2><ExternalLink href="https://github.com/sapinsapin/halohalo/issues" className="btn btn-primary mt-8" label="Join the SapinSapin AI community on GitHub">Join us <ArrowUpRight className="h-4 w-4" /></ExternalLink></div><div className="max-w-md"><p className="text-[1.05rem] leading-7 text-ink/70">This work is designed to be used, questioned, and improved in public.</p><CodeBlock /></div></div><Reveal className="mt-4 grid gap-4 md:grid-cols-3">{cards.map(({ icon: Icon, number, title, text, cta, href }) => <article key={title} className="contribute-card"><div className="flex items-center justify-between"><Icon className="h-7 w-7 text-ube" /><span className="text-xs text-ink/60">{number}</span></div><h3 className="mt-12 text-xl font-semibold tracking-[-.045em] text-ink">{title}</h3><p className="mt-3 min-h-[72px] text-sm leading-6 text-ink/68">{text}</p><ExternalLink href={href} className="text-link mt-8" label={cta}>{cta} <ArrowUpRight className="h-4 w-4" /></ExternalLink></article>)}</Reveal></section>
 }
 
 function PartnersAndFaq() {
