@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1640" height="624" viewBox="0 0 1640 624" role="img" aria-label="SapinSapin AI — Every voice belongs in the future">
+  <!-- Facebook cover, 1640x624 (2x the 820x312 desktop display).
+       Mobile crops the sides to roughly x 265–1375, so all text sits inside that band;
+       only the decorative bars run past it. -->
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,500&amp;family=Inter:wght@400;500;600;700&amp;display=swap');
+      .display { font-family: 'Fraunces', Georgia, serif; }
+      .label { font-family: 'Inter', Arial, sans-serif; }
+    </style>
+    <linearGradient id="gridFade" x1="0%" y1="0%" x2="72%" y2="88%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="62%" stop-color="#000"/>
+      <stop offset="100%" stop-color="#000"/>
+    </linearGradient>
+    <mask id="gridMask">
+      <rect width="1640" height="624" fill="url(#gridFade)"/>
+    </mask>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0H0V44" fill="none" stroke="#1A1613" stroke-opacity=".045"/>
+    </pattern>
+  </defs>
+
+  <rect width="1640" height="624" fill="#FBF7F0"/>
+  <rect width="1640" height="624" fill="url(#grid)" mask="url(#gridMask)"/>
+
+  <!-- Brand mark as the landscape, bleeding off the right edge -->
+  <rect x="1250" y="-22" width="460" height="208" rx="104" fill="#EBD9AE"/>
+  <rect x="1120" y="208" width="600" height="208" rx="104" fill="#6E964A"/>
+  <rect x="960" y="438" width="760" height="208" rx="104" fill="#5B3E96"/>
+
+  <text x="300" y="165" class="label" font-weight="700" font-size="19" letter-spacing="3" fill="#1A1613" fill-opacity=".62">OPEN FOUNDATIONS FOR PHILIPPINE AI</text>
+
+  <text x="300" y="257" class="display" font-weight="500" font-size="88" letter-spacing="-1.8" fill="#1A1613">SapinSapin AI</text>
+
+  <text x="300" y="329" class="display" font-weight="500" font-size="54" letter-spacing="-1.1" fill="#1A1613">Every voice belongs</text>
+  <text x="300" y="393" class="display" font-style="italic" font-weight="500" font-size="54" letter-spacing="-1.1" fill="#5B3E96">in the future.</text>
+
+  <g transform="translate(300, 449)">
+    <rect x="7" y="0" width="16" height="7" rx="3.5" fill="#EBD9AE"/>
+    <rect x="3.5" y="9" width="23" height="7" rx="3.5" fill="#6E964A"/>
+    <rect x="0" y="18" width="30" height="7" rx="3.5" fill="#5B3E96"/>
+  </g>
+  <text x="342" y="469" class="label" font-weight="600" font-size="22" letter-spacing="-.2" fill="#1A1613" fill-opacity=".72">sapinsapin.ai</text>
+</svg>
