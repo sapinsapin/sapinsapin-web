@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "prepare:map": "node scripts/prepare-map.mjs",
     "prepare:icons": "node scripts/prepare-icons.mjs",
+    "prepare:brand": "node scripts/prepare-brand.mjs",
     "sync": "node scripts/sync-catalog.mjs && node scripts/sync-space.mjs",
     "sync:catalog": "node scripts/sync-catalog.mjs",
     "sync:space": "node scripts/sync-space.mjs",

@@ -27,6 +27,7 @@ npm run sync:catalog     # Dataset/model figures from the Hub API → src/data/h
 npm run sync:space       # Demo language/voice/clip lists from the Space → src/data/spaceManifest.js
 npm run prepare:map      # Regenerate hero map geometry from public boundary data
 npm run prepare:icons    # Rasterise the brand mark to PNG favicons
+npm run prepare:brand    # Social banners and profile pictures → brand/<platform>/ (needs Chrome)
 ```
 
 There is no test suite and no lint script configured in `package.json`.

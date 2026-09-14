@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1128" height="191" viewBox="0 0 1128 191" role="img" aria-label="SapinSapin AI — Every voice belongs in the future">
+  <!-- LinkedIn Company Page cover 1128x191 -->
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,500&amp;family=Inter:wght@400;500;600;700&amp;display=swap');
+      .display { font-family: 'Fraunces', Georgia, serif; }
+      .label { font-family: 'Inter', Arial, sans-serif; }
+    </style>
+    <linearGradient id="gridFade" x1="0%" y1="0%" x2="72%" y2="88%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="62%" stop-color="#000"/>
+      <stop offset="100%" stop-color="#000"/>
+    </linearGradient>
+    <mask id="gridMask"><rect width="1128" height="191" fill="url(#gridFade)"/></mask>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0H0V44" fill="none" stroke="#1A1613" stroke-opacity=".045"/>
+    </pattern>
+  </defs>
+  <rect width="1128" height="191" fill="#FBF7F0"/>
+  <rect width="1128" height="191" fill="url(#grid)" mask="url(#gridMask)"/>
+  <rect x="1008.63" y="-6.73" width="140.8" height="63.67" rx="31.83" fill="#EBD9AE"/>
+  <rect x="968.83" y="63.67" width="180.59" height="63.67" rx="31.83" fill="#6E964A"/>
+  <rect x="919.86" y="134.07" width="229.57" height="63.67" rx="31.83" fill="#5B3E96"/>
+  <text x="250" y="86.5" class="display" font-weight="500" font-size="48.4" letter-spacing="-0.99" fill="#1A1613">SapinSapin AI</text>
+  <text x="250" y="126.1" class="display" font-weight="500" font-size="29.7" letter-spacing="-0.61" fill="#1A1613">Every voice belongs <tspan font-style="italic" fill="#5B3E96">in the future.</tspan></text>
+</svg>
