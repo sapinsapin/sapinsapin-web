@@ -13,7 +13,7 @@ const hub = 'https://huggingface.co/sapinsapin'
 const github = 'https://github.com/sapinsapin'
 const facebook = 'https://www.facebook.com/sapinsapinai'
 const linkedin = 'https://www.linkedin.com/showcase/sapinsapin'
-const discord = 'https://discord.gg/jjpSJMPgS7'
+const discord = 'https://discord.gg/8snUfQw5Uq'
 const space = 'https://huggingface.co/spaces/sapinsapin/halohalo-dashboard'
 
 /* Scrolls to the true document top rather than to the #top hash target —
