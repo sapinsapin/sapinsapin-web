@@ -1479,6 +1479,21 @@
   .footer-body { color: rgb(var(--footer-fg) / .7); }
   .footer-rule { border-top: 1px solid rgb(var(--footer-fg) / .15); color: rgb(var(--footer-fg) / .58); }
 
+  /* Icon buttons for the footer's social links. The footer sits on a fixed
+     dark ground in both themes, so — unlike .nav-icon-link — these are built
+     from --footer-fg rather than --c-paper/--c-ink/--c-ube, which flip with
+     the page theme and would go low-contrast here in light mode. */
+  .footer-social { display: flex; gap: .55rem; margin-top: 1rem; }
+  .footer-social a {
+    display: grid; place-items: center; flex: none;
+    height: 2.15rem; width: 2.15rem; border-radius: 50%;
+    border: 1px solid rgb(var(--footer-fg) / .18);
+    background: rgb(var(--footer-fg) / .06);
+    color: rgb(var(--footer-fg) / .78);
+    transition: color .2s, border-color .2s, background-color .2s, transform .2s;
+  }
+  .footer-social a:hover { color: rgb(var(--footer-fg)); border-color: rgb(var(--footer-fg) / .4); background: rgb(var(--footer-fg) / .12); transform: translateY(-1px); }
+
   /* ---------------------------------------------------------------- reveal */
   .reveal > * { opacity: 1; }
 
@@ -1927,7 +1942,8 @@
   .theme-toggle,
   .nav-icon-link,
   .nav-menu summary,
-  .round-link {
+  .round-link,
+  .footer-social a {
     height: 2.75rem;
     width: 2.75rem;
   }

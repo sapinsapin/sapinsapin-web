@@ -1,7 +1,7 @@
 import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import NumberFlow from '@number-flow/react'
 import { datasets, models, catalogSnapshot, totals } from './data/catalog'
-import { ArrowDown, ArrowUp, ArrowUpRight, CheckIcon, Code, CopyIcon, Dataset, Github, HuggingFace, Mark, MarkMono } from './components/Icons'
+import { ArrowDown, ArrowUp, ArrowUpRight, CheckIcon, Code, CopyIcon, Dataset, Discord, Facebook, Github, HuggingFace, LinkedIn, Mark, MarkMono } from './components/Icons'
 import ThemeToggle from './components/ThemeToggle'
 import PhilippinesMap from './components/PhilippinesMap'
 import { useTheme } from './lib/theme'
@@ -11,6 +11,9 @@ import { languageAnchors } from './data/philippinesMapPaths'
 
 const hub = 'https://huggingface.co/sapinsapin'
 const github = 'https://github.com/sapinsapin'
+const facebook = 'https://www.facebook.com/sapinsapinai'
+const linkedin = 'https://www.linkedin.com/showcase/sapinsapin'
+const discord = 'https://discord.gg/jjpSJMPgS7'
 const space = 'https://huggingface.co/spaces/sapinsapin/halohalo-dashboard'
 
 /* Scrolls to the true document top rather than to the #top hash target —
@@ -877,7 +880,7 @@ function BackToTop() {
 }
 
 function Footer() {
-  return <footer className="site-footer mt-20 sm:mt-40"><div className="section-shell py-14 sm:py-20"><div className="grid gap-12 lg:grid-cols-[1.25fr_.75fr_.75fr]"><div><div className="flex items-center gap-2.5"><Mark className="h-[2.1rem] w-[2.3rem]" /><p className="font-semibold tracking-[-.04em]">SapinSapin AI</p></div><p className="footer-body mt-5 max-w-sm text-sm leading-6">Open foundations for Philippine-language AI. Built with care for the layers that make a language live.</p><p className="footer-label mt-8">Contact</p><div className="footer-links"><a href="mailto:contact@sapinsapin.ai">contact@sapinsapin.ai</a></div></div><div><p className="footer-label">Find us</p><div className="footer-links"><ExternalLink href={github}>GitHub <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href={hub}>Hugging Face <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href="https://github.com/sapinsapin/halohalo/issues">Contact / contribute <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href="https://github.com/faeldon/philippines-json-maps">Map attribution <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink></div></div><div><p className="footer-label">Licensing</p><p className="footer-body mt-4 text-sm leading-6">No single project-wide license is implied. Individual datasets and models have their own terms, including MIT and other licenses. Check each linked card before use.</p></div></div><div className="footer-rule mt-14 flex flex-col justify-between gap-3 pt-5 text-[11px] sm:flex-row"><p>© 2026 SapinSapin AI</p><p>Catalog data synced {catalogSnapshot} · Designed for open research</p></div></div></footer>
+  return <footer className="site-footer mt-20 sm:mt-40"><div className="section-shell py-14 sm:py-20"><div className="grid gap-12 lg:grid-cols-[1.25fr_.75fr_.75fr]"><div><div className="flex items-center gap-2.5"><Mark className="h-[2.1rem] w-[2.3rem]" /><p className="font-semibold tracking-[-.04em]">SapinSapin AI</p></div><p className="footer-body mt-5 max-w-sm text-sm leading-6">Open foundations for Philippine-language AI. Built with care for the layers that make a language live.</p><p className="footer-label mt-8">Contact</p><div className="footer-links"><a href="mailto:contact@sapinsapin.ai">contact@sapinsapin.ai</a></div><p className="footer-label mt-8">Follow</p><div className="footer-social"><ExternalLink href={facebook} label="SapinSapin AI on Facebook"><Facebook className="h-4 w-4" /></ExternalLink><ExternalLink href={linkedin} label="SapinSapin AI on LinkedIn"><LinkedIn className="h-4 w-4" /></ExternalLink><ExternalLink href={discord} label="SapinSapin AI on Discord"><Discord className="h-4 w-4" /></ExternalLink></div></div><div><p className="footer-label">Find us</p><div className="footer-links"><ExternalLink href={github}>GitHub <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href={hub}>Hugging Face <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href="https://github.com/sapinsapin/halohalo/issues">Contact / contribute <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href="https://github.com/faeldon/philippines-json-maps">Map attribution <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink></div></div><div><p className="footer-label">Licensing</p><p className="footer-body mt-4 text-sm leading-6">No single project-wide license is implied. Individual datasets and models have their own terms, including MIT and other licenses. Check each linked card before use.</p></div></div><div className="footer-rule mt-14 flex flex-col justify-between gap-3 pt-5 text-[11px] sm:flex-row"><p>© 2026 SapinSapin AI</p><p>Catalog data synced {catalogSnapshot} · Designed for open research</p></div></div></footer>
 }
 
 function App() {
