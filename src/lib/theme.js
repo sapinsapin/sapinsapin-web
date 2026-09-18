@@ -11,7 +11,7 @@ import { flushSync } from 'react-dom'
    The initial value is whatever the inline script in the document head already
    resolved before first paint, so mounting never flashes the other palette. */
 export function useTheme() {
-  const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'light')
+  const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
 
   useEffect(() => {
     const root = document.documentElement

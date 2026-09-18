@@ -12,8 +12,8 @@
          second thing having gone wrong. -->
     <script>
       (function () {
-        var theme = 'light'
-        try { theme = localStorage.getItem('sapinsapin-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') } catch (e) { /* private mode */ }
+        var theme = 'dark'
+        try { theme = localStorage.getItem('sapinsapin-theme') || 'dark' } catch (e) { /* private mode */ }
         var root = document.documentElement
         root.dataset.theme = theme
         root.style.colorScheme = theme
