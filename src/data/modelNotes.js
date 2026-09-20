@@ -25,6 +25,10 @@ const baseNotes = {
     'SpeechT5 (Microsoft), the voice-conversion configuration of the same shared speech-and-text model.',
   'openai/whisper-small':
     'Whisper Small (OpenAI) — a 244M-parameter encoder–decoder trained on about 680,000 hours of weakly supervised audio across 99 languages.',
+  'openai/whisper-large-v3':
+    'Whisper Large-v3 (OpenAI) — the largest Whisper encoder–decoder at about 1.5 billion parameters, more accurate than Small and far slower to run.',
+  'ylacombe/omniASR_W2V_1B_SSL':
+    'OmniASR W2V 1B SSL (Meta, ported to transformers) — a 1-billion-parameter self-supervised speech encoder from the Omnilingual-ASR project; the project attaches CTC heads that transcribe in characters or syllables.',
   'meta-llama/Llama-3.1-8B':
     'Llama 3.1 8B (Meta) — an 8-billion-parameter multilingual base language model.',
   'openai/gpt-oss-20b':
@@ -61,8 +65,16 @@ const specialSummaries = {
 function familyOf(name) {
   if (name.startsWith('speecht5_tts-pld-')) return { kind: 'tts', code: name.slice('speecht5_tts-pld-'.length) }
   if (name.startsWith('whisper-small-pld-')) return { kind: 'asr', code: name.slice('whisper-small-pld-'.length) }
+  if (name.startsWith('whisper-large-v3-pld-')) return { kind: 'asr', code: name.slice('whisper-large-v3-pld-'.length) }
+  // omniASR repos spell the separator with an underscore ("…-ctc-char-pld_ceb"),
+  // unlike the whisper models' hyphens.
+  if (name.startsWith('omniASR_W2V_1B_SSL-')) {
+    const code = name.slice(name.indexOf('_pld_') + '_pld_'.length)
+    if (languageNames[code]) return { kind: 'asr', code }
+  }
   if (name === 'speecht5_tts-fsc') return { kind: 'tts', code: 'fil' }
   if (name === 'whisper-small-fsc') return { kind: 'asr', code: 'fil' }
+  if (name === 'whisper-small-fsc-pld-fil') return { kind: 'asr', code: 'fil' }
   return null
 }
 

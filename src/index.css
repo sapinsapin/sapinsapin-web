@@ -884,24 +884,26 @@
   .demo-intro { display: grid; gap: 2rem; padding: 2rem 1.5rem 2.25rem; }
   /* Measured against the mounted console, not estimated — this is the whole
      point of the placeholder, so a wrong number just moves the layout shift
-     rather than removing it. One number cannot do it: the console is 659px at
-     the desktop breakpoint and 985px on a phone, where the two columns stack
-     and every control is sized for a finger. A desktop-only figure left a
-     phone with a 326px jump at the moment the chunk landed — which is the
-     jump the placeholder exists to prevent. The steps below are the measured
-     heights at each breakpoint; see "Touch and small screens" for the others. */
-  .demo-placeholder { min-height: 68.5rem; border-top: 1px solid var(--border-soft); background: var(--surface-panel); }
-  @media (min-width: 22.5rem) { .demo-placeholder { min-height: 61.5rem; } }
-  @media (min-width: 27rem) { .demo-placeholder { min-height: 58.5rem; } }
-  @media (min-width: 40rem) { .demo-placeholder { min-height: 47rem; } }
-  @media (min-width: 48rem) { .demo-placeholder { min-height: 43.5rem; } }
-  @media (min-width: 64rem) { .demo-placeholder { min-height: 41.2rem; } }
-  @media (min-width: 80rem) { .demo-placeholder { min-height: 39.2rem; } }
-  /* A finger costs the console roughly 100px of extra control height, so the
-     touch reservation at the two-column breakpoints is its own number. */
-  @media (pointer: coarse) and (min-width: 40rem) { .demo-placeholder { min-height: 53rem; } }
-  @media (pointer: coarse) and (min-width: 48rem) { .demo-placeholder { min-height: 48.5rem; } }
-  @media (pointer: coarse) and (min-width: 64rem) { .demo-placeholder { min-height: 45.5rem; } }
+     rather than removing it. One number cannot do it: the console is 761px at
+     the desktop breakpoint and 1100px on a phone, where the two columns stack
+     and every control is sized for a finger. The Transcribe tab is the tallest
+     on every screen now that it carries its own Model dropdown, so it defines
+     the figures. A one-profile figure left a phone with a jump at the moment
+     the chunk landed — which is the jump the placeholder exists to prevent.
+     The steps below are the measured heights at each breakpoint; see "Touch
+     and small screens" for the others. */
+  .demo-placeholder { min-height: 68.8rem; border-top: 1px solid var(--border-soft); background: var(--surface-panel); }
+  @media (min-width: 22.5rem) { .demo-placeholder { min-height: 67.1rem; } }
+  @media (min-width: 27rem) { .demo-placeholder { min-height: 62.8rem; } }
+  @media (min-width: 40rem) { .demo-placeholder { min-height: 58.7rem; } }
+  @media (min-width: 48rem) { .demo-placeholder { min-height: 52.8rem; } }
+  @media (min-width: 64rem) { .demo-placeholder { min-height: 47.6rem; } }
+  @media (min-width: 80rem) { .demo-placeholder { min-height: 47.6rem; } }
+  /* A finger costs the console roughly 40–90px of extra control height, so
+     the touch reservation at the two-column breakpoints is its own number. */
+  @media (pointer: coarse) and (min-width: 40rem) { .demo-placeholder { min-height: 65.6rem; } }
+  @media (pointer: coarse) and (min-width: 48rem) { .demo-placeholder { min-height: 58.8rem; } }
+  @media (pointer: coarse) and (min-width: 64rem) { .demo-placeholder { min-height: 51.4rem; } }
 
   /* The capability switcher. Cards rather than pills: each one carries a label
      and a plain-language subtitle, which is what makes three unfamiliar model

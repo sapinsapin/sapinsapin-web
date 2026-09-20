@@ -108,6 +108,13 @@ const modelRows = [
   ['whisper-small-pld-pam', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
   ['whisper-small-pld-tsg', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
   ['whisper-small-pld-war', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
+  ['whisper-small-fsc-pld-fil', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
+  ['whisper-large-v3-pld-ceb', 'Speech recognition', 'openai/whisper-large-v3', 'sapinsapin/pld'],
+  ['whisper-large-v3-pld-pam', 'Speech recognition', 'openai/whisper-large-v3', 'sapinsapin/pld'],
+  ['omniASR_W2V_1B_SSL-ctc-char-pld_ceb', 'Speech recognition', 'ylacombe/omniASR_W2V_1B_SSL', 'sapinsapin/pld'],
+  ['omniASR_W2V_1B_SSL-ctc-syllable-pld_ceb', 'Speech recognition', 'ylacombe/omniASR_W2V_1B_SSL', 'sapinsapin/pld'],
+  ['omniASR_W2V_1B_SSL-ctc-char-pld_pam', 'Speech recognition', 'ylacombe/omniASR_W2V_1B_SSL', 'sapinsapin/pld'],
+  ['omniASR_W2V_1B_SSL-ctc-syllable-pld_pam', 'Speech recognition', 'ylacombe/omniASR_W2V_1B_SSL', 'sapinsapin/pld'],
 ]
 
 const datasetCopyById = new Map(datasetCopy.map((item) => [item.id, item]))

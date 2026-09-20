@@ -35,6 +35,8 @@ training data. Facts about the base models come from their public cards and pape
 
 - SpeechT5 (TTS and voice conversion) — https://huggingface.co/microsoft/speecht5_tts
 - Whisper Small — https://huggingface.co/openai/whisper-small
+- Whisper Large-v3 — https://huggingface.co/openai/whisper-large-v3
+- OmniASR W2V 1B SSL — https://huggingface.co/ylacombe/omniASR_W2V_1B_SSL
 - Llama 3.1 8B — https://huggingface.co/meta-llama/Llama-3.1-8B
 - gpt-oss-20b — https://openai.com/index/introducing-gpt-oss/
 - Qwen-SEA-LION-v4 8B VL — https://huggingface.co/aisingapore/Qwen-SEA-LION-v4-8B-VL

@@ -20,10 +20,13 @@ const languageMeta = {
 
 // Each PLD language has its own fine-tuned models on the Hub. Reading them out
 // of the catalog keeps the map honest: the dots grow with real download counts
-// rather than with a number chosen to look good.
+// rather than with a number chosen to look good. The separator differs across
+// families — whisper repos use "-pld-<code>", the omniASR repos use "_pld_<code>".
 function buildLayers() {
   const layers = languageAnchors.map(({ id, x, y }) => {
-    const own = models.filter((model) => model.name.endsWith(`-pld-${id}`))
+    const own = models.filter(
+      (model) => model.name.endsWith(`-pld-${id}`) || model.name.endsWith(`-pld_${id}`),
+    )
     const downloads = own.reduce((total, model) => total + (Number(model.downloads) || 0), 0)
     const tasks = [...new Set(own.map((model) => model.task))]
     return { id, x, y, ...languageMeta[id], code: id.toUpperCase(), models: own.length, downloads, tasks }

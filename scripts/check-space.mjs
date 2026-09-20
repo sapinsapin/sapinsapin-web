@@ -67,7 +67,7 @@ check('every endpoint the demo calls still exists', async () => {
   if (!response.ok) throw new Error(`HTTP ${response.status}`)
   info = await response.json()
   const named = Object.keys(info.named_endpoints ?? {})
-  const needed = ['/lambda', '/lambda_1', '/load_sample', '/transcribe', '/synthesize', '/convert']
+  const needed = ['/lambda', '/_on_lang', '/load_sample', '/transcribe', '/synthesize', '/convert']
   const missing = needed.filter((name) => !named.includes(name))
   if (missing.length) throw new Error(`missing: ${missing.join(', ')}`)
   return `${needed.length} present`
@@ -78,9 +78,9 @@ check('every endpoint the demo calls still exists', async () => {
 check('endpoint parameters are unchanged', async () => {
   const expected = {
     '/lambda': ['l'],
-    '/lambda_1': ['l'],
+    '/_on_lang': ['lang_name'],
     '/load_sample': ['lang_name', 'label'],
-    '/transcribe': ['lang_name', 'audio', 'reference'],
+    '/transcribe': ['lang_name', 'model_label', 'audio', 'reference'],
     '/synthesize': ['lang_name', 'text', 'voice_label'],
     '/convert': ['audio', 'voice_label'],
   }
@@ -112,7 +112,7 @@ check('the manifest still matches the Space', async () => {
 // choices per session this can be simplified away — until then, prove it holds.
 check('dropdown choices are still session-scoped (prep is required)', async () => {
   const other = languages.find((entry) => entry.name !== 'Cebuano')
-  await call('lambda', ['Cebuano'])
+  await call('_on_lang', ['Cebuano'])
   let rejected = false
   try {
     await call('load_sample', [other.name, other.clips[0]])
@@ -126,10 +126,26 @@ check('dropdown choices are still session-scoped (prep is required)', async () =
 
 check('preparing then calling in one session works', async () => {
   const target = languages.find((entry) => entry.name !== 'Cebuano')
-  await call('lambda', [target.name])
+  await call('_on_lang', [target.name])
   const result = await call('load_sample', [target.name, target.clips[0]])
   if (!result?.[0]?.url && !result?.[0]?.path) throw new Error('no audio returned')
   return `${target.name} clip loaded`
+})
+
+// The Model dropdown only accepts labels the session's _on_lang has filled in,
+// and the page's first paint ships baked labels — so drift there means the picker
+// shows sizes that would all be rejected. Assert the two stay in step.
+check('per-language model lists still match the manifest', async () => {
+  const wrong = []
+  for (const entry of languages) {
+    const prep = await call('_on_lang', [entry.name])
+    const live = values(prep?.[1]?.choices)
+    if (live.join('|') !== entry.models.join('|')) {
+      wrong.push(`${entry.name}: manifest ${entry.models.length} ≠ live ${live.length} (run npm run sync:space)`)
+    }
+  }
+  if (wrong.length) throw new Error(wrong.join(' · '))
+  return `${languages.length} model lists in sync`
 })
 
 let failures = 0

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { languages, targetVoices } from '../data/spaceManifest'
 import { AudioError, canRecord, extractPeaks, formatBytes, formatSeconds, startRecording, toSpeechWav } from '../lib/audio'
-import { convert, fetchAudioBlob, isWarm, listClips, listVoices, loadSample, synthesize, transcribe, uploadBlob } from '../lib/spaceClient'
+import { convert, fetchAudioBlob, isWarm, listClips, listModels, listVoices, loadSample, synthesize, transcribe, uploadBlob } from '../lib/spaceClient'
 
 // The Hub's model ids use ISO codes that do not always match the speaker
 // prefixes in the corpus — Bikol speakers are BIK_*, but the model is …-bcl —
@@ -109,9 +109,13 @@ function statusCopy({ phase, position, elapsed, job }) {
   if (job.cold && elapsed >= COLD_NOTICE_AFTER) {
     // Voice conversion is one language-independent model, so naming a language
     // here would promise a per-language wait that does not exist.
-    return job.capability.warmKind === 'vc'
-      ? 'First run — the Space is loading the voice-conversion model onto free CPU. This happens once.'
-      : `First run for ${job.languageLabel} — the Space is loading a ~1 GB model onto free CPU. This happens once per language.`
+    if (job.capability.warmKind === 'vc') {
+      return 'First run — the Space is loading the voice-conversion model onto free CPU. This happens once.'
+    }
+    const big = /whisper-large-v3/.test(job.model ?? '')
+    const size = big ? 'several GB' : 'about 1 GB'
+    const after = big ? ' The large bake-off model takes a few minutes.' : ' This happens once per language.'
+    return `First run for ${job.languageLabel} — the Space is loading a ${size} model onto free CPU.${after}`
   }
   if (elapsed >= 45) {
     return 'Still going. This runs on free shared CPU with no GPU — you can keep reading, the result will appear here.'
@@ -633,9 +637,12 @@ function AudioSource({ language, languageLabel, value, onChange, disabled, step 
 
 /* -------------------------------------------------------------------- stage */
 
-function Stage({ capability, language, children, status, live, busy }) {
+function Stage({ capability, language, children, status, live, busy, modelBadge }) {
   const ref = useRef(null)
   const was = useRef(false)
+  // The default badge names the model that generates this capability for the
+  // language; call sites override it when the exact model in flight matters.
+  const badge = modelBadge ?? capability.model(language)
 
   // On a phone the stage sits below the button that fills it, so starting a job
   // would otherwise put the answer off-screen for the fifteen seconds someone is
@@ -658,7 +665,7 @@ function Stage({ capability, language, children, status, live, busy }) {
     <div className="demo-stage" ref={ref}>
       <div className="demo-stage-head">
         <span className="demo-stage-label">{capability.resultLabel}</span>
-        {capability.model(language) && <code className="demo-stage-model">{capability.model(language)}</code>}
+        {badge && <code className="demo-stage-model">{badge}</code>}
       </div>
       <div className="demo-stage-body">{children}</div>
       {status}
@@ -785,6 +792,9 @@ function SynthesizePanel({ capability, language, languageLabel, languageField })
 function TranscribePanel({ capability, language, languageLabel, languageField }) {
   const [audio, setAudio] = useState(null)
   const [reference, setReference] = useState('')
+  const manifestModels = useMemo(() => languages.find((entry) => entry.name === language)?.models ?? [], [language])
+  const [models, refreshModels] = useLiveOptions(language, manifestModels, listModels)
+  const [model, setModel] = useState(manifestModels[0] ?? '')
   const job = useJob(capability)
   const live = useAnnouncement(job.phase, job.error)
   const id = useId()
@@ -793,25 +803,50 @@ function TranscribePanel({ capability, language, languageLabel, languageField })
   // way to judge a transcription in a language you may not know.
   useEffect(() => setReference(audio?.reference ?? ''), [audio])
 
+  // The whisper-small baseline is the first option in the Space's own list, so
+  // a fresh language follows the picker to its default there too.
+  useEffect(() => setModel(manifestModels[0] ?? ''), [manifestModels])
+
+  // Follows the list rather than the language, so a refresh that finds the
+  // selected model gone lands on a real one instead of failing at submit.
+  useEffect(() => {
+    if (models.length && models.includes(model)) return
+    if (models.length) setModel(models[0])
+  }, [models, model])
+
   const run = useCallback(() => {
     if (!audio) return
     job.start(
-      { language, languageLabel, subject: languageLabel, cold: !isWarm(capability.warmKind, language), uploadSize: audio.blob.size },
+      {
+        language,
+        languageLabel,
+        model,
+        subject: languageLabel,
+        cold: !isWarm(capability.warmKind, language, model),
+        uploadSize: audio.blob.size,
+      },
       async ({ signal, onPosition, setPhase }) => {
         setPhase('uploading')
         const uploaded = await uploadBlob(audio.blob, 'input.wav', { signal })
         setPhase('connecting')
-        return { text: (await transcribe({ language, audio: uploaded, reference }, { signal, onPosition })).text }
+        // The model is re-validated against the Space's live list on its way
+        // in, so a manifest that has gone stale recovers instead of failing.
+        return { text: (await transcribe({ language, model, audio: uploaded, reference }, { signal, onPosition })).text }
       },
     )
-  }, [audio, capability, job, language, languageLabel, reference])
+  }, [audio, capability, job, language, languageLabel, model, reference])
 
   return (
     <>
       <div className="demo-inputs">
         {languageField}
-        <AudioSource step="2" language={language} languageLabel={languageLabel} value={audio} onChange={setAudio} disabled={job.busy} />
-        <Field step="3" label="Expected transcript" hint="Optional — filled in for you when you pick a corpus clip." htmlFor={`${id}-ref`}>
+        <Field step="2" label="Model" hint="Cebuano and Kapampangan offer a bake-off of small, mid and gigabyte-scale models — slower, larger models are the most accurate, and the first run downloads their weights.">
+          <select id={`${id}-model`} value={model} onFocus={refreshModels} onChange={(event) => setModel(event.target.value)}>
+            {models.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+        </Field>
+        <AudioSource step="3" language={language} languageLabel={languageLabel} value={audio} onChange={setAudio} disabled={job.busy} />
+        <Field step="4" label="Expected transcript" hint="Optional — filled in for you when you pick a corpus clip." htmlFor={`${id}-ref`}>
           {/* Same reasoning as the synthesis box: this field holds a sentence
               in a Philippine language, and a phone keyboard correcting it into
               English would quietly change what the transcription is scored
@@ -839,6 +874,7 @@ function TranscribePanel({ capability, language, languageLabel, languageField })
         // The badge names the model that produced what is on the stage, not
         // whatever the picker moved to while the request was in flight.
         language={job.result?.job.language ?? language}
+        modelBadge={model ? model.split(' · ')[0] : capability.model(language)}
         live={live}
         busy={job.busy}
         status={<StatusLine phase={job.phase} position={job.position} elapsed={job.elapsed} job={job.job} error={job.error} onCancel={job.cancel} onRetry={run} />}

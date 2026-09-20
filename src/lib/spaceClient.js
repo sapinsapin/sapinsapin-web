@@ -18,10 +18,14 @@
 //
 // 3. Gradio validates dropdown values against the choices that dropdown
 //    currently holds *for this session*, and there is one live choice list per
-//    dropdown per session. Asking for a Bikol voice without telling the Space
-//    the language changed fails with "is not in the list of choices". Worse,
-//    preparing Bikol and then Waray leaves Bikol invalid again — preparation is
-//    a cursor, not a cache. See `withPrepared`.
+//    dropdown per session. A fresh session only knows the default language's
+//    choices, so a Bikol model label fails with "is not in the list of choices"
+//    until the Space's language-change handler has run for Bikol in this
+//    session. Those handlers are exposed to the API under their internal names:
+//    /_on_lang fills the Transcribe tab's clip and model dropdowns in one call,
+//    /lambda fills the Synthesize tab's voice dropdown. Preparation is a
+//    cursor, not a cache: switching Bikol -> Waray -> Bikol refills the lists
+//    each time the cursor moves. See `withTranscriptInputs` and `withPrepared`.
 
 import { spaceOrigin, languages as manifestLanguages } from '../data/spaceManifest.js'
 
@@ -36,8 +40,10 @@ function newSessionHash() {
 }
 
 // Which language each prep-driven dropdown is currently showing, server-side.
-// null means "unknown" — after a reset we cannot assume anything.
-let prepared = { clips: null, voices: null }
+// null means "unknown" — after a reset we cannot assume anything. clips and
+// models move together: the Space's own language-change handler fills both from
+// the same call, so they share one cursor.
+let prepared = { clips: null, models: null, voices: null }
 
 export class SpaceError extends Error {
   constructor(message, { kind = 'failed', retryable = false, cause } = {}) {
@@ -72,9 +78,9 @@ function notifyPositions() {
   waiting.forEach((entry, index) => entry.onPosition?.(index + 1))
 }
 
-function schedule(task, { signal, onPosition } = {}) {
+function schedule(task, { signal, onPosition, ceiling } = {}) {
   return new Promise((resolve, reject) => {
-    const entry = { task, resolve, reject, signal, onPosition }
+    const entry = { task, resolve, reject, signal, onPosition, ceiling }
     waiting.push(entry)
     notifyPositions()
 
@@ -108,17 +114,19 @@ function schedule(task, { signal, onPosition } = {}) {
 // request at a time.
 const SPACE_LOCK = 'sapinsapin-space-request'
 
-// Above the longest per-request budget, so this never pre-empts a legitimately
-// slow model load. It exists because a slot that never finishes would hold the
-// queue — and the cross-tab lock — closed for the life of the page, turning one
-// stuck request into a demo that is permanently dead in every tab.
+// How long a slot with no declared ceiling may live: above the shared heavy
+// budget of 180s so it never pre-empts a legitimately slow model load, but low
+// enough that a genuinely stuck request cannot hold the queue — and the
+// cross-tab lock — closed for the life of the page. Jobs whose budgets outrun
+// this (the large ASR models do) declare their own, larger ceiling when they
+// schedule.
 const SLOT_CEILING_MS = 210_000
 
-function watchdog(task) {
+function watchdog(task, ceiling) {
   return new Promise((resolve, reject) => {
     const bell = setTimeout(
       () => reject(new SpaceError('The Space did not answer in time.', { kind: 'timeout', retryable: true })),
-      SLOT_CEILING_MS,
+      ceiling ?? SLOT_CEILING_MS,
     )
     task().then(resolve, reject).finally(() => clearTimeout(bell))
   })
@@ -149,7 +157,7 @@ async function pump() {
   try {
     // Position 1 reads as "waiting for the Space to free up", which is exactly
     // what a lock held by another tab means.
-    entry.resolve(await runExclusive(() => watchdog(entry.task), () => entry.onPosition?.(1)))
+    entry.resolve(await runExclusive(() => watchdog(entry.task, entry.ceiling), () => entry.onPosition?.(1)))
   } catch (error) {
     entry.reject(error)
   } finally {
@@ -262,41 +270,68 @@ function translate(error, signal, timeout) {
 
 /* ------------------------------------------------------------- preparation */
 
-const prepEndpoint = { clips: 'lambda', voices: 'lambda_1' }
+// The Dropdown inputs are per-session, so each one has to be told which
+// language it is pointed at. On the live Space these are the language-change
+// handlers; the API names match the internal fn names.
+const prepEndpoint = { voices: 'lambda' }
+// The Transcribe tab's clip and model dropdowns are filled by one handler
+// (_on_lang) whose response carries both lists, so they are prepared together.
+const transcribePrep = '_on_lang'
 
 // Gradio hands back {choices: [[label, value], …]}; the value is what it will
 // validate against later.
-const choiceValues = (payload) =>
-  (payload?.[0]?.choices ?? []).map((choice) => (Array.isArray(choice) ? choice[1] : choice))
+const choiceValues = (value) =>
+  (value?.choices ?? []).map((choice) => (Array.isArray(choice) ? choice[1] : choice))
 
-// Runs `task` with the named dropdown pointed at `language`, refreshing it
+// Runs `task` with a single dropdown pointed at `language`, refreshing it
 // whenever the cursor is somewhere else. Both calls happen inside a single
 // queue slot, so nothing can move the cursor in between.
 async function withPrepared(kind, language, task, options = {}) {
   let choices = null
   if (prepared[kind] !== language) {
     const payload = await request(prepEndpoint[kind], [language], { ...options, timeoutMs: 30_000 })
-    choices = choiceValues(payload)
+    choices = choiceValues(payload?.[0])
     prepared[kind] = language
   }
   return { choices, value: await task() }
 }
 
+// Same idea for the Transcribe tab, where one _on_lang call fills both the clip
+// and the model dropdown for the session. The task receives the fresh lists so
+// callers can fall back to a valid value instead of submitting a stale one.
+async function withTranscriptInputs(language, task, options = {}) {
+  let clips = null
+  let models = null
+  if (prepared.clips !== language || prepared.models !== language) {
+    const payload = await request(transcribePrep, [language], { ...options, timeoutMs: 30_000 })
+    clips = choiceValues(payload?.[0])
+    models = choiceValues(payload?.[1])
+    prepared.clips = language
+    prepared.models = language
+  }
+  return { clips, models, value: await task({ clips, models }) }
+}
+
 export function resetSession(reason) {
   sessionHash = newSessionHash()
-  prepared = { clips: null, voices: null }
+  prepared = { clips: null, models: null, voices: null }
   if (reason && import.meta.env?.DEV) console.warn(`[spaceClient] new session: ${reason}`)
 }
 
 /* ------------------------------------------------------------ warm tracking */
 
-// The Space loads a model per language on first use, except voice conversion,
-// which is a single language-independent model — one successful convert warms
-// it for every language. Tracking that wrong shows a bogus "first run" notice.
+// The Space loads a model per language on first use, and the ASR models differ
+// hugely in size, so warmth is tracked per language *and* model there. Voice
+// conversion is a single language-independent model — one successful convert
+// warms it for every language. Tracking that wrong shows a bogus "first run".
 const warm = new Set()
-export const warmKey = (capability, language) => (capability === 'vc' ? 'vc' : `${capability}:${language}`)
-export const isWarm = (capability, language) => warm.has(warmKey(capability, language))
-const markWarm = (capability, language) => warm.add(warmKey(capability, language))
+export const warmKey = (capability, language, model) => {
+  if (capability === 'vc') return 'vc'
+  if (capability === 'asr') return `asr:${language}:${model ?? ''}`
+  return `${capability}:${language}`
+}
+export const isWarm = (capability, language, model) => warm.has(warmKey(capability, language, model))
+const markWarm = (capability, language, model) => warm.add(warmKey(capability, language, model))
 
 /* -------------------------------------------------------------------- files */
 
@@ -357,6 +392,19 @@ const file = (value) => (value && typeof value === 'object' && (value.url || val
 
 const heavy = { timeoutMs: 180_000 }
 
+// Cold ASR loads span a huge range on free cpu-basic — roughly 168s for a
+// whisper-small, ~230s for a 1B CTC head, ~364s for whisper-large-v3 — so a
+// single transcribe budget cannot both let the big models finish and fail fast
+// for the small ones. The budget is derived from the size in the model's
+// dropdown label ("… · 1543M · …"); new sizes need no new number here.
+function modelBudget(model) {
+  const size = Number(String(model ?? '').match(/·\s*(\d+)M\s*·/)?.[1])
+  if (!Number.isFinite(size)) return 210_000
+  if (size >= 1200) return 450_000
+  if (size >= 500) return 300_000
+  return 210_000
+}
+
 // The Space forgets our session when it restarts, which surfaces as a choices
 // error on a value we know we prepared. That is worth exactly one silent retry
 // on a fresh session; retrying anything else would double a minute-long wait.
@@ -376,17 +424,31 @@ export function listClips(language, options = {}) {
   return schedule(
     () =>
       withStaleSessionRetry(async () => {
-        const { choices } = await withPrepared('clips', language, async () => null, options)
-        return choices ?? manifestLanguages.find((entry) => entry.name === language)?.clips ?? []
+        const { clips } = await withTranscriptInputs(language, async () => null, options)
+        return clips ?? manifestLanguages.find((entry) => entry.name === language)?.clips ?? []
       }),
     options,
   )
 }
 
-// The voice list is the one piece of baked state that can silently invalidate a
-// request: offering a voice the Space has since renamed produces "is not in the
-// list of choices" on submit, after the visitor has already waited. Refreshing
-// from /lambda_1 lets the page correct itself between deploys.
+// The model list is the newest piece of session state: /transcribe gained a
+// Model dropdown whose options are only valid once _on_lang has filled them,
+// and those options are the sizes a visitor can actually run.
+export function listModels(language, options = {}) {
+  return schedule(
+    () =>
+      withStaleSessionRetry(async () => {
+        const { models } = await withTranscriptInputs(language, async () => null, options)
+        return models ?? manifestLanguages.find((entry) => entry.name === language)?.models ?? []
+      }),
+    options,
+  )
+}
+
+// The voice list is one of the things that can silently invalidate a request:
+// offering a voice the Space has since renamed produces "is not in the list of
+// choices" on submit, after the visitor has already waited. Refreshing from
+// /lambda lets the page correct itself between deploys.
 export function listVoices(language, options = {}) {
   return schedule(
     () =>
@@ -402,8 +464,7 @@ export function loadSample(language, label, options = {}) {
   return schedule(
     () =>
       withStaleSessionRetry(async () => {
-        const { value } = await withPrepared(
-          'clips',
+        const { value } = await withTranscriptInputs(
           language,
           () => request('load_sample', [language, label], { ...options, ...heavy }),
           options,
@@ -433,17 +494,28 @@ export function synthesize({ language, voice, text: input }, options = {}) {
   )
 }
 
-// /transcribe needs no preparation: its language dropdown holds all ten
-// languages at all times, and the other two inputs are free-form.
-export function transcribe({ language, audio, reference = '' }, options = {}) {
+// /transcribe now takes [language, model_label, audio, reference] — the Space
+// gained a Model dropdown, so the model's current per-session choices have to
+// be filled first (withTranscriptInputs does that). A stale model label falls
+// back to the first valid one rather than failing at submit.
+export function transcribe({ language, model, audio, reference = '' }, options = {}) {
+  const budget = modelBudget(model)
   return schedule(
     () =>
       withStaleSessionRetry(async () => {
-        const value = await request('transcribe', [language, audio, reference], { ...options, ...heavy })
-        markWarm('asr', language)
+        const { models, value } = await withTranscriptInputs(
+          language,
+          ({ models: live }) => {
+            const label = live?.length ? (live.includes(model) ? model : live[0]) : model
+            return request('transcribe', [language, label, audio, reference], { ...options, timeoutMs: budget })
+          },
+          options,
+        )
+        markWarm('asr', language, model)
         return { text: text(value?.[0]) }
       }),
     options,
+    { ceiling: budget + 60_000 },
   )
 }
 
