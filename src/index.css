@@ -1183,6 +1183,11 @@
     text-decoration-color: rgb(var(--c-ube) / .8);
   }
   .sappy-msg-text a:hover { color: rgb(var(--c-ube)); }
+  .sappy-msg-text code {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .8em; background: rgb(var(--c-ink) / .08);
+    padding: .12em .32em; border-radius: .32em;
+  }
   .sappy-msg.is-you .sappy-msg-text {
     /* Ink, not brand purple — the darkest palette token against paper reads at
        a much higher contrast than a bright tint with white type, and it keeps

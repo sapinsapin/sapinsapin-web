@@ -185,21 +185,55 @@ function ReplyActions({ text }) {
   )
 }
 
-// Linkify the bare marcocampo.com mention plus full http(s) URLs. Only those
-// two shapes become anchors — the chat renders untrusted-ish assistant text as
-// plain text otherwise, so no other scheme (javascript:, data:) can slip in.
-const URL_RE = /(https?:\/\/[^\s<>"'()]+|(?:www\.)?marcocampo\.com)(?=[\s.,;:!?\u2019'")\]]|$)/
-function Linkify({ text }) {
-  const parts = String(text).split(URL_RE)
-  return parts.map((part, i) => {
-    if (i % 2 === 0) return part
-    const href = /^https?:/.test(part) ? part : `https://${part}`
-    return (
-      <a key={i} href={href} target="_blank" rel="noopener noreferrer">
-        {part}
-      </a>
-    )
-  })
+// Minimal inline formatting for chat bubbles. The assistant writes Discord
+// markdown (**bold**, *italic*, `code`, [text](url)); without conversion the
+// web chat would print the literal asterisks. Only these four shapes change,
+// and — as with the autolinker below — every anchor is checked to be a real
+// http(s) URL, so no other scheme (javascript:, data:) can slip in. Renders
+// React elements only; nothing here touches dangerouslySetInnerHTML.
+const INLINE_RE =
+  /(\*\*([^*\n]+?)\*\*|\*([^*\n]+?)\*|`([^`\n]+)`|\[([^\]\n<>]+)\]\((https?:\/\/[^()\s<>]+)\)|(https?:\/\/[^\s<>"'()]+|(?:www\.)?marcocampo\.com)(?=[\s.,;:!?\u2019'")\]]|$))/g
+
+const SAFE_URL_RE = /^https?:\/\//i
+
+function RichText({ text }) {
+  const source = String(text)
+  if (!source) return null
+  const out = []
+  let last = 0
+  let key = 0
+  for (const m of source.matchAll(INLINE_RE)) {
+    if (m.index > last) out.push(source.slice(last, m.index))
+    last = m.index + m[0].length
+    const bold = m[2]
+    const italic = m[3]
+    const code = m[4]
+    const label = m[5]
+    const url = m[6]
+    const bare = m[7]
+    if (bold != null) {
+      out.push(<strong key={key++}>{bold}</strong>)
+    } else if (italic != null) {
+      out.push(<em key={key++}>{italic}</em>)
+    } else if (code != null) {
+      out.push(<code key={key++}>{code}</code>)
+    } else if (url != null && SAFE_URL_RE.test(url)) {
+      out.push(
+        <a key={key++} href={url} target="_blank" rel="noopener noreferrer">
+          {label}
+        </a>
+      )
+    } else if (bare != null) {
+      const href = /^https:/i.test(bare) ? bare : `https://${bare}`
+      out.push(
+        <a key={key++} href={href} target="_blank" rel="noopener noreferrer">
+          {bare}
+        </a>
+      )
+    }
+  }
+  if (last < source.length) out.push(source.slice(last))
+  return out
 }
 
 export default function ChatWidget() {
@@ -528,11 +562,11 @@ export default function ChatWidget() {
               {chat.map((message) =>
                 message.role === 'user' ? (
                   <div key={message.id} className="sappy-msg is-you">
-                    <p className="sappy-msg-text"><Linkify text={message.text} /></p>
+                    <p className="sappy-msg-text"><RichText text={message.text} /></p>
                   </div>
                 ) : (
                   <div key={message.id} className="sappy-msg is-sappy">
-                    <p className="sappy-msg-text"><Linkify text={message.text} /></p>
+                    <p className="sappy-msg-text"><RichText text={message.text} /></p>
                     <ReplyActions text={message.text} />
                     {message.blob && (
                       <ChatReply blob={message.blob} autoplay={message.id === lastSpokenRef.current} />

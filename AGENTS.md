@@ -209,7 +209,11 @@ instead of sending near-silence down the model path. Transaction state lives in 
   Every Sappy reply carries Copy / Share chips under the bubble: Copy puts the answer
   on the clipboard (with an execCommand fallback for non-HTTPS previews), and Share
   hands it to the Web Share API when the browser has one, so the answer can leave the
-  card on a phone's share sheet.
+  card on a phone's share sheet. Bubble text is rendered through a tiny
+  four-shape markdown pass (`RichText` in `ChatWidget.jsx`): `**bold**`, `*italic*`,
+  `` `code` ``, and `[text](url)` links become real `<strong>`/`<em>`/`<code>`/anchors,
+  so the Discord-style markup Sappy writes never prints as literal asterisks on the
+  web — anchors stay validated to `http(s)` and nothing uses `dangerouslySetInnerHTML`.
 
  #### The floating chat ("Ask Sappy")
 
@@ -503,16 +507,23 @@ Auth is `wrangler login` (OAuth stored on this Mac in
 `wrangler login` once and click Allow in the browser. The toml mirrors the deployed
 config exactly: the Workers AI binding (`[ai]` → `env.AI`), the AI Search instance
 (`SAPPY_KNOWLEDGE` → `sappy-knowledge`), and three plain vars (Discord application id,
-guild id, public key). `DISCORD_BOT_TOKEN` is a Cloudflare **secret** — it is not in the
-toml, it survives `wrangler deploy` untouched, and it is re-set with
-`echo <value> | npx wrangler secret put DISCORD_BOT_TOKEN`. Do not "helpfully" move a
-secret into the toml. Before the first deploy of a changed toml, run
+guild id, public key). Two things are Cloudflare **secrets** — they are not in the toml,
+they survive `wrangler deploy` untouched, and they are re-set with
+`echo <value> | npx wrangler secret put NAME`:
+`DISCORD_BOT_TOKEN` and `BOTGHOST_SHARED_SECRET`. Do not "helpfully" move a secret into
+the toml. Before the first deploy of a changed toml, run
 `wrangler deploy --dry-run` and diff its "has access to the following bindings" table
 against what is described here — a binding missing from the toml is silently detached.
 
-The Worker itself serves the five CORS headers the site needs (origin-pinned
-`access-control-allow-origin`, `vary: Origin`, allow methods/headers), so checking CORS
-is a curl, not a dashboard setting. After any deploy, verify the round trip:
+The Worker gates its CORS origins rather than reflecting them: a browser from any site
+other than `sapinsapin-web.vercel.app`, `sapinsapin.ai`, or `localhost` is refused with
+`403` before the model ever runs, while callers with no `Origin` header at all (Discord,
+BotGhost, curl) are unaffected. `/message` (BotGhost) is locked by default — it requires
+the `X-Sappy-Secret` header to equal `BOTGHOST_SHARED_SECRET`, and refuses outright if
+that secret is not configured. The public `/?q=` chat path carries a small in-memory
+per-IP burst limiter (15 requests/minute); treat it as a tripwire, not a wall, since
+free-tier isolates recycle and the counter is not global. After any deploy, verify the
+round trip for both a clean call and a stranger origin:
 
 ```bash
 curl -s -D - -H "Origin: https://sapinsapin-web.vercel.app" \
