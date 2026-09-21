@@ -21,6 +21,12 @@ Every dataset and model is openly published on Hugging Face. Figures on sapinsap
 
 The demo covers the speech models only. The text and language models (BalitaNLP continued-pretraining checkpoints, bikoLLM) are on the Hub rather than in the demo.
 
+## People
+
+- **Tim Santos** — Founder. LinkedIn: https://www.linkedin.com/in/internetoftim/ · Hugging Face: https://huggingface.co/internetoftim
+- **Marc Ocampo** (Marc Niño Christopher Ocampo) — Core team. Website: https://marcocampo.com · LinkedIn: https://www.linkedin.com/in/mnco25/ · Hugging Face: https://huggingface.co/marcxxv
+- **JC Diamante** — Core team. Website: https://jcdiamante.com · LinkedIn: https://www.linkedin.com/in/jcdiamante/ · Hugging Face: https://huggingface.co/zeraphim
+
 ## Links
 
 - [Hugging Face organization](https://huggingface.co/sapinsapin)

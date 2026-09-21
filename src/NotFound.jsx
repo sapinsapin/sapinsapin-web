@@ -56,7 +56,7 @@ const destinations = [
   {
     id: 'people', kind: 'section', title: 'People', href: '/#people',
     blurb: 'The people behind the work — portraits, roles, and how to reach them.',
-    keywords: ['people', 'team', 'contributors', 'contributor', 'founder', 'creators', 'authors', 'tim santos', 'marc ocampo', 'jc diamante', 'jcdiamante.com', 'about us'],
+    keywords: ['people', 'team', 'contributors', 'contributor', 'founder', 'creators', 'authors', 'tim santos', 'marc ocampo', 'marc niño christopher ocampo', 'jc diamante', 'jcdiamante.com', 'about us'],
   },
   {
     id: 'faq', kind: 'section', title: 'Partners and FAQ', href: '/#faq',
