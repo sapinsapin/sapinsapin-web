@@ -7,6 +7,45 @@ const MAX_DISCORD_RESPONSE_LENGTH = 1950;
 const MAX_REPLY_CONTEXT_LENGTH = 3500;
 
 
+// ─────────────────────────────────────────────
+// RATE LIMITING
+//
+// A gentle in-memory breather per visitor IP. It cannot stop a determined
+// attacker (isolates are ephemeral and per-colo), but it stops an unlucky
+// page load or a dumb bot from hammering the paid model head-on. Applied
+// only to the public /?q= chat path, never to Discord or BotGhost, which
+// carry their own identities.
+// ─────────────────────────────────────────────
+
+const RATE_LIMIT = Object.freeze({
+  windowMs: 60_000,
+  max: 15,
+});
+
+const rateLimitBuckets = new Map();
+
+function consumeRateLimit(clientIp) {
+  const now = Date.now();
+
+  if (rateLimitBuckets.size > 4000) {
+    rateLimitBuckets.clear();
+  }
+
+  const bucket = rateLimitBuckets.get(clientIp);
+
+  if (!bucket || now >= bucket.resetAt) {
+    rateLimitBuckets.set(clientIp, {
+      count: 1,
+      resetAt: now + RATE_LIMIT.windowMs,
+    });
+    return true;
+  }
+
+  bucket.count += 1;
+  return bucket.count <= RATE_LIMIT.max;
+}
+
+
 // Strip Discord mention syntax from a finished answer. The web client renders
 // plain text and must never see a snowflake, even if a prompt or the knowledge
 // base ever reintroduces one.
@@ -631,20 +670,17 @@ function isBotGhostAuthorized(
   env
 ) {
   /*
-   * This is backward-compatible.
+   * Locked by default.
    *
-   * If BOTGHOST_SHARED_SECRET does not exist,
-   * your existing BotGhost request continues
-   * working normally.
-   *
-   * Later, we can secure /message by adding the
-   * same secret to BotGhost as:
-   *
-   * X-Sappy-Secret
+   * /message is only accepted when the request carries the present
+   * BOTGHOST_SHARED_SECRET in the X-Sappy-Secret header. If the secret
+   * is not configured at all, refuse rather than open — an unconfigured
+   * deploy must not silently become an open door for anyone to trigger
+   * Sappy and run up spend.
    */
 
   if (!env.BOTGHOST_SHARED_SECRET) {
-    return true;
+    return false;
   }
 
   const provided =
@@ -2231,6 +2267,31 @@ export default {
           mention_test:
             "/test-message?q=your question",
         }, { headers: corsHeaders });
+      }
+
+
+      // ▲ Breather: the chat is human-paced, and this is the paid path.
+      const clientIp =
+        request.headers.get(
+          "CF-Connecting-IP"
+        );
+
+      if (
+        clientIp &&
+        !consumeRateLimit(
+          clientIp
+        )
+      ) {
+        return Response.json({
+          error:
+            "Too many questions, ang bilis! Wait a minute and ask again.",
+        }, {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            "Retry-After": "60",
+          },
+        });
       }
 
 
