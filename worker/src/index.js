@@ -2000,14 +2000,35 @@ export default {
         request.url
       );
 
-    // ▲ CORS · the site reads these responses from the browser, so every
-    //    answer must carry access-control headers. Also answer preflights.
-    const corsHeaders = {
-      'access-control-allow-origin': request.headers.get('Origin') || '*',
-      'access-control-allow-methods': 'GET, POST, OPTIONS',
-      'access-control-allow-headers': 'Content-Type, Accept',
-      'vary': 'Origin',
-    };
+    // ▲ CORS · the site reads every /?q= response from the browser, so answers
+    //    must carry access-control headers, and preflights are answered.
+    //
+    //    Origins are gated, not reflected: a browser from any other site is
+    //    refused with 403 BEFORE the model runs — otherwise any webpage could
+    //    silently rack up Workers AI spend through its visitors. Callers that
+    //    send no Origin header at all (Discord, BotGhost, curl) are untouched.
+    const ALLOWED_ORIGINS = new Set([
+      'https://sapinsapin-web.vercel.app',
+      'https://sapinsapin.ai',
+      'https://www.sapinsapin.ai',
+    ]);
+    const requestOrigin = request.headers.get('Origin');
+    const isAllowedOrigin =
+      !requestOrigin ||
+      ALLOWED_ORIGINS.has(requestOrigin) ||
+      /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(requestOrigin);
+    const corsHeaders = isAllowedOrigin
+      ? {
+          'access-control-allow-origin': requestOrigin || '*',
+          'access-control-allow-methods': 'GET, POST, OPTIONS',
+          'access-control-allow-headers': 'Content-Type, Accept',
+          'vary': 'Origin',
+        }
+      : null;
+
+    if (!corsHeaders) {
+      return new Response('Forbidden origin', { status: 403 });
+    }
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders });
