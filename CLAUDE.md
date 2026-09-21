@@ -464,3 +464,37 @@ The build emits two documents: `dist/index.html` and `dist/404.html`. Vercel ser
 second for any path that does not resolve to a file, with a `404` status — which depends on
 there being no catch-all rewrite in `vercel.json`. After a deploy, `curl -I` any nonsense
 path to confirm it still answers `404` rather than `200`.
+
+### The sappy-ai Worker (the floating chat's backend)
+
+The Worker lives at `worker/src/index.js` with its config in `worker/wrangler.toml` and
+deploys with Wrangler (no SSH — Cloudflare has none):
+
+```bash
+cd worker && npx wrangler deploy
+```
+
+Auth is `wrangler login` (OAuth stored on this Mac in
+`~/Library/Preferences/.wrangler/config/default.toml`); if that state is missing, run
+`wrangler login` once and click Allow in the browser. The toml mirrors the deployed
+config exactly: the Workers AI binding (`[ai]` → `env.AI`), the AI Search instance
+(`SAPPY_KNOWLEDGE` → `sappy-knowledge`), and three plain vars (Discord application id,
+guild id, public key). `DISCORD_BOT_TOKEN` is a Cloudflare **secret** — it is not in the
+toml, it survives `wrangler deploy` untouched, and it is re-set with
+`echo <value> | npx wrangler secret put DISCORD_BOT_TOKEN`. Do not "helpfully" move a
+secret into the toml. Before the first deploy of a changed toml, run
+`wrangler deploy --dry-run` and diff its "has access to the following bindings" table
+against what is described here — a binding missing from the toml is silently detached.
+
+The Worker itself serves the five CORS headers the site needs (origin-pinned
+`access-control-allow-origin`, `vary: Origin`, allow methods/headers), so checking CORS
+is a curl, not a dashboard setting. After any deploy, verify the round trip:
+
+```bash
+curl -s -D - -H "Origin: https://sapinsapin-web.vercel.app" \
+  "https://sappy-ai.primary-bd7.workers.dev/?q=Ano%20ang%20SapinSapin%20AI%3F"
+```
+
+Expect `200` + `access-control-allow-origin: https://sapinsapin-web.vercel.app` + a JSON
+body with an `answer` key. Keep the workers.dev origin in the site's CSP `connect-src`
+(check-csp) in step with any origin change here.

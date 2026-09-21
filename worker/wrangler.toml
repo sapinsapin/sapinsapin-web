@@ -1,0 +1,16 @@
+name = "sappy-ai"
+main = "src/index.js"
+compatibility_date = "2026-09-18"
+account_id = "bd7cc1ad3407fb0024c197108e016285"
+
+[vars]
+DISCORD_APPLICATION_ID = "1550091743003811842"
+DISCORD_GUILD_ID = "1548673048876683296"
+DISCORD_PUBLIC_KEY = "cebbf1f26b8e885308fb7f785835579892d094cd26c4d22d9f481f4a2ff8dd4f"
+
+[ai]
+binding = "AI"
+
+[[ai_search]]
+binding = "SAPPY_KNOWLEDGE"
+instance_name = "sappy-knowledge"
