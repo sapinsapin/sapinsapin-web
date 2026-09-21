@@ -87,6 +87,8 @@ const modelRows = [
   ['bikoLLM', 'Text generation', 'meta-llama/Llama-3.1-8B', 'sapinsapin/halo-bcl'],
   ['speecht5_tts-fsc', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/filipinospeechcorpus'],
   ['whisper-small-fsc', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/filipinospeechcorpus'],
+  ['speecht5_tts-fsc-ONNX', 'Text to speech', 'sapinsapin/speecht5_tts-fsc', 'sapinsapin/filipinospeechcorpus'],
+  ['whisper-small-fsc-ONNX', 'Speech recognition', 'sapinsapin/whisper-small-fsc', 'sapinsapin/filipinospeechcorpus'],
   ['speecht5_tts-pld-bcl', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],
   ['speecht5_tts-pld-ceb', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],
   ['speecht5_tts-pld-eng', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],

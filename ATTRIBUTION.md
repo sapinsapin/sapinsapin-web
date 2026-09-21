@@ -43,6 +43,10 @@ training data. Facts about the base models come from their public cards and pape
 - BalitaNLP — https://huggingface.co/datasets/LanceBunag/BalitaNLP
 - Aya dataset — https://huggingface.co/datasets/CohereLabs/aya_dataset
 
+The `-ONNX` exports inherit their architecture and training-set facts from the project’s own
+`whisper-small-fsc` and `speecht5_tts-fsc` fine-tunes; export details (Transformers.js
+inference, quantized variants) come from the two ONNX model cards.
+
 Dataset and model counts, downloads, tasks, and dates are synced from the public Hub API
 by `npm run sync` (`scripts/sync-catalog.mjs`), which writes `src/data/hubSnapshot.js`.
 Run it before each deploy. `downloads` is the Hub's 30-day figure, matching the label used

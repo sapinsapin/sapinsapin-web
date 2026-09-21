@@ -1,9 +1,9 @@
 // Plain-language notes for the model catalog.
 //
 // The catalog is systematic — most entries are one base model fine-tuned on one
-// Philippine language — so descriptions are derived rather than written 28
-// times. Facts about the base models and training sets come from their public
-// cards and papers; see ATTRIBUTION.md for the source list.
+// Philippine language — so descriptions are derived per family rather than
+// written one by one. Facts about the base models and training sets come from
+// their public cards and papers; see ATTRIBUTION.md for the source list.
 
 const languageNames = {
   bcl: 'Bikol',
@@ -25,6 +25,10 @@ const baseNotes = {
     'SpeechT5 (Microsoft), the voice-conversion configuration of the same shared speech-and-text model.',
   'openai/whisper-small':
     'Whisper Small (OpenAI) — a 244M-parameter encoder–decoder trained on about 680,000 hours of weakly supervised audio across 99 languages.',
+  'sapinsapin/speecht5_tts-fsc':
+    'The project\u2019s own SpeechT5 Filipino text-to-speech fine-tune, exported to ONNX for in-browser inference with Transformers.js (WebGPU or WASM).',
+  'sapinsapin/whisper-small-fsc':
+    'The project\u2019s own Whisper Small Filipino speech-recognition fine-tune, exported to ONNX for in-browser inference with Transformers.js (WebGPU or WASM).',
   'openai/whisper-large-v3':
     'Whisper Large-v3 (OpenAI) — the largest Whisper encoder–decoder at about 1.5 billion parameters, more accurate than Small and far slower to run.',
   'ylacombe/omniASR_W2V_1B_SSL':
@@ -60,6 +64,8 @@ const specialSummaries = {
   'gpt-oss-20b-balitanlp-cpt': 'OpenAI’s open-weight model with its training continued on Filipino news text, adapting it to Filipino usage.',
   bikoLLM: 'A Llama 3.1 adapted to Bikol — one of the first language models aimed specifically at that language.',
   'speecht5_vc-pld': 'Re-speaks an existing recording in a different voice while keeping the words and timing intact.',
+  'speecht5_tts-fsc-ONNX': 'The Filipino text-to-speech model above, exported to ONNX so it can run directly in the browser with Transformers.js — the lighter, device-side path to the same voice.',
+  'whisper-small-fsc-ONNX': 'The Filipino recognizer above, exported to ONNX so it can run directly in the browser with Transformers.js — the lighter, device-side path to the same model.',
 }
 
 function familyOf(name) {
@@ -75,6 +81,9 @@ function familyOf(name) {
   if (name === 'speecht5_tts-fsc') return { kind: 'tts', code: 'fil' }
   if (name === 'whisper-small-fsc') return { kind: 'asr', code: 'fil' }
   if (name === 'whisper-small-fsc-pld-fil') return { kind: 'asr', code: 'fil' }
+  // The ONNX suffixes are exports of the FSC fine-tunes above, same language.
+  if (name === 'speecht5_tts-fsc-ONNX') return { kind: 'tts', code: 'fil' }
+  if (name === 'whisper-small-fsc-ONNX') return { kind: 'asr', code: 'fil' }
   return null
 }
 

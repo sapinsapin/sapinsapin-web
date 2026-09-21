@@ -1,11 +1,24 @@
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { hubTotals } from './src/data/hubSnapshot.js'
 
 const entry = (file) => fileURLToPath(new URL(file, import.meta.url))
 
+// index.html carries an SEO copy with a model count that would go stale the way
+// every hardcoded figure does. Replace the token at build time from the synced
+// snapshot so the meta/OG/Twitter/noscript text always matches the catalog.
+const syncCounts = () => ({
+  name: 'sync-counts-in-html',
+  transformIndexHtml(html) {
+    return html
+      .replaceAll('{{MODEL_COUNT}}', String(hubTotals.models))
+      .replaceAll('{{DATASET_COUNT}}', String(hubTotals.datasets))
+  },
+})
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), syncCounts()],
   build: {
     // Target modern browsers for smaller, faster bundles
     target: 'es2020',
