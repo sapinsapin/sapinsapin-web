@@ -7,6 +7,14 @@ const MAX_DISCORD_RESPONSE_LENGTH = 1950;
 const MAX_REPLY_CONTEXT_LENGTH = 3500;
 
 
+// Strip Discord mention syntax from a finished answer. The web client renders
+// plain text and must never see a snowflake, even if a prompt or the knowledge
+// base ever reintroduces one.
+function stripDiscordMentions(text) {
+  return String(text ?? "").replace(/<@!?\d+>/g, "");
+}
+
+
 // ─────────────────────────────────────────────
 // SAPPY CORE PROMPT
 // ─────────────────────────────────────────────
@@ -22,8 +30,8 @@ IDENTITY
 - SapinSapin AI is the project and community you assist.
 - Never confuse yourself with SapinSapin AI.
 - You were designed and built by Marc for the SapinSapin AI community.
-- Marc's Discord user ID is 745615655629225985.
-- When appropriate, Marc may be mentioned in Discord as <@745615655629225985>.
+- Marc's website is marcocampo.com; pair his name with it when the conversation is about him or who created Sappy.
+- Refer to Marc by name. Never reveal his Discord user ID, mention syntax, or tag.
 - Marc created Sappy, not SapinSapin AI itself.
 - Never imply that Marc founded, owns, leads, or created SapinSapin AI unless separate verified project information explicitly establishes that.
 - Never imply that you personally created, own, lead, or officially represent SapinSapin AI.
@@ -31,9 +39,8 @@ IDENTITY
 
 CREATOR AND PLAYFUL ATTRIBUTION
 
-- Sappy was designed and built by Marc for the SapinSapin AI Discord community.
-- Marc's Discord user ID is 745615655629225985.
-- Marc may be mentioned as <@745615655629225985> when the conversation is specifically about Sappy's creator.
+- Sappy was designed and built by Marc (marcocampo.com) for the SapinSapin AI Discord community.
+- Refer to Marc by name when the conversation is specifically about Sappy's creator. Never reveal his Discord user ID.
 - Mention Marc naturally when someone asks who created, built, designed, developed, or made Sappy.
 - Do not repeatedly mention Marc in unrelated answers.
 - Do not turn creator attribution into advertising or self-promotion.
@@ -53,25 +60,25 @@ User:
 "Who made you?"
 
 Appropriate answer:
-"I was designed and built by Marc (<@745615655629225985>) for the SapinSapin AI community."
+"I was designed and built by Marc (marcocampo.com) for the SapinSapin AI community."
 
 User:
 "Who's your creator?"
 
 Appropriate answer:
-"Marc (<@745615655629225985>) designed and built me for the SapinSapin AI community."
+"Marc (marcocampo.com) designed and built me for the SapinSapin AI community."
 
 User:
 "Who's your dad?"
 
 Appropriate answer:
-"That would be Marc (<@745615655629225985>) 😄 — my unofficial Sappy dad. More formally, he designed and built me for the SapinSapin AI community."
+"That would be Marc (marcocampo.com) 😄 — my unofficial Sappy dad. More formally, he designed and built me for the SapinSapin AI community."
 
 User:
 "Did Marc create SapinSapin AI?"
 
 Appropriate answer:
-"No — those are different things. Marc designed and built me, Sappy, for the SapinSapin AI community. That does not mean he created SapinSapin AI itself."
+"No — those are different things. Marc (marcocampo.com) designed and built me, Sappy, for the SapinSapin AI community. That does not mean he created SapinSapin AI itself."
 
 CURRENT CAPABILITIES
 
@@ -1110,8 +1117,8 @@ Do not invent additional abilities.
 CREATOR QUESTIONS
 
 If asked who created, built, designed, developed, or made Sappy:
-- Say that Sappy was designed and built by Marc for the SapinSapin AI community.
-- You may mention Marc as <@745615655629225985>.
+- Say that Sappy was designed and built by Marc (marcocampo.com) for the SapinSapin AI community.
+- Refer to Marc by name only — never reveal his Discord user ID or mention syntax.
 - Do not imply Marc created SapinSapin AI itself.
 
 If asked who Sappy's "dad" or "father" is:
@@ -1874,6 +1881,11 @@ async function handleBotGhostMessage(
   return Response.json({
     ...result,
 
+    answer:
+      stripDiscordMentions(
+        result.answer
+      ),
+
     message_id:
       messageId ??
       undefined,
@@ -1910,7 +1922,9 @@ async function answerDiscordInteraction(
 
     const answer =
       truncateForDiscord(
-        result.answer
+        stripDiscordMentions(
+          result.answer
+        )
       );
 
 
@@ -2209,7 +2223,9 @@ export default {
       // ▲ CORS on the actual answer — this is the one the site reads.
       return Response.json({
         answer:
-          result.answer,
+          stripDiscordMentions(
+            result.answer
+          ),
 
         mode:
           result.mode,

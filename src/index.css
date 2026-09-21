@@ -1175,6 +1175,14 @@
     border-radius: .9rem; padding: .65rem .9rem;
     font-size: .88rem; line-height: 1.55; overflow-wrap: anywhere; white-space: pre-wrap;
   }
+  .sappy-msg-text a {
+    /* Links keep the bubble's own ink/paper text colour — an underline (and
+       ube on hover) is the only affordance, so a link on the light ink bubble
+       in dark mode never loses contrast to a fixed brand colour. */
+    color: inherit; text-decoration: underline; text-underline-offset: .14em;
+    text-decoration-color: rgb(var(--c-ube) / .8);
+  }
+  .sappy-msg-text a:hover { color: rgb(var(--c-ube)); }
   .sappy-msg.is-you .sappy-msg-text {
     /* Ink, not brand purple — the darkest palette token against paper reads at
        a much higher contrast than a bright tint with white type, and it keeps
@@ -1182,6 +1190,13 @@
        loud colour. */
     background: rgb(var(--c-ink)); color: rgb(var(--c-paper));
     border-bottom-right-radius: .25rem;
+  }
+  .sappy-msg.is-you ::selection {
+    /* The base ::selection paints selected text with --c-ink, which in dark
+       mode is light cream — cream-on-cream on this ink bubble. Selected text
+       keeps the bubble's own paper colour (black in dark mode) and gets a
+       stronger tint so the highlight reads against the light fill. */
+    background: rgb(var(--c-ube) / .5); color: rgb(var(--c-paper));
   }
   .sappy-msg.is-sappy .sappy-msg-text {
     /* Neutral paper keeps the reply side quiet; the hairline border is what

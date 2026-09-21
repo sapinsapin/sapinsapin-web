@@ -185,6 +185,23 @@ function ReplyActions({ text }) {
   )
 }
 
+// Linkify the bare marcocampo.com mention plus full http(s) URLs. Only those
+// two shapes become anchors — the chat renders untrusted-ish assistant text as
+// plain text otherwise, so no other scheme (javascript:, data:) can slip in.
+const URL_RE = /(https?:\/\/[^\s<>"'()]+|(?:www\.)?marcocampo\.com)(?=[\s.,;:!?\u2019'")\]]|$)/
+function Linkify({ text }) {
+  const parts = String(text).split(URL_RE)
+  return parts.map((part, i) => {
+    if (i % 2 === 0) return part
+    const href = /^https?:/.test(part) ? part : `https://${part}`
+    return (
+      <a key={i} href={href} target="_blank" rel="noopener noreferrer">
+        {part}
+      </a>
+    )
+  })
+}
+
 export default function ChatWidget() {
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(false)
@@ -511,11 +528,11 @@ export default function ChatWidget() {
               {chat.map((message) =>
                 message.role === 'user' ? (
                   <div key={message.id} className="sappy-msg is-you">
-                    <p className="sappy-msg-text">{message.text}</p>
+                    <p className="sappy-msg-text"><Linkify text={message.text} /></p>
                   </div>
                 ) : (
                   <div key={message.id} className="sappy-msg is-sappy">
-                    <p className="sappy-msg-text">{message.text}</p>
+                    <p className="sappy-msg-text"><Linkify text={message.text} /></p>
                     <ReplyActions text={message.text} />
                     {message.blob && (
                       <ChatReply blob={message.blob} autoplay={message.id === lastSpokenRef.current} />
