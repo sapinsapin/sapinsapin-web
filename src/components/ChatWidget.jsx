@@ -22,13 +22,6 @@ const VAD_OFF = 0.012
 const VAD_HANGOVER_MS = 700
 const TAP_MS = 300
 
-const PHASE_TEXT = {
-  uploading: 'Contacting the demo Space…',
-  transcribing: 'Transcribing your question…',
-  searching: 'Sappy is searching the project knowledge base…',
-  speaking: 'Reading the answer aloud in Filipino…',
-}
-
 const clamp = (text, limit = 240) =>
   typeof text === 'string' && text.length > limit ? `${text.slice(0, limit).trimEnd()}…` : text
 
@@ -93,6 +86,101 @@ function ChatReply({ blob, autoplay }) {
         )}
       </button>
       <span className="chat-reply-label">Sappy's spoken reply</span>
+    </div>
+  )
+}
+
+/* Copy / Share under each answer. Copy puts the reply on the clipboard;
+   Share hands it to the Web Share API when the browser offers one, so a phone
+   can pass the answer into its own share sheet. The label swaps to Copied /
+   Shared for its brief life as feedback. */
+function ReplyActions({ text }) {
+  const [feedback, setFeedback] = useState('')
+  const timerRef = useRef(null)
+
+  useEffect(() => () => clearTimeout(timerRef.current), [])
+
+  const announce = useCallback(
+    (label) => {
+      setFeedback(label)
+      clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(() => setFeedback(''), 1600)
+    },
+    [],
+  )
+
+  /* Clipboard needs a secure context and a granted permission; the execCommand
+     path covers a denied write (or a non-HTTPS preview) by copying from a
+     hidden, selected textarea instead of failing silently. */
+  const copyText = useCallback(async (value) => {
+    const legacy = () => {
+      const helper = document.createElement('textarea')
+      helper.value = value
+      helper.setAttribute('readonly', '')
+      helper.style.position = 'fixed'
+      helper.style.opacity = '0'
+      document.body.appendChild(helper)
+      helper.select()
+      const ok = document.execCommand('copy')
+      helper.remove()
+      return ok
+    }
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value)
+        return
+      }
+    } catch {
+      /* denied or insecure — try the legacy path below */
+    }
+    if (!legacy()) throw new Error('copy rejected')
+  }, [])
+
+  const onCopy = useCallback(async () => {
+    try {
+      await copyText(text)
+      announce('Copied')
+    } catch {
+      /* both paths refused — the button simply stays put */
+    }
+  }, [text, copyText, announce])
+
+  const onShare = useCallback(async () => {
+    try {
+      await navigator.share({
+        title: 'Ask Sappy · SapinSapin AI',
+        text: `${text}\n\n— ${location.origin}`,
+      })
+      announce('Shared')
+    } catch {
+      /* dismissed share sheet — no state change */
+    }
+  }, [text, announce])
+
+  return (
+    <div className="sappy-actions">
+      <button
+        type="button"
+        className={`sappy-action ${feedback === 'Copied' ? 'is-feedback' : ''}`}
+        onClick={onCopy}
+        aria-label="Copy this answer"
+        aria-live="polite"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+        {feedback === 'Copied' ? 'Copied' : 'Copy'}
+      </button>
+      {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
+        <button
+          type="button"
+          className={`sappy-action ${feedback === 'Shared' ? 'is-feedback' : ''}`}
+          onClick={onShare}
+          aria-label="Share this answer"
+          aria-live="polite"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6" fill="none" stroke="currentColor" strokeWidth="1.8" /><circle cx="6" cy="12" r="2.6" fill="none" stroke="currentColor" strokeWidth="1.8" /><circle cx="18" cy="19" r="2.6" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="M8.3 10.6l7.4-4.2M8.3 13.4l7.4 4.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+          {feedback === 'Shared' ? 'Shared' : 'Share'}
+        </button>
+      )}
     </div>
   )
 }
@@ -246,17 +334,23 @@ export default function ChatWidget() {
     [busy, push, replaceLastUser],
   )
 
+  const sendText = useCallback(() => {
+    if (busy) return
+    const value = draft.trim()
+    if (!value) return
+    setDraft('')
+    run(value)
+  }, [busy, draft, run])
+
   const submit = useCallback(
     (event) => {
       event.preventDefault()
-      if (busy) return
-      const value = draft.trim()
-      if (!value) return
-      setDraft('')
-      run(value)
+      sendText()
     },
-    [busy, draft, run],
+    [sendText],
   )
+
+  const stop = useCallback(() => controllerRef.current?.abort(), [])
 
   const toggle = useCallback(() => setOpen((was) => !was), [])
   const close = useCallback(() => setOpen(false), [])
@@ -386,7 +480,6 @@ export default function ChatWidget() {
   )
 
   const recordable = canRecord()
-  const status = PHASE_TEXT[phase] ?? null
   const shown = visible || open
 
   return (
@@ -423,6 +516,7 @@ export default function ChatWidget() {
                 ) : (
                   <div key={message.id} className="sappy-msg is-sappy">
                     <p className="sappy-msg-text">{message.text}</p>
+                    <ReplyActions text={message.text} />
                     {message.blob && (
                       <ChatReply blob={message.blob} autoplay={message.id === lastSpokenRef.current} />
                     )}
@@ -452,12 +546,6 @@ export default function ChatWidget() {
           </div>
 
           <div className="chat-foot">
-            {busy && status && (
-              <p className="chat-status">
-                {status}
-                <button type="button" className="chat-cancel" onClick={() => controllerRef.current?.abort()}>Cancel</button>
-              </p>
-            )}
             {recorder && <p className="sappy-live-hint">Hold and speak — release to send, or let a pause do it.</p>}
 
             <form className="sappy-compose chat-compose" onSubmit={submit}>
@@ -491,8 +579,18 @@ export default function ChatWidget() {
                   <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                 </svg>
               </button>
-              <button type="submit" className="sappy-send" aria-label="Send message" disabled={busy || recorder || !draft.trim()}>
-                <svg viewBox="0 0 24 24" className="sappy-send-glyph" aria-hidden="true"><path d="M12 20V5M5 12l7-7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <button
+                type="button"
+                className={`sappy-send ${busy ? 'is-stop' : ''}`}
+                onClick={busy ? stop : submit}
+                aria-label={busy ? 'Stop the pending answer' : 'Send message'}
+                disabled={!busy && (!draft.trim() || !!recorder)}
+              >
+                {busy ? (
+                  <svg viewBox="0 0 24 24" className="sappy-send-glyph" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor" /></svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" className="sappy-send-glyph" aria-hidden="true"><path d="M12 20V5M5 12l7-7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                )}
               </button>
             </form>
           </div>

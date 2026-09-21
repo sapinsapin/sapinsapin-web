@@ -201,10 +201,15 @@ a failed call. `sync-space.mjs` failing is the signal that the Space's shape cha
  like any other demo request, on purpose: the floating chat and the demo share one lane,
  so the two never double up on the Space's single session. A recording that decodes to
  nothing arrives as `{ question: '' }` and becomes the ordinary "didn't catch that" turn
- instead of sending near-silence down the model path. While the exchange runs, a status
- strip above the compose row reports each leg (uploading, transcribing, searching,
- speaking) and Cancel stops the whole exchange — the reply bubble lands in the history,
- and autoplays once, when it's done.
+instead of sending near-silence down the model path. Transaction state lives in the
+  send button, not a status line: while an exchange runs, the send control becomes a
+  Stop control (a filled square in the same circular button) that aborts the whole
+  pipeline — so there is no separate status strip above the compose row to grow or
+  forget. The reply bubble lands in the history, and autoplays once, when it's done.
+  Every Sappy reply carries Copy / Share chips under the bubble: Copy puts the answer
+  on the clipboard (with an execCommand fallback for non-HTTPS previews), and Share
+  hands it to the Web Share API when the browser has one, so the answer can leave the
+  card on a phone's share sheet.
 
  #### The floating chat ("Ask Sappy")
 

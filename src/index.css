@@ -1424,22 +1424,27 @@
     display: grid; grid-template-columns: minmax(0, 1fr); gap: .45rem;
   }
 
-  /* Busy status strip above the compose row — a quiet line, not a meter. */
-  .chat-status {
-    display: flex; align-items: center; gap: .55rem;
-    font-size: .7rem; line-height: 1.5; color: rgb(var(--c-ink) / .58);
+  /* Copy / Share under each reply — quiet ghost chips so an answer can leave
+     the card. Clipboard needs a secure context; Share rides the Web Share API
+     when the browser offers it. */
+  .sappy-actions {
+    display: flex; align-items: center; gap: .3rem; margin-top: .3rem;
   }
-  .chat-status::before {
-    content: ''; width: .4rem; height: .4rem; border-radius: 999px; flex: none;
-    background: rgb(var(--c-ube) / .85); animation: sappy-blink 1.1s ease-in-out infinite;
+  .sappy-action {
+    display: inline-flex; align-items: center; gap: .28rem;
+    border: 1px solid transparent; border-radius: 999px;
+    padding: .12rem .55rem; font: inherit; font-size: .66rem; font-weight: 700;
+    letter-spacing: .02em; background: transparent;
+    color: rgb(var(--c-ink) / .45); cursor: pointer;
+    transition: color .2s, border-color .2s, background-color .2s;
   }
-  .chat-cancel {
-    margin-left: auto; border-radius: 999px; border: 1px solid var(--border-strong);
-    padding: .18rem .6rem; font: inherit; font-size: .66rem; font-weight: 600;
-    background: transparent; color: rgb(var(--c-ink) / .7); cursor: pointer;
-    transition: border-color .2s, color .2s;
+  .sappy-action:hover {
+    color: rgb(var(--c-ube)); border-color: rgb(var(--c-ube) / .3);
+    background: rgb(var(--c-ube) / .05);
   }
-  .chat-cancel:hover { border-color: rgb(var(--c-ube) / .5); color: rgb(var(--c-ube)); }
+  .sappy-action:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(var(--c-paper)), 0 0 0 6px rgb(var(--c-ube) / .6); }
+  .sappy-action svg { width: .74rem; height: .74rem; flex: none; }
+  .sappy-action.is-feedback { color: rgb(var(--c-pandan)); }
 
   /* The floating chat's send control is a circular icon button, the same
      silhouette as the mic beside it — the compose row reads as three equal
@@ -1490,8 +1495,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .chat-root { transition: opacity .15s ease; }
-    .chat-tip, .chat-card, .chat-status::before { animation: none; }
-    .chat-status::before { opacity: .6; }
+    .chat-tip, .chat-card { animation: none; }
   }
 
   /* Custom player. The browser's own controls are the one element that would

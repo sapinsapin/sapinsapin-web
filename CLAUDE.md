@@ -195,8 +195,10 @@ caption, and the spoken reply as a blob. The Space legs queue through `spaceClie
 any demo request, on purpose: the floating chat and the demo share one lane, so the two
 never double up on the Space's single session. A recording that decodes to nothing becomes
 the ordinary "didn't catch that" turn instead of sending near-silence down the model path.
-A status strip reports each leg (uploading, transcribing, searching, speaking) with a
-Cancel that stops the whole exchange; the reply autoplays once in its bubble.
+While an exchange runs the send button becomes a Stop control (same circle, filled-square
+glyph) that aborts the whole pipeline — no status strip above the compose row. The reply
+autoplays once in its bubble, and every reply carries Copy / Share chips (Clipboard API
+with an execCommand fallback, and the Web Share API on browsers that have it).
 
 #### The floating chat ("Ask Sappy")
 
