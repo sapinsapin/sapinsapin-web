@@ -103,6 +103,10 @@ function statusCopy({ phase, position, elapsed, job }) {
   }
   if (phase !== 'running') return ''
 
+  // A job that carries its own running label sets it here; it outranks the
+  // generic verb+subject line below.
+  if (job?.detail) return job.detail
+
   const eta = etaFor(job.capability, job.cold)
   const label = `${job.capability.verb} ${job.subject}`
   if (elapsed < 6) return label
@@ -279,7 +283,7 @@ function usePeaks(blob, ready) {
  * This draws the clip's own waveform, which doubles as the scrubber and shows
  * at a glance that a result really is speech and not silence.
  */
-function AudioPlayer({ blob, label, tone = 'ube', peaks: ready }) {
+function AudioPlayer({ blob, label, tone = 'ube', peaks: ready, autoplay = false }) {
   const url = useObjectUrl(blob)
   const peaks = usePeaks(blob, ready)
   const audioRef = useRef(null)
@@ -291,6 +295,13 @@ function AudioPlayer({ blob, label, tone = 'ube', peaks: ready }) {
     setPlaying(false)
     setTime(0)
   }, [url])
+
+  // The result plays the moment it lands. Autoplay can be refused
+  // by the browser — but only when it is blocked, so the refused case still
+  // leaves the waveform button, which the visitor can press.
+  useEffect(() => {
+    if (autoplay && url) audioRef.current?.play().catch(() => {})
+  }, [autoplay, url])
 
   const toggle = useCallback(() => {
     const audio = audioRef.current
@@ -702,7 +713,7 @@ function useAnnouncement(phase, error) {
 
 /* ------------------------------------------------------------------- panels */
 
-function SynthesizePanel({ capability, language, languageLabel, languageField }) {
+function SynthesizePanel({ capability, language, languageLabel, LanguageField }) {
   const manifestVoices = useMemo(() => languages.find((entry) => entry.name === language)?.voices ?? [], [language])
   const [voices, refreshVoices] = useLiveOptions(language, manifestVoices, listVoices)
   const [voice, setVoice] = useState(manifestVoices[0] ?? '')
@@ -737,8 +748,7 @@ function SynthesizePanel({ capability, language, languageLabel, languageField })
   return (
     <>
       <div className="demo-inputs">
-        {languageField}
-        <Field step="2" label="What should it say?" htmlFor={`${id}-text`}>
+        <Field step="1" label="What should it say?" htmlFor={`${id}-text`}>
           {/* Autocorrect and spellcheck are turned off deliberately, not for
               tidiness. A phone keyboard set to English will silently rewrite
               Cebuano and Waray as it is typed — "Maayong" becomes "Maying" —
@@ -760,11 +770,12 @@ function SynthesizePanel({ capability, language, languageLabel, languageField })
             enterKeyHint="done"
           />
         </Field>
-        <Field step="3" label="Voice" htmlFor={`${id}-voice`}>
+        <Field step="2" label="Voice" htmlFor={`${id}-voice`}>
           <select id={`${id}-voice`} value={voice} onFocus={refreshVoices} onChange={(event) => setVoice(event.target.value)}>
             {voices.map((option) => <option key={option} value={option}>{option}</option>)}
           </select>
         </Field>
+        <LanguageField step="3" />
         <button type="button" className="demo-run" onClick={run} disabled={job.busy || !text.trim()}>
           {job.busy ? 'Working…' : capability.action}
         </button>
@@ -789,7 +800,7 @@ function SynthesizePanel({ capability, language, languageLabel, languageField })
   )
 }
 
-function TranscribePanel({ capability, language, languageLabel, languageField }) {
+function TranscribePanel({ capability, language, languageLabel, LanguageField }) {
   const [audio, setAudio] = useState(null)
   const [reference, setReference] = useState('')
   const manifestModels = useMemo(() => languages.find((entry) => entry.name === language)?.models ?? [], [language])
@@ -839,14 +850,13 @@ function TranscribePanel({ capability, language, languageLabel, languageField })
   return (
     <>
       <div className="demo-inputs">
-        {languageField}
-        <Field step="2" label="Model" hint="Cebuano and Kapampangan offer a bake-off of small, mid and gigabyte-scale models — slower, larger models are the most accurate, and the first run downloads their weights.">
+        <Field step="1" label="Model" hint="Cebuano and Kapampangan offer a bake-off of small, mid and gigabyte-scale models — slower, larger models are the most accurate, and the first run downloads their weights.">
           <select id={`${id}-model`} value={model} onFocus={refreshModels} onChange={(event) => setModel(event.target.value)}>
             {models.map((option) => <option key={option} value={option}>{option}</option>)}
           </select>
         </Field>
-        <AudioSource step="3" language={language} languageLabel={languageLabel} value={audio} onChange={setAudio} disabled={job.busy} />
-        <Field step="4" label="Expected transcript" hint="Optional — filled in for you when you pick a corpus clip." htmlFor={`${id}-ref`}>
+        <AudioSource step="2" language={language} languageLabel={languageLabel} value={audio} onChange={setAudio} disabled={job.busy} />
+        <Field step="3" label="Expected transcript" hint="Optional — filled in for you when you pick a corpus clip." htmlFor={`${id}-ref`}>
           {/* Same reasoning as the synthesis box: this field holds a sentence
               in a Philippine language, and a phone keyboard correcting it into
               English would quietly change what the transcription is scored
@@ -865,6 +875,7 @@ function TranscribePanel({ capability, language, languageLabel, languageField })
             enterKeyHint="done"
           />
         </Field>
+        <LanguageField step="4" />
         <button type="button" className="demo-run" onClick={run} disabled={job.busy || !audio}>
           {job.busy ? 'Working…' : capability.action}
         </button>
@@ -890,7 +901,7 @@ function TranscribePanel({ capability, language, languageLabel, languageField })
   )
 }
 
-function ConvertPanel({ capability, language, languageLabel, languageField }) {
+function ConvertPanel({ capability, language, languageLabel, LanguageField }) {
   const [audio, setAudio] = useState(null)
   const [voice, setVoice] = useState(targetVoices[0] ?? '')
   const job = useJob(capability)
@@ -924,13 +935,13 @@ function ConvertPanel({ capability, language, languageLabel, languageField }) {
   return (
     <>
       <div className="demo-inputs">
-        {languageField}
-        <AudioSource step="2" language={language} languageLabel={languageLabel} value={audio} onChange={setAudio} disabled={job.busy} />
-        <Field step="3" label="Target voice" htmlFor={`${id}-voice`}>
+        <AudioSource step="1" language={language} languageLabel={languageLabel} value={audio} onChange={setAudio} disabled={job.busy} />
+        <Field step="2" label="Target voice" htmlFor={`${id}-voice`}>
           <select id={`${id}-voice`} value={voice} onChange={(event) => setVoice(event.target.value)}>
             {targetVoices.map((option) => <option key={option} value={option}>{option}</option>)}
           </select>
         </Field>
+        <LanguageField step="3" />
         <button type="button" className="demo-run" onClick={run} disabled={job.busy || !audio}>
           {job.busy ? 'Working…' : capability.action}
         </button>
@@ -1002,9 +1013,44 @@ export default function SpeechConsole() {
     [active],
   )
 
+  // The language picker is the same control in every panel, but it is not in
+  // the same slot: it sits at the *end* of each panel's field list, so its
+  // step number is whatever the fields above it leave free. Passing it as a
+  // component rather than an element lets each panel stamp its own number.
+  const LanguageField = function LanguageField({ step }) {
+    return (
+      <div className="demo-field">
+        <div className="demo-field-head">
+          <span className="demo-step" aria-hidden="true">{step}</span>
+          <span className="demo-label">Language</span>
+        </div>
+        <div className="demo-langs" role="group" aria-label="Choose a language">
+          {languages.map((item) => (
+            <button
+              key={item.name}
+              type="button"
+              onClick={() => setLanguage(item.name)}
+              aria-pressed={language === item.name}
+              className={language === item.name ? 'is-active' : ''}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="demo-studio">
-      <div className="demo-switch" role="tablist" aria-label="Choose a capability" ref={tabsRef} onKeyDown={onKeyDown}>
+      <div
+        className="demo-switch"
+        role="tablist"
+        aria-label="Choose a capability"
+        ref={tabsRef}
+        onKeyDown={onKeyDown}
+        style={{ '--demo-cols': String(capabilities.length) }}
+      >
         {capabilities.map((item) => (
           <button
             key={item.id}
@@ -1043,32 +1089,12 @@ export default function SpeechConsole() {
             half-filled state into another's fields. The panel renders the input
             column and the stage as siblings, so both sit directly in the grid. */}
         <Panel
-          key={capability.id}
-          capability={capability}
-          language={entry.name}
-          languageLabel={entry.label}
-          languageField={
-            <div className="demo-field">
-              <div className="demo-field-head">
-                <span className="demo-step" aria-hidden="true">1</span>
-                <span className="demo-label">Language</span>
-              </div>
-              <div className="demo-langs" role="group" aria-label="Choose a language">
-                {languages.map((item) => (
-                  <button
-                    key={item.name}
-                    type="button"
-                    onClick={() => setLanguage(item.name)}
-                    aria-pressed={language === item.name}
-                    className={language === item.name ? 'is-active' : ''}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          }
-        />
+            key={capability.id}
+            capability={capability}
+            language={entry.name}
+            languageLabel={entry.label}
+            LanguageField={LanguageField}
+          />
       </div>
     </div>
   )

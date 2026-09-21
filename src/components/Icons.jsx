@@ -3,7 +3,7 @@ export function ArrowUpRight({ className = '' }) {
 }
 
 export function ArrowUp({ className = '' }) {
-  return <svg className={className} viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 12.75V3.25M3.75 7.5 8 3.25l4.25 4.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+  return <svg className={className} viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 12.75V3.25M3.75 7.5 8 3.25l4.25 4.25" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
 }
 
 export function ArrowDown({ className = '' }) {

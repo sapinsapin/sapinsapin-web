@@ -12,6 +12,12 @@
 // not cover those — only 'unsafe-hashes' does, which is worth avoiding — so one
 // reintroduced handler would silently stop working in production.
 //
+// Finally it checks that connect-src still names both origins the page fetches
+// at runtime: the halohalo-dashboard Space (photo, upload, queue — every leg of
+// the demo and the talk orb) and the sappy-ai Worker (the Ask Sappy answer).
+// Nothing else enforces that pair; a careless CSP edit would otherwise make
+// the whole Sappy capability fail with a console warning and no error state.
+//
 // Run after `npm run build`.
 
 import { readFile } from 'node:fs/promises'
@@ -57,6 +63,15 @@ for (const doc of DOCS) {
   if (handlers.length) {
     problems.push(`${doc}: inline event handler(s) the CSP will block: ${handlers.join(', ')}`)
   }
+}
+
+// Both runtime fetch origins must survive in connect-src: the Space for every
+// demo/orb leg, and the sappy-ai Worker for the Ask Sappy answer.
+for (const origin of [
+  'https://sapinsapin-halohalo-dashboard.hf.space',
+  'https://sappy-ai.primary-bd7.workers.dev',
+]) {
+  if (!csp.includes(origin)) problems.push(`connect-src must allow ${origin} — the page fetches it at runtime`)
 }
 
 if (problems.length) {

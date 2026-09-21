@@ -472,23 +472,53 @@
   }
 
   /* ------------------------------------------------------------ back-to-top */
+/* The same footprint as the Ask Sappy launcher — same size, same right
+      edge, same circle — offset by the launcher's drawn height plus a breath of
+      air, so the two read as one control. The toggle emerges *from* the
+      launcher when the reader scrolls down and sinks back into it when they
+      scroll up: transform-origin sits below its own bottom, so scaling from
+      hidden reads as growing out of the circle under it. */
   .back-to-top {
-    position: fixed; right: 1.1rem; bottom: 1.1rem; z-index: 40;
+    position: fixed;
+    right: max(1.1rem, env(safe-area-inset-right));
+    bottom: calc(max(1.1rem, env(safe-area-inset-bottom)) + 4.3rem);
+    z-index: 40;
     display: grid; place-items: center;
-    height: 2.7rem; width: 2.7rem; border-radius: 50%;
+    height: 3.4rem; width: 3.4rem; border-radius: 50%;
     border: 1px solid var(--border-strong);
     background: rgb(var(--c-paper) / .85);
     color: rgb(var(--c-ink) / .78);
     box-shadow: var(--shadow-float);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    opacity: 0; transform: translateY(.6rem) scale(.92);
+    transform-origin: 50% 135%;
+    opacity: 0; transform: scale(.35) translateY(.3rem);
     pointer-events: none;
-    transition: opacity .25s ease, transform .3s cubic-bezier(.22, 1, .36, 1), color .22s, border-color .22s, background-color .22s;
+    transition: opacity .22s ease, transform .32s cubic-bezier(.22, 1, .36, 1), color .22s, border-color .22s, background-color .22s;
   }
-  .back-to-top[data-visible='true'] { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+  .back-to-top[data-visible='true'] { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
   .back-to-top:hover { color: rgb(var(--c-ube)); border-color: rgb(var(--c-ube) / .5); background: rgb(var(--c-ube) / .08); }
-  @media (min-width: 640px) { .back-to-top { right: 1.75rem; bottom: 1.75rem; } }
+  .back-to-top:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgb(var(--c-paper)), 0 0 0 6px rgb(var(--c-ube) / .6);
+  }
+  @media (min-width: 640px) {
+    .back-to-top {
+      right: max(1.75rem, env(safe-area-inset-right));
+      bottom: calc(max(1.75rem, env(safe-area-inset-bottom)) + 4.45rem);
+    }
+  }
+  /* The dark theme's paper is near-black, so a pale glass toggle would glare;
+     it gets a smoked panel and a ube chevron instead. */
+  [data-theme='dark'] .back-to-top {
+    background: linear-gradient(180deg, rgb(42 38 33 / .72), rgb(24 22 19 / .78));
+    border-color: rgb(183 157 250 / .22);
+    color: rgb(216 196 244 / .82);
+    box-shadow: 0 8px 24px -12px rgb(0 0 0 / .7), inset 0 1px 0 rgb(255 255 255 / .06);
+  }
+  [data-theme='dark'] .back-to-top:hover {
+    color: #efe6ff; border-color: rgb(183 157 250 / .45); background: rgb(42 38 33 / .72);
+  }
 
   /* ------------------------------------------------------------------ hero */
   .hero-frame {
@@ -804,8 +834,10 @@
     line-height: 1.1; letter-spacing: -.05em; color: rgb(var(--c-ink));
   }
   .dataset-desc {
-    margin-top: .9rem; min-height: 4.5rem;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    margin-top: .9rem;
+    /* No line clamp — a description that visibly cuts off mid-sentence reads
+       as broken copy rather than a card discipline, so each text is shown in
+       full and the card stretches to fit it. */
     font-size: .9rem; line-height: 1.5; color: rgb(var(--c-ink) / .72);
   }
 
@@ -884,36 +916,47 @@
   .demo-intro { display: grid; gap: 2rem; padding: 2rem 1.5rem 2.25rem; }
   /* Measured against the mounted console, not estimated — this is the whole
      point of the placeholder, so a wrong number just moves the layout shift
-     rather than removing it. One number cannot do it: the console is 761px at
-     the desktop breakpoint and 1100px on a phone, where the two columns stack
-     and every control is sized for a finger. The Transcribe tab is the tallest
-     on every screen now that it carries its own Model dropdown, so it defines
-     the figures. A one-profile figure left a phone with a jump at the moment
-     the chunk landed — which is the jump the placeholder exists to prevent.
-     The steps below are the measured heights at each breakpoint; see "Touch
-     and small screens" for the others. */
-  .demo-placeholder { min-height: 68.8rem; border-top: 1px solid var(--border-soft); background: var(--surface-panel); }
-  @media (min-width: 22.5rem) { .demo-placeholder { min-height: 67.1rem; } }
-  @media (min-width: 27rem) { .demo-placeholder { min-height: 62.8rem; } }
-  @media (min-width: 40rem) { .demo-placeholder { min-height: 58.7rem; } }
+     rather than removing it. One number cannot do it: the console is 1133px
+     tall at 320px and 761px at 1280px, the Transcribe tab is the tallest on
+     every screen (it is the only one carrying three dropdowns plus a Voice
+     conversion's worth of audio controls), and phones reserve heavier control
+     heights. A one-profile figure left a phone with a jump at the moment the
+     chunk landed — which is the jump the placeholder exists to prevent. The
+     steps below are the measured heights at each breakpoint; see "Touch and
+     small screens" for the others. */
+  .demo-placeholder { min-height: 72.3rem; border-top: 1px solid var(--border-soft); background: var(--surface-panel); }
+  @media (min-width: 22.5rem) { .demo-placeholder { min-height: 69.2rem; } }
+  @media (min-width: 27rem) { .demo-placeholder { min-height: 64.8rem; } }
+  @media (min-width: 40rem) { .demo-placeholder { min-height: 63.4rem; } }
   @media (min-width: 48rem) { .demo-placeholder { min-height: 52.8rem; } }
   @media (min-width: 64rem) { .demo-placeholder { min-height: 47.6rem; } }
   @media (min-width: 80rem) { .demo-placeholder { min-height: 47.6rem; } }
   /* A finger costs the console roughly 40–90px of extra control height, so
      the touch reservation at the two-column breakpoints is its own number. */
-  @media (pointer: coarse) and (min-width: 40rem) { .demo-placeholder { min-height: 65.6rem; } }
+  @media (pointer: coarse) and (min-width: 40rem) { .demo-placeholder { min-height: 70.4rem; } }
   @media (pointer: coarse) and (min-width: 48rem) { .demo-placeholder { min-height: 58.8rem; } }
   @media (pointer: coarse) and (min-width: 64rem) { .demo-placeholder { min-height: 51.4rem; } }
 
   /* The capability switcher. Cards rather than pills: each one carries a label
      and a plain-language subtitle, which is what makes three unfamiliar model
-     types legible at a glance. */
+     types legible at a glance. The column count follows the capability list:
+     SpeechConsole.jsx stamps the count into --demo-cols, the desktop grid
+     repeats it, and the phone keeps two-up with an odd final card spanning
+     the whole row — a dangling empty cell would look like a missing tab. */
   .demo-switch {
     position: relative;
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px;
     border-block: 1px solid var(--border-soft); background: var(--border-soft);
   }
-  /* One underline that travels, rather than three that blink on and off.
+  @media (min-width: 48rem) {
+    .demo-switch { grid-template-columns: repeat(var(--demo-cols, 3), 1fr); }
+  }
+  @media (max-width: 767px) {
+    /* Odd card counts leave one orphan in a two-column grid; it spans the
+       full row so every slot is filled and none reads as missing. */
+    .demo-switch button:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  }
+  /* One underline that travels, rather than four that blink on and off.
      SpeechConsole.jsx measures the selected tab into --tab-x / --tab-w, the
      same mechanism the nav pill uses. */
   .demo-switch::after {
@@ -924,8 +967,9 @@
     transition: transform .45s cubic-bezier(.22, 1, .36, 1), width .45s cubic-bezier(.22, 1, .36, 1);
     pointer-events: none;
   }
-  /* Three columns hold at every width; below the small breakpoint the eyebrow
-     is dropped rather than letting "Voice conversion" wrap to three lines. */
+  /* Two cards per row on a phone, one per capability once there is room;
+     below the small breakpoint the eyebrow is dropped so "Voice conversion"
+     cannot wrap. */
   @media (max-width: 599px) {
     .demo-switch-kicker { display: none; }
     .demo-switch button { padding: .8rem .7rem; }
@@ -1102,11 +1146,353 @@
   .demo-result { display: grid; gap: .6rem; }
   .demo-caption { font-size: .72rem; line-height: 1.45; color: rgb(var(--c-ink) / .58); }
   .demo-transcript { font-size: 1.12rem; line-height: 1.6; letter-spacing: -.015em; color: rgb(var(--c-ink)); overflow-wrap: anywhere; }
+  .demo-answer { font-size: .95rem; line-height: 1.55; color: rgb(var(--c-ink) / .82); overflow-wrap: anywhere; }
 
   .demo-empty { display: grid; justify-items: center; gap: .45rem; text-align: center; color: rgb(var(--c-ink) / .45); }
   .demo-empty-icon { width: 3.2rem; height: auto; fill: currentColor; opacity: .32; }
   .demo-empty p { font-size: .82rem; }
   .demo-empty-meta { font-size: .72rem; color: rgb(var(--c-ink) / .38); }
+
+  /* Ask Sappy is a conversation, not a form, so the two-column workspace gives
+     way to a single chat column that owns both tracks the forms use. */
+  .sappy-chat {
+    grid-column: 1 / -1;
+    display: grid; gap: 1rem; align-content: start;
+  }
+  .sappy-history {
+    display: grid; gap: .7rem; max-height: 24rem; overflow-y: auto;
+    overscroll-behavior: contain; padding-right: .2rem;
+  }
+  .sappy-welcome {
+    /* No dashed box, no tint: the welcome is just two plain sentences so the
+       card opens quiet rather than decorated. */
+    font-size: .8rem; line-height: 1.6; color: rgb(var(--c-ink) / .62); max-width: 42rem;
+  }
+  .sappy-msg { display: grid; gap: .4rem; max-width: min(46ch, 92%); min-width: 0; }
+  .sappy-msg.is-you { justify-self: end; }
+  .sappy-msg.is-sappy { justify-self: start; }
+  .sappy-msg-text {
+    border-radius: .9rem; padding: .65rem .9rem;
+    font-size: .88rem; line-height: 1.55; overflow-wrap: anywhere; white-space: pre-wrap;
+  }
+  .sappy-msg.is-you .sappy-msg-text {
+    /* Ink, not brand purple — the darkest palette token against paper reads at
+       a much higher contrast than a bright tint with white type, and it keeps
+       the conversation in the page's own monochrome instead of adding a second
+       loud colour. */
+    background: rgb(var(--c-ink)); color: rgb(var(--c-paper));
+    border-bottom-right-radius: .25rem;
+  }
+  .sappy-msg.is-sappy .sappy-msg-text {
+    /* Neutral paper keeps the reply side quiet; the hairline border is what
+       separates it from the card, not a warm fill that reads as yellow next
+       to the ink bubble. */
+    background: rgb(var(--c-paper)); color: rgb(var(--c-ink));
+    border: 1px solid var(--border-soft); border-bottom-left-radius: .25rem;
+  }
+  .sappy-msg .demo-player { margin-top: .1rem; max-width: 24rem; }
+  .sappy-caption { font-size: .68rem; line-height: 1.45; color: rgb(var(--c-ink) / .48); }
+  .sappy-msg.is-thinking {
+    display: flex; gap: .3rem; padding: .7rem .9rem; border-radius: .9rem;
+    background: rgb(var(--c-paper)); border: 1px solid var(--border-soft);
+    border-bottom-left-radius: .25rem;
+  }
+  .sappy-dot { width: .45rem; height: .45rem; border-radius: 999px; background: rgb(var(--c-ink) / .4); animation: sappy-blink 1.1s ease-in-out infinite; }
+  .sappy-dot:nth-child(2) { animation-delay: .18s; }
+  .sappy-dot:nth-child(3) { animation-delay: .36s; }
+  @keyframes sappy-blink { 0%, 60%, 100% { opacity: .3; transform: translateY(0); } 30% { opacity: .9; transform: translateY(-2px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .sappy-dot { animation: none; opacity: .45; }
+  }
+  .sappy-error { font-size: .76rem; line-height: 1.5; color: rgb(var(--c-ink) / .65); }
+
+  .sappy-strip {
+    display: flex; align-items: center; gap: .85rem; flex-wrap: wrap;
+    border-top: 1px solid var(--border-soft); padding-top: .8rem;
+  }
+  .sappy-status { display: grid; gap: .25rem; font-size: .8rem; line-height: 1.5; color: rgb(var(--c-ink) / .75); }
+  .sappy-status-note { font-size: .72rem; line-height: 1.5; color: rgb(var(--c-ube)); }
+  .sappy-clock { margin-left: auto; font-size: .72rem; font-variant-numeric: tabular-nums; color: rgb(var(--c-ink) / .45); }
+
+  .sappy-compose { display: flex; gap: .5rem; align-items: center; }
+  .sappy-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .sappy-compose input {
+    flex: 1; min-width: 0; height: 2.7rem; border-radius: .8rem;
+    border: 1px solid var(--border-soft); background: rgb(var(--c-paper) / .7);
+    color: rgb(var(--c-ink)); padding: 0 .85rem; font: inherit; font-size: .88rem;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .sappy-compose input::placeholder { color: rgb(var(--c-ink) / .42); }
+  .sappy-compose input:hover { border-color: var(--border-strong); }
+  .sappy-compose input:focus-visible { outline: none; border-color: rgb(var(--c-ube) / .6); box-shadow: 0 0 0 3px rgb(var(--c-ube) / .14); }
+  .sappy-send {
+    flex: none; height: 2.7rem; border-radius: 999px; padding: 0 1.15rem;
+    background: rgb(var(--c-ink)); color: rgb(var(--c-paper));
+    font-size: .82rem; font-weight: 650; letter-spacing: -.01em;
+    transition: transform .2s ease, opacity .2s ease;
+  }
+  .sappy-send:hover:not(:disabled) { transform: translateY(-1px); }
+  .sappy-send:disabled { opacity: .4; }
+  .sappy-mic {
+    flex: none; display: grid; place-items: center; width: 2.7rem; height: 2.7rem;
+    border-radius: 999px; border: 1px solid var(--border-soft);
+    background: rgb(var(--c-paper) / .7); color: rgb(var(--c-ink) / .65);
+    cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none;
+    transition: border-color .2s ease, color .2s ease, background-color .2s ease;
+  }
+  .sappy-mic:hover:not(:disabled) { border-color: rgb(var(--c-ube) / .5); color: rgb(var(--c-ube)); }
+  .sappy-mic:disabled { opacity: .4; }
+  .sappy-mic.is-live { border-color: rgb(var(--c-ube)); color: rgb(var(--c-ube)); background: rgb(var(--c-ube) / .08); }
+  .sappy-mic-glyph { width: 1.05rem; height: 1.05rem; }
+
+/* --------------------------------------------------- the Ask Sappy chat */
+  /* The floating "Ask Sappy" chat (ChatWidget.jsx): a launcher that opens a
+     compact conversation card, anchored to the bottom-right corner of every
+     page; the back-to-top button stacks above it. The launcher's one-line
+     invitation shows only on hover or keyboard focus. Like that button it
+     hides in the hero and only materialises once the reader scrolls past the
+     first screen — an open card is never hidden. The card reuses the demo's
+     .sappy-* conversation styles, so the floating chat
+     and the demo's results speak the same visual language. */
+  .chat-root {
+    /* Brand fills (launcher + avatar) share this ancestry, so the mark is one
+       brand wherever it renders: ube-to-pandan on light paper, a smoky plum
+       that does not wash out against dark paper. */
+    --chat-bg: linear-gradient(145deg, rgb(var(--c-ube)) 0%, rgb(var(--c-pandan)) 135%);
+    position: fixed;
+    right: max(1.1rem, env(safe-area-inset-right));
+    bottom: max(1.1rem, env(safe-area-inset-bottom));
+    z-index: 45;
+    display: flex; flex-direction: column; align-items: flex-end; gap: .75rem;
+    opacity: 0; transform: translateY(.6rem) scale(.96);
+    pointer-events: none;
+    transition: opacity .25s ease, transform .3s cubic-bezier(.22, 1, .36, 1);
+  }
+  [data-theme='dark'] .chat-root { --chat-bg: linear-gradient(160deg, #6f51c6 0%, #43307e 55%, #2a2140 135%); }
+  .chat-root[data-visible='true'] { opacity: 1; transform: none; pointer-events: auto; }
+  @media (min-width: 640px) {
+    .chat-root {
+      right: max(1.75rem, env(safe-area-inset-right));
+      bottom: max(1.75rem, env(safe-area-inset-bottom));
+    }
+  }
+
+  .chat-btn {
+    position: relative; display: grid; place-items: center;
+    width: 3.4rem; height: 3.4rem; border-radius: 999px;
+    border: 1px solid rgb(255 255 255 / .2);
+    background: var(--chat-bg);
+    color: #fbf7f0;
+    box-shadow: 0 12px 28px -10px rgb(0 0 0 / .4), 0 0 0 5px rgb(var(--c-ube) / .12);
+    cursor: pointer; touch-action: manipulation;
+    transition: transform .22s cubic-bezier(.22, 1, .36, 1), box-shadow .25s ease, filter .2s ease;
+  }
+  /* A soft sheen across the top, so the flat gradient reads as a glossy button
+     rather than a sticker. */
+  .chat-btn::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit;
+    background: linear-gradient(160deg, rgb(255 255 255 / .2), transparent 38%);
+    pointer-events: none;
+  }
+  .chat-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+  .chat-btn:active { transform: scale(.96); }
+  .chat-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgb(var(--c-paper)), 0 0 0 6px rgb(var(--c-ube) / .7), 0 12px 28px -10px rgb(0 0 0 / .4);
+  }
+  [data-theme='dark'] .chat-btn {
+    border-color: rgb(255 255 255 / .1);
+    box-shadow: 0 14px 32px -12px rgb(0 0 0 / .65), 0 0 0 6px rgb(139 106 214 / .15), inset 0 1px 0 rgb(255 255 255 / .14);
+  }
+  [data-theme='dark'] .chat-btn:focus-visible {
+    box-shadow: 0 0 0 3px rgb(var(--c-paper)), 0 0 0 6px rgb(166 134 255 / .75);
+  }
+  .chat-glyph { position: relative; width: 1.45rem; height: 1.45rem; }
+
+  /* The one-line invitation only appears on hover or keyboard focus of the
+     launcher — never beside it as a permanent element. It floats out of the
+     button's left side as a pill, notched toward the launcher so the two read
+     as one object. */
+  .chat-tip {
+    position: absolute; right: calc(100% + .7rem); top: 50%;
+    transform: translateY(-50%) translateX(.4rem);
+    white-space: nowrap; padding: .5rem .9rem; border-radius: 999px;
+    border: 1px solid var(--border-soft);
+    background: rgb(var(--c-paper) / .96);
+    color: rgb(var(--c-ink) / .78);
+    font-size: .72rem; font-weight: 600; line-height: 1.4;
+    box-shadow: var(--shadow-float);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .18s ease, transform .22s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .22s;
+  }
+  .chat-tip::after {
+    content: ''; position: absolute; left: 100%; top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent; border-left-color: rgb(var(--c-paper) / .96);
+    filter: drop-shadow(2px 0 1px rgb(0 0 0 / .04));
+  }
+  .chat-btn:hover .chat-tip,
+  .chat-btn:focus-visible .chat-tip {
+    opacity: 1; visibility: visible; transform: translateY(-50%) translateX(0);
+    transition: opacity .18s ease, transform .22s cubic-bezier(.22, 1, .36, 1);
+  }
+  /* Touch has no hover; a tooltip that stays after a tap would just get in the
+     way — the launcher's own brand mark is enough on phones. */
+  @media (hover: none) {
+    .chat-tip { display: none; }
+  }
+
+  .chat-card {
+    display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr); gap: .55rem;
+    width: min(22rem, calc(100vw - 2.4rem));
+    max-height: min(63vh, 30rem);
+    border: 1px solid var(--border-soft);
+    border-radius: 1rem;
+    background: rgb(var(--c-paper) / .97);
+    padding: .8rem .85rem .75rem;
+    box-shadow: var(--shadow-float);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    animation: chat-in .24s cubic-bezier(.22, 1, .36, 1) both;
+  }
+  @keyframes chat-in {
+    from { opacity: 0; transform: translateY(8px) scale(.98); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .chat-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .chat-head-brand { display: flex; align-items: center; gap: .6rem; min-width: 0; }
+  .chat-avatar {
+    position: relative; display: grid; place-items: center; flex: none;
+    width: 2rem; height: 2rem; border-radius: .55rem;
+    border: 1px solid rgb(var(--c-ube) / .18);
+    background: rgb(var(--c-ube) / .1);
+    color: rgb(var(--c-ube));
+  }
+  .chat-avatar-glyph { width: 1rem; height: 1rem; }
+  .chat-head-copy {
+    /* The kicker and the meta line must stack, never sit side by side. */
+    display: grid; gap: .05rem; min-width: 0;
+  }
+  .chat-kicker {
+    font-size: .6rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: rgb(var(--c-ube));
+  }
+  .chat-sub { font-size: .66rem; font-weight: 600; line-height: 1.4; color: rgb(var(--c-ink) / .52); }
+  .chat-close {
+    position: relative; flex: none; display: grid; place-items: center;
+    width: 2rem; height: 2rem; border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent; color: rgb(var(--c-ink) / .45);
+    cursor: pointer; transition: color .2s, border-color .2s, background-color .2s;
+  }
+  .chat-close:hover { color: rgb(var(--c-ink) / .8); border-color: var(--border-soft); background: rgb(var(--c-paper) / .6); }
+  .chat-close:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(var(--c-paper)), 0 0 0 6px rgb(var(--c-ube) / .6); }
+  .chat-close svg { width: .72rem; height: .72rem; }
+
+  /* The card owns its height (grid row minmax 0). Body splits its row in two:
+     the history scrolls, the suggestion chips stay planted below it — chips
+     that scroll away with the conversation stop being chips. */
+  .chat-body {
+    display: grid; grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr); gap: .55rem;
+    min-height: 0; padding-right: .15rem;
+  }
+  .chat-history { max-height: none; min-width: 0; min-height: 0; }
+  .chat-suggest { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+  .chat-suggest-label {
+    font-size: .66rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+    color: rgb(var(--c-ink) / .5);
+  }
+  .chat-chip {
+    display: inline-flex; align-items: center; max-width: 100%;
+    min-height: 1.8rem; padding: .2rem .7rem; border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: rgb(var(--c-ink) / .72);
+    font: inherit; font-size: .7rem; font-weight: 600; line-height: 1.35; text-align: left;
+    cursor: pointer; transition: border-color .2s ease, color .2s ease, background-color .2s ease;
+  }
+  .chat-chip:hover { border-color: rgb(var(--c-ube) / .55); color: rgb(var(--c-ube)); background: rgb(var(--c-ube) / .05); }
+  .chat-chip:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(var(--c-paper)), 0 0 0 6px rgb(var(--c-ube) / .5); }
+
+  /* The foot stacks the busy strip and the compose row at a fixed gap; the
+     explicit column keeps the row from inflating a single auto track with the
+     input's intrinsic width and shoving the mic and send past the card edge. */
+  .chat-foot {
+    display: grid; grid-template-columns: minmax(0, 1fr); gap: .45rem;
+  }
+
+  /* Busy status strip above the compose row — a quiet line, not a meter. */
+  .chat-status {
+    display: flex; align-items: center; gap: .55rem;
+    font-size: .7rem; line-height: 1.5; color: rgb(var(--c-ink) / .58);
+  }
+  .chat-status::before {
+    content: ''; width: .4rem; height: .4rem; border-radius: 999px; flex: none;
+    background: rgb(var(--c-ube) / .85); animation: sappy-blink 1.1s ease-in-out infinite;
+  }
+  .chat-cancel {
+    margin-left: auto; border-radius: 999px; border: 1px solid var(--border-strong);
+    padding: .18rem .6rem; font: inherit; font-size: .66rem; font-weight: 600;
+    background: transparent; color: rgb(var(--c-ink) / .7); cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+  .chat-cancel:hover { border-color: rgb(var(--c-ube) / .5); color: rgb(var(--c-ube)); }
+
+  /* The floating chat's send control is a circular icon button, the same
+     silhouette as the mic beside it — the compose row reads as three equal
+     controls around the field. (The demo no longer floods its results, so this
+     class is the chat's alone.) */
+  .sappy-send {
+    flex: none; display: grid; place-items: center;
+    width: 2.7rem; height: 2.7rem; border-radius: 999px; padding: 0;
+    background: rgb(var(--c-ink)); color: rgb(var(--c-paper));
+    transition: transform .2s ease, opacity .2s ease;
+  }
+  .sappy-send:hover:not(:disabled) { transform: translateY(-1px); }
+  .sappy-send:disabled { opacity: .4; cursor: default; }
+  .sappy-send-glyph { width: .95rem; height: .95rem; }
+
+  /* The voice line's ring is driven by the live audio level (audio.js onLevel,
+     ChatWidget's press-and-hold mic) so the button swells with the visitor's
+     voice while they hold it to talk. */
+  .sappy-mic.is-live { position: relative; }
+  .sappy-mic.is-live::after {
+    content: ''; position: absolute; inset: -3px; border-radius: 999px;
+    border: 2px solid rgb(var(--c-ube) / .6);
+    background: rgb(var(--c-ube) / .14);
+    pointer-events: none;
+    transform: scale(calc(1 + var(--level, 0) * .5));
+    transition: transform .12s ease-out, opacity .15s ease;
+  }
+  .sappy-live-hint {
+    font-size: .7rem; line-height: 1.45; font-weight: 600; color: rgb(var(--c-ube));
+  }
+
+  /* Play/pause for Sappy's spoken reply. A wave would steal the room the text
+     needs — the reply is already prose, the play button just needs to be
+     unmistakable. */
+  .chat-reply { display: flex; align-items: center; gap: .55rem; margin-top: .15rem; }
+  .chat-reply audio { display: none; }
+  .chat-replay {
+    flex: none; display: grid; place-items: center;
+    width: 2.1rem; height: 2.1rem; border-radius: 999px;
+    background: rgb(var(--c-ube)); color: #fbf7f0;
+    cursor: pointer;
+    transition: transform .2s ease, opacity .2s ease;
+  }
+  .chat-replay:hover { transform: scale(1.06); }
+  .chat-replay:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(var(--c-paper)), 0 0 0 6px rgb(var(--c-ube) / .6); }
+  .chat-replay svg { width: .95rem; height: .95rem; fill: currentColor; }
+  .chat-reply-label { font-size: .68rem; font-weight: 600; color: rgb(var(--c-ink) / .55); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chat-root { transition: opacity .15s ease; }
+    .chat-tip, .chat-card, .chat-status::before { animation: none; }
+    .chat-status::before { opacity: .6; }
+  }
 
   /* Custom player. The browser's own controls are the one element that would
      make this read as a form rather than a demo, and a waveform doubles as
@@ -1926,6 +2312,7 @@
   .demo-field textarea,
   .demo-field input[type='text'],
   .demo-field input[type='file'],
+  .sappy-compose input,
   .nf-search input {
     font-size: 16px;
   }
@@ -1953,7 +2340,25 @@
   .nav-menu-panel { top: 3.4rem; }
   .nav-menu-panel a { min-height: 2.75rem; display: flex; align-items: center; }
 
-  .back-to-top { height: 3rem; width: 3rem; }
+  .back-to-top { height: 3.4rem; width: 3.4rem; }
+
+  .sappy-mic,
+  .sappy-send { height: 2.75rem; }
+  .sappy-mic { width: 2.75rem; }
+  .sappy-send { width: 2.75rem; }
+
+  .chat-btn { width: 3.75rem; height: 3.75rem; }
+  /* The toggle stays the launcher's twin on touch too — same 3.75rem circle. */
+  .back-to-top { height: 3.75rem; width: 3.75rem; }
+  /* The close button's drawn size is doing design work in the header row, so
+     the box stays 2.1rem and only the touchable area grows. */
+  .chat-close { position: relative; min-height: 0; }
+  .chat-close::before {
+    content: ''; position: absolute; inset: -.45rem; border-radius: inherit;
+  }
+  .chat-chip { min-height: 2.75rem; }
+  .chat-compose input,
+  .sappy-compose input { min-height: 2.75rem; }
 
   .nav-links a { min-height: 2.75rem; display: inline-flex; align-items: center; }
   .demo-langs button,
@@ -2069,18 +2474,40 @@ main,
     padding-right: max(2.25rem, env(safe-area-inset-right));
   }
 }
-/* The one element that would otherwise sit under the Android gesture bar and
-   the iPhone's home indicator. */
-.back-to-top {
-  right: max(1.1rem, env(safe-area-inset-right));
-  bottom: calc(1.1rem + env(safe-area-inset-bottom));
-}
-@media (min-width: 640px) {
-  .back-to-top {
-    right: max(1.75rem, env(safe-area-inset-right));
-    bottom: calc(1.75rem + env(safe-area-inset-bottom));
-  }
-}
+/* The two fixed corner controls that would otherwise sit under the Android
+   gesture bar and the iPhone's home indicator. The launcher owns the inset;
+   the back-to-top stacks above it and steals the same inset so the gap between
+   them survives a device with a thick home indicator. */
+.chat-root {
+   right: max(1.1rem, env(safe-area-inset-right));
+   bottom: max(1.1rem, env(safe-area-inset-bottom));
+ }
+ .back-to-top {
+   right: max(1.1rem, env(safe-area-inset-right));
+   bottom: calc(max(1.1rem, env(safe-area-inset-bottom)) + 4.3rem);
+ }
+ @media (min-width: 640px) {
+   .chat-root {
+     right: max(1.75rem, env(safe-area-inset-right));
+     bottom: max(1.75rem, env(safe-area-inset-bottom));
+   }
+   .back-to-top {
+     right: max(1.75rem, env(safe-area-inset-right));
+     bottom: calc(max(1.75rem, env(safe-area-inset-bottom)) + 4.45rem);
+   }
+ }
+ /* On touch the launcher grows to 3.75rem, so the toggle keeps the same
+    breathing room above its taller circle. */
+ @media (pointer: coarse) {
+   .back-to-top {
+     bottom: calc(max(1.1rem, env(safe-area-inset-bottom)) + 4.65rem);
+   }
+   @media (min-width: 640px) {
+     .back-to-top {
+       bottom: calc(max(1.75rem, env(safe-area-inset-bottom)) + 4.8rem);
+     }
+   }
+ }
 
 /* ------------------------------------------------- length of the page */
 /* A phone renders this page as one column, and one column of everything the

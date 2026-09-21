@@ -3,6 +3,7 @@ import NumberFlow from '@number-flow/react'
 import { datasets, models, catalogSnapshot, totals } from './data/catalog'
 import { ArrowDown, ArrowUp, ArrowUpRight, CheckIcon, Code, CopyIcon, Dataset, Discord, Facebook, Github, HuggingFace, LinkedIn, Mark, MarkMono } from './components/Icons'
 import ThemeToggle from './components/ThemeToggle'
+import DeferredOrb from './components/DeferredOrb'
 import PhilippinesMap from './components/PhilippinesMap'
 import { useTheme } from './lib/theme'
 import { describeModel } from './data/modelNotes'
@@ -851,14 +852,24 @@ function PartnersAndFaq() {
    them straight back to the unscrolled, header-above-hero view. */
 function BackToTop() {
   const [visible, setVisible] = useState(false)
+  const lastY = useRef(window.scrollY)
+  const dir = useRef('down')
 
   useEffect(() => {
     let frame = 0
     const onScroll = () => {
       if (frame) return
       frame = requestAnimationFrame(() => {
-        setVisible(window.scrollY > window.innerHeight * .6)
         frame = 0
+        const y = window.scrollY
+        // Small dead zone so a resting finger or a subtle jitter cannot flap
+        // the button back and forth; direction drives it because the button
+        // rises out of the Ask Sappy launcher while scrolling down and sinks
+        // back into it while scrolling up.
+        const delta = y - lastY.current
+        if (Math.abs(delta) > 4) dir.current = delta > 0 ? 'down' : 'up'
+        lastY.current = y
+        setVisible(y > window.innerHeight * .6 && dir.current === 'down')
       })
     }
     onScroll()
@@ -941,6 +952,11 @@ function App() {
     <main aria-label="SapinSapin AI — Open foundations for Philippine-language AI"><Hero /><Demo /><Problem /><Impact /><Datasets /><Models /><Openness /><Contribute /><PartnersAndFaq /><References /></main>
     <Footer />
     <BackToTop />
+    {/* The Ask Sappy chat is page chrome rather than demo furniture, so it cannot
+        ride the demo's approach gate — a visitor who never scrolls to the demo should
+        still be able to ask. DeferredOrb defers it a beat past paint and keeps the
+        Worker call off the first-paint path; 404.html mounts the same widget. */}
+    <DeferredOrb load={() => import('./components/ChatWidget')} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(datasetsSchema) }} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(faqSchema) }} />
   </>

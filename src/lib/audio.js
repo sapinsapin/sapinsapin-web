@@ -215,6 +215,40 @@ export const canRecord = () =>
   typeof MediaRecorder !== 'undefined' &&
   Boolean(navigator.mediaDevices?.getUserMedia)
 
+// Wires an AnalyserNode onto a live stream so `onLevel` can observe the room
+// as it is recorded. Unwritten this is pure overhead, so the graph is only
+// built when a caller asks for levels (the voice orb's VAD). The shared context
+// is used rather than a private one per record — a second context eats into the
+// browser's per-origin budget for no benefit — which means recording leaves the
+// shared context running. That is fine for the demo, which only suspends it as
+// a courtesy.
+function connectMeter(stream, onLevel) {
+  if (!onLevel) return null
+  const context = audioContext()
+  if (context.state !== 'running') context.resume().catch(() => {})
+  const source = context.createMediaStreamSource(stream)
+  const analyser = context.createAnalyser()
+  analyser.fftSize = 2048
+  source.connect(analyser)
+
+  const data = new Float32Array(analyser.fftSize)
+  let level = 0
+  const tick = setInterval(() => {
+    analyser.getFloatTimeDomainData(data)
+    let sum = 0
+    for (let i = 0; i < data.length; i += 1) sum += data[i] * data[i]
+    const rms = Math.sqrt(sum / data.length)
+    // Fast attack, slow decay: a spoken "t" spikes and vanishes inside one
+    // window, and the meter should show the spike rather than smear it away.
+    level = rms > level ? rms : level * 0.9
+    onLevel(level)
+  }, 100)
+  return () => {
+    clearInterval(tick)
+    source.disconnect()
+  }
+}
+
 /**
  * Start recording. Resolves to a handle whose `stop()` returns the WAV.
  *
@@ -222,7 +256,7 @@ export const canRecord = () =>
  * open keeps the browser's recording indicator lit long after the UI says it
  * finished, which reads as the page still listening.
  */
-export async function startRecording({ maxSeconds = MAX_SECONDS, onTick, onAutoStop } = {}) {
+export async function startRecording({ maxSeconds = MAX_SECONDS, onTick, onLevel, onAutoStop } = {}) {
   let stream
   try {
     stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -240,6 +274,7 @@ export async function startRecording({ maxSeconds = MAX_SECONDS, onTick, onAutoS
     if (event.data?.size) chunks.push(event.data)
   })
 
+  const disconnectMeter = connectMeter(stream, onLevel)
   const startedAt = Date.now()
   const stopped = new Promise((resolve) => recorder.addEventListener('stop', resolve, { once: true }))
   recorder.start()
@@ -250,6 +285,7 @@ export async function startRecording({ maxSeconds = MAX_SECONDS, onTick, onAutoS
   const release = () => {
     clearInterval(tick)
     clearTimeout(cap)
+    disconnectMeter?.()
     stream.getTracks().forEach((track) => track.stop())
   }
 

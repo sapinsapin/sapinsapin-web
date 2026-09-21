@@ -10,10 +10,12 @@ initiative building corpora, benchmarks, and models for Philippine-language AI. 
 page shows is synced from the Hugging Face Hub at build time.
 Live at https://sapinsapin-web.vercel.app.
 
-The one exception is the live speech demo in the `#demo` section, which calls the
-`sapinsapin/halohalo-dashboard` Gradio Space from the browser. It is still the only runtime
-fetching on the page; see "The live demo" below for why it is allowed to do that when the
-catalog is not.
+The two runtime fetches live in the browser: the `sapinsapin/halohalo-dashboard` Gradio
+Space (the three audio capabilities) and a small Cloudflare Worker, `sappy-ai`, that
+answers plain-language questions about the project in Filipino (the "Ask Sappy" chat). Both
+originate in the live `#demo` section; the floating "Ask Sappy" chat repeats the Worker path
+on every page. See "The live demo" below for why those are allowed to do that
+when the catalog is not.
 
 ## Commands
 
@@ -28,6 +30,7 @@ npm run sync:space       # Demo language/voice/clip lists from the Space → src
 npm run prepare:map      # Regenerate hero map geometry from public boundary data
 npm run prepare:icons    # Rasterise the brand mark to PNG favicons
 npm run prepare:brand    # Social banners and profile pictures → brand/<platform>/ (needs Chrome)
+npm run check:csp        # Assert every inline script is hashed and both runtime origins are in connect-src
 ```
 
 There is no test suite and no lint script configured in `package.json`.
@@ -82,7 +85,9 @@ src/
     Icons.jsx              Inline SVG icon set and the brand mark
     ThemeToggle.jsx         The sun/moon button, shared by both page roots
     PhilippinesMap.jsx      Hero map, bearing dial, language readout
-    SpeechConsole.jsx       The live demo: all three capabilities, lazy-loaded
+    SpeechConsole.jsx       The live demo: the three audio capabilities plus the "Ask Sappy" chat, lazy-loaded
+    ChatWidget.jsx          The floating "Ask Sappy" text chat, bottom-right of both pages, lazy-loaded
+    DeferredOrb.jsx         Mounts a lazy chunk on the earlier of a beat or the first interaction
     SignalTrace.jsx         404 only: the requested URL drawn as a waveform
   lib/
     theme.js                useTheme() — palette state and the view-transition wipe
@@ -106,9 +111,9 @@ src/
 `PartnersAndFaq`, `Footer`, plus shared helpers like `Cite`, `Reveal`, `CountUp`, `Nav`)
 rather than being split into per-file components. Follow that convention rather than
 introducing a new components directory for section content. `PhilippinesMap.jsx` and
-`SpeechConsole.jsx` are the exceptions and not a precedent for splitting sections: both are
-self-contained interactive widgets, and the prose around them still lives in `Hero()` and
-`Demo()`.
+`SpeechConsole.jsx` and `ChatWidget.jsx` are the exceptions and not a precedent for splitting
+sections: all three are self-contained interactive widgets, and the prose around them still
+lives in `Hero()` / `Demo()` (the chat keeps its description in "The floating chat" below).
 
 `NotFound.jsx` is not an exception to that rule either — it is a **second page root**, a
 sibling of `App.jsx` rather than a piece of it, and it follows the same one-file convention
@@ -158,6 +163,67 @@ Space's own API page is wrong about the third.
 `spaceManifest.js` exists only so the controls can render before any request; the Space's own
 `choices` outrank it at call time, so drift there degrades to a stale first paint rather than
 a failed call. `sync-space.mjs` failing is the signal that the Space's shape changed.
+
+"Ask Sappy" is not a demo capability — the demo is exactly synthesize, transcribe and
+ convert voice. Ask Sappy lives entirely in the floating bottom-right chat below, which
+ answers plain-language questions through a tiny Cloudflare Worker (`sappy-ai`) rather than
+ the Space, and pins Filipino: the voice input is transcribed with whisper-small (the
+ cheapest warm model), and only the Worker's live `meta` decides what happens next.
+
+`ChatWidget.jsx` enables the mic only when `canRecord()` reports it can record (insecure
+origins and blocked permissions keep it disabled with a hint): the mic button degrades to a
+disabled state instead of a dead click.
+
+The chat's voice assistant is **press-and-hold, not push-to-talk**: press the mic, speak,
+and release to send — or keep holding and let a real silence end the turn. The mic takes
+`pointer capture` on press, so a finger that slides off it as it lifts still counts as a
+release, and a press shorter than `TAP_MS` (300ms) is a tap and is cancelled rather than
+sent as a sliver of noise. End-of-utterance is detected with the browser's **native RMS
+meter**, not a model: `connectMeter` in `audio.js` feeds `onLevel`, and `ChatWidget` turns
+that level into a decision with hysteresis — speech enters only above `VAD_ON` (0.02) and,
+once in, must fall below `VAD_OFF` (0.012) before its silence counts, for a full
+`VAD_HANGOVER_MS` (700ms), at which point the recording finalises itself and the answer
+pipeline takes over (the hold is the earlier way to send). The same level drives the mic's
+live ring (`--level` on `.sappy-mic.is-live`) and a hint bar explains the gesture. A hold
+that never rises above the floor sends ~0.7s of near-silence, which the chat answers with
+its ordinary "I couldn't understand the question" turn.
+
+A finished recording runs through `callSappyVoice` in `sappyClient.js`, one exchange end
+to end: upload the WAV, hear it with whisper-small, ask the Worker, and read the answer
+back aloud with the Filipino corpus voice — returning the heard question, the answer, its
+caption, and the spoken reply as a blob. The Space legs queue through `spaceClient` like
+any demo request, on purpose: the floating chat and the demo share one lane, so the two
+never double up on the Space's single session. A recording that decodes to nothing becomes
+the ordinary "didn't catch that" turn instead of sending near-silence down the model path.
+A status strip reports each leg (uploading, transcribing, searching, speaking) with a
+Cancel that stops the whole exchange; the reply autoplays once in its bubble.
+
+#### The floating chat ("Ask Sappy")
+
+`ChatWidget.jsx` floats the "Ask Sappy" chat in the bottom-right corner of **both** pages
+(index and 404; `DeferredOrb.jsx` mounts it on the earlier of a beat or the first interaction). It is the whole
+Ask Sappy experience — the demo has no chat tab at all. It carries a text conversation
+(one pointed call to the Worker) side by side with the press-and-hold voice line above,
+and plays Sappy's spoken reply back in the bubble it lands in. Its controls: a launcher
+ bubble whose one-line invitation appears on hover or keyboard focus, a panel that opens
+ into a card, suggestion chips before the first ask, and a compose row with field, mic and
+ send. The card
+reuses the demo's `.sappy-*` conversation classes for the bubbles and its own `.chat-*`
+shell and controls. `Escape` closes it, Tab is trapped inside the card while it is open,
+and focus returns to the launcher when it closes. The 404 mount is why the widget lives in
+`components/` like every other thing shared between the two roots.
+
+Stacking is deliberate: the chat owns the corner at `z-index: 45` — below the sticky nav
+(`z-50`) — and the back-to-top control (`z-40`) stacks **above** it, offset by the
+launcher's drawn height so the two can never collide. Both hide in the hero and only ever
+appear beneath it (`scrollY > 0.6 * innerHeight`); an open chat card is never hidden. The
+back-to-top is *directional*: it rises out of the launcher while scrolling **down** and
+sinks back into it while scrolling **up** (4px dead zone against jitter). `DeferredOrb`
+mounts the chat on the earlier of its timer or the visitor's first scroll/click/keypress,
+so the widget is present the moment the scroll that reveals it happens instead of
+trailing the back-to-top by a beat. `check-csp.mjs` allows both runtime origins in
+`connect-src`; the chat calls both — Space for the voice legs, Worker for the question —
+and the demo calls the Space; keep both if either origin changes.
 
 #### What updates on its own, and what does not
 
@@ -216,7 +282,11 @@ if you want to re-run it). **Safari and iOS have never been tested**, and they a
 where the untested branches live: the `decodeAudioData` callback form, MediaRecorder's
 mp4/aac output, `audio/wav` re-typing, and iOS's gesture requirement for `AudioContext`. The
 `resample` linear-interpolation fallback has also never executed, since `OfflineAudioContext`
-works in Chrome. Worth a pass on a real device before treating those as sound.
+works in Chrome. The video/call assistant adds two more untested branches: the press-and-talk
+gesture itself (`pointer capture` + hold-release on the demo's Ask Sappy mic) has only been
+exercised with a mouse, and the `VAD_ON`/`VAD_OFF`/`VAD_HANGOVER_MS` thresholds are tuned on
+a desktop mic — a loud environment or a phone held close could make the meter behave
+differently. Worth a pass on a real device before treating those as sound.
 
 The same caveat covers the mobile pass described under "Mobile and touch" below: the layout,
 overflow and hit-target work was measured in a mobile Chromium emulation across 320–1440px
@@ -224,7 +294,7 @@ in both orientations, which is enough to catch a bar that does not fit or a fiel
 trip Safari's zoom, and is not the same as a real handset. Three things emulation cannot
 answer: whether iOS really leaves the viewport alone at 16px, whether the
 `env(safe-area-inset-*)` padding lands where the notch and the home indicator actually are,
-and how the map and the demo feel under a thumb.
+and how the map, the demo, and the chat widget feel under a thumb.
 
 The console is lazy-loaded and gated on approaching the viewport, so it stays off the
 first-paint path and a visitor who never scrolls never contacts the Space at all. Feedback
@@ -344,8 +414,12 @@ The audit that drove all of this is worth repeating after a layout change: drive
 site in a mobile Chromium context and assert three things at 320/360/375/390/414/768 —
 `document.documentElement.scrollWidth === window.innerWidth` (no horizontal overflow),
 no `input`/`select`/`textarea` with a computed `font-size` under 16px, and no interactive
-element under 44px tall. Also switch through all three demo capabilities and all three
-audio sources; several of the controls only exist on one of them.
+element under 44px tall. Also switch through all four demo tabs (the three audio
+capabilities plus the Sappy chat) and all three audio sources; several of the controls only
+exist on one of them. And open the floating chat's card at the same widths — its controls
+carry their own 16px/44px coarse rules (`.chat-compose input`, `.chat-close`, `.chat-chip`,
+and a 3.75rem `.chat-btn`), and the fixed launcher must not pick a corner collision with
+`.back-to-top` at 320px.
 
 Two things about that audit are easy to get wrong.
 

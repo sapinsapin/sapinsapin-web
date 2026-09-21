@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Anchor, ArrowLeft, ArrowUpRight, Github, HuggingFace, Mark } from './components/Icons'
 import SignalTrace from './components/SignalTrace'
 import ThemeToggle from './components/ThemeToggle'
+import DeferredOrb from './components/DeferredOrb'
 import { useTheme } from './lib/theme'
 
 /* The 404 document. A separate Vite entry rather than a client-side route:
@@ -419,5 +420,6 @@ export default function NotFound() {
     </main>
 
     <Footer />
+    <DeferredOrb load={() => import('./components/ChatWidget')} />
   </>
 }
