@@ -92,7 +92,7 @@ const people = [
   },
   {
     name: 'Marc Ocampo',
-    role: 'Builder',
+    role: 'Core team',
     blurb: '',
     image: '/portraits/marc.webp',
     links: [
@@ -103,7 +103,7 @@ const people = [
   },
   {
     name: 'JC Diamante',
-    role: 'Builder',
+    role: 'Core team',
     blurb: '',
     image: '/portraits/jc.webp',
     links: [
@@ -917,7 +917,7 @@ function PersonCard({ person }) {
 
 function People() {
   return <section id="people" className="section-shell scroll-mt-24 pt-20 sm:pt-40">
-    <SectionHeading eyebrow="People" title={<>The <em className="text-ube">people</em> behind<br />the work.</>}>
+    <SectionHeading className="person-heading" eyebrow="People" title={<>The <em className="text-ube">people</em> behind<br />the work.</>}>
       Every dataset, model, and line of code comes from someone working with a Philippine language.
     </SectionHeading>
     <Reveal className="person-grid">

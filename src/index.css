@@ -1755,10 +1755,16 @@
 
   /* -------------------------------------------------------------- people */
   /* A professional team grid: portrait, name, role, links — the same anatomy
-     as the contribute cards, read left to right. */
+     as the contribute cards, read left to right. The grid is narrower than
+     the page so the three cards stay at a human scale, and it shares the
+     heading's 48rem measure so the centered edges line up. */
+  .person-heading { margin-inline: auto; text-align: center; }
+  .person-heading .eyebrow { justify-content: center; }
+  .person-heading > p { margin-inline: auto; }
   .person-grid {
     display: grid; gap: 1rem; margin-top: 2.25rem;
     grid-template-columns: 1fr;
+    max-width: 48rem; margin-inline: auto;
   }
   .person-card {
     display: grid; align-content: start; min-width: 0;
