@@ -6,7 +6,7 @@
 export const spaceId = "sapinsapin/halohalo-dashboard"
 export const spaceOrigin = "https://sapinsapin-halohalo-dashboard.hf.space"
 export const gradioVersion = "6.22.0"
-export const syncedAt = "2026-09-20"
+export const syncedAt = "2026-09-21"
 export const languages = [
   {
     "name": "Bikol",
