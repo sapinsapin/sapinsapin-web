@@ -1753,6 +1753,68 @@
     font-family: Fraunces, 'Fraunces Fallback', Georgia, serif; font-size: 1.1rem;
   }
 
+  /* -------------------------------------------------------------- people */
+  /* A professional team grid: portrait, name, role, links — the same anatomy
+     as the contribute cards, read left to right. */
+  .person-grid {
+    display: grid; gap: 1rem; margin-top: 2.25rem;
+    grid-template-columns: 1fr;
+  }
+  .person-card {
+    display: grid; align-content: start; min-width: 0;
+    border: 1px solid var(--border-soft); border-radius: 1.1rem;
+    background: var(--surface-raised); padding: .9rem;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .28s ease;
+  }
+  .person-card:hover {
+    transform: translateY(-3px); box-shadow: var(--shadow-card);
+    border-color: rgb(var(--c-ube) / .28);
+  }
+  /* The photo slot doubles as the portrait placeholder: a themed plate with
+     the initials in Fraunces reads as designed until the portrait lands. */
+  .person-photo {
+    position: relative; display: grid; place-items: center;
+    aspect-ratio: 1 / 1; overflow: hidden;
+    border-radius: .72rem; border: 1px solid var(--border-soft);
+    background:
+      radial-gradient(120% 100% at 50% 0%, rgb(var(--c-ube) / .13), transparent 58%),
+      linear-gradient(165deg, var(--surface-panel), var(--surface-sunken));
+  }
+  .person-photo img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: center 20%;
+  }
+  .person-photo-mark {
+    font-family: Fraunces, 'Fraunces Fallback', Georgia, serif;
+    font-size: 2.5rem; font-weight: 500; letter-spacing: -.06em;
+    color: rgb(var(--c-ube) / .82);
+  }
+  .person-body { display: flex; flex-direction: column; padding: 1rem .3rem .3rem; }
+  .person-role {
+    font-size: .68rem; font-weight: 700; letter-spacing: .16em;
+    text-transform: uppercase; color: rgb(var(--c-ube));
+    margin-bottom: .3rem;
+  }
+  .person-name {
+    font-family: Fraunces, 'Fraunces Fallback', Georgia, serif;
+    font-size: 1.35rem; font-weight: 500; line-height: 1.1; letter-spacing: -.045em;
+    color: rgb(var(--c-ink));
+  }
+  .person-blurb { margin-top: .5rem; font-size: .85rem; line-height: 1.55; color: rgb(var(--c-ink) / .65); }
+  .person-links { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+  /* Same footprint as the in-page icon links, so the row reads as controls. */
+  .person-link {
+    display: grid; place-items: center; flex: none;
+    height: 2rem; width: 2rem; border-radius: 50%;
+    border: 1px solid var(--border-strong); background: rgb(var(--c-paper) / .6);
+    color: rgb(var(--c-ink) / .74);
+    transition: color .22s, border-color .22s, background-color .22s, transform .22s;
+  }
+  .person-link:hover {
+    transform: translateY(-1px);
+    color: rgb(var(--c-ube)); border-color: rgb(var(--c-ube) / .5); background: rgb(var(--c-ube) / .08);
+  }
+
   .faq summary {
     display: flex; cursor: pointer; align-items: center; justify-content: space-between; gap: 1rem;
     padding: 1.25rem 0; color: rgb(var(--c-ink));
@@ -2185,6 +2247,7 @@
 [data-theme='dark'] .dataset-card,
 [data-theme='dark'] .contribute-card,
 [data-theme='dark'] .partner-card,
+[data-theme='dark'] .person-card,
 [data-theme='dark'] .models-panel,
 [data-theme='dark'] .demo-panel,
 [data-theme='dark'] .map-readout,
@@ -2192,7 +2255,8 @@
   box-shadow: var(--edge-highlight);
 }
 [data-theme='dark'] .dataset-card:hover,
-[data-theme='dark'] .contribute-card:hover {
+[data-theme='dark'] .contribute-card:hover,
+[data-theme='dark'] .person-card:hover {
   box-shadow: var(--edge-highlight), var(--shadow-card);
 }
 [data-theme='dark'] .language-map,
@@ -2356,6 +2420,7 @@
   .nav-icon-link,
   .nav-menu summary,
   .round-link,
+  .person-link,
   .footer-social a {
     height: 2.75rem;
     width: 2.75rem;
@@ -2441,7 +2506,8 @@
   .list-more button:hover,
   .model-filters button:hover,
   .btn-small:hover,
-  .demo-run:hover:not(:disabled) { transform: none; }
+  .demo-run:hover:not(:disabled),
+  .person-card:hover { transform: none; }
   .round-link:hover { transform: none; }
   .text-link:hover,
   .footer-links a:hover { gap: .45rem; }
@@ -2575,9 +2641,21 @@ main,
   .contribute-card h3 { margin-top: 2.25rem; }
   .contribute-card p { min-height: 0; }
 
+  /* The cards tighten on a phone so the portrait stays pleasant to look at. */
+  .person-card { padding: .8rem; }
+  .person-grid { gap: .75rem; margin-top: 1.5rem; }
+  .person-photo-mark { font-size: 2.2rem; }
+  .person-body { padding-top: .85rem; }
+
   .model-row { padding-inline: 1.15rem; }
   .model-filters,
   .model-more { padding-inline: 1.15rem; }
+}
+
+/* Three across once there is room; below this the cards stack full width so
+   the portrait keeps a sensible size on a phone. */
+@media (min-width: 768px) {
+  .person-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* The layer list is nine rows of "code · name · downloads" stacked under the

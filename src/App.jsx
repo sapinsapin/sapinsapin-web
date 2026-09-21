@@ -31,6 +31,7 @@ const navItems = [
   { id: 'work', label: 'Work' },
   { id: 'models', label: 'Models' },
   { id: 'open', label: 'Why open' },
+  { id: 'people', label: 'People' },
   { id: 'contribute', label: 'Join us' },
 ]
 
@@ -73,6 +74,45 @@ const references = [
 const COMPACT_DATASETS = 3
 
 const referenceIndex = Object.fromEntries(references.map((reference, index) => [reference.id, { ...reference, number: index + 1 }]))
+
+/* The people behind the work. Drop a portrait file into `image` and the card
+   renders it cover-cropped into the photo slot; while a portrait is pending,
+   the initials stand in so the grid stays whole. Roles and blurbs are the
+   keepers' to amend — update them as contributors are added or titles change. */
+const people = [
+  {
+    name: 'Tim Santos',
+    role: 'Founder',
+    blurb: '',
+    image: '/portraits/tim.webp',
+    links: [
+      { kind: 'LinkedIn', href: 'https://www.linkedin.com/in/internetoftim/' },
+      { kind: 'Hugging Face', href: 'https://huggingface.co/internetoftim' },
+    ],
+  },
+  {
+    name: 'Marc Ocampo',
+    role: 'Builder',
+    blurb: '',
+    image: '/portraits/marc.webp',
+    links: [
+      { kind: 'Website', href: 'https://marcocampo.com' },
+      { kind: 'LinkedIn', href: 'https://www.linkedin.com/in/mnco25/' },
+      { kind: 'Hugging Face', href: 'https://huggingface.co/marcxxv' },
+    ],
+  },
+  {
+    name: 'JC Diamante',
+    role: 'Builder',
+    blurb: '',
+    image: '/portraits/jc.webp',
+    links: [
+      { kind: 'Website', href: 'https://jcdiamante.com' },
+      { kind: 'LinkedIn', href: 'https://www.linkedin.com/in/jcdiamante/' },
+      { kind: 'Hugging Face', href: 'https://huggingface.co/zeraphim' },
+    ],
+  },
+]
 
 /* Serialises structured data for a <script> tag. The escaping is the point:
    these schemas carry dataset titles and descriptions synced from the Hub, and
@@ -836,6 +876,56 @@ function Contribute() {
   return <section id="contribute" className="section-shell scroll-mt-24 pt-20 sm:pt-40"><div className="contribute-intro"><div><Eyebrow>It takes a village</Eyebrow><h2 className="mt-5 max-w-3xl font-display text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[.96] tracking-[-.065em] text-ink">Help make Philippine AI <em className="text-ube">more possible.</em></h2><div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3"><ExternalLink href="https://github.com/sapinsapin/halohalo/issues" className="btn btn-primary" label="Join the SapinSapin AI community on GitHub">Join us <ArrowUpRight className="h-4 w-4" /></ExternalLink><a href="mailto:contact@sapinsapin.ai" className="text-link">Prefer email? contact@sapinsapin.ai</a></div></div><div className="max-w-md"><p className="text-[1.05rem] leading-7 text-ink/70">This work is designed to be used, questioned, and improved in public.</p><CodeBlock /></div></div><Reveal className="mt-4 grid gap-4 md:grid-cols-3">{cards.map(({ icon: Icon, number, title, text, cta, href }) => <article key={title} className="contribute-card"><div className="flex items-center justify-between"><Icon className="h-7 w-7 text-ube" /><span className="text-xs text-ink/60">{number}</span></div><h3 className="mt-12 text-xl font-semibold tracking-[-.045em] text-ink">{title}</h3><p className="mt-3 min-h-[72px] text-sm leading-6 text-ink/68">{text}</p><ExternalLink href={href} className="text-link mt-8" label={cta}>{cta} <ArrowUpRight className="h-4 w-4" /></ExternalLink></article>)}</Reveal></section>
 }
 
+/* A team card: portrait up top, name and role beneath, links at the foot —
+   the same anatomy as the contribute cards, so the section reads as part of
+   the page rather than a one-off. */
+function PersonCard({ person }) {
+  const initials = person.name
+    .replace(/[^A-Za-z ]/g, '')
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join('')
+
+  const glyphFor = (kind) => {
+    if (kind === 'LinkedIn') return <LinkedIn className="h-3.5 w-3.5" />
+    if (kind === 'GitHub') return <Github className="h-3.5 w-3.5" />
+    if (kind === 'Hugging Face') return <HuggingFace className="h-3.5 w-3.5" />
+    return <ArrowUpRight className="h-3.5 w-3.5" />
+  }
+
+  return <article className="person-card">
+    <div className="person-photo">
+      {person.image
+        ? <img src={person.image} alt={`Portrait of ${person.name}`} loading="lazy" />
+        : <span className="person-photo-mark" aria-hidden="true">{initials}</span>}
+    </div>
+    <div className="person-body">
+      <p className="person-role">{person.role}</p>
+      <h3 className="person-name">{person.name}</h3>
+      {person.blurb && <p className="person-blurb">{person.blurb}</p>}
+      {person.links.length > 0 && (
+        <div className="person-links">
+          {person.links.map((link) => (
+            <ExternalLink key={link.href} href={link.href} className="person-link" label={`${person.name} on ${link.kind}`}>{glyphFor(link.kind)}</ExternalLink>
+          ))}
+        </div>
+      )}
+    </div>
+  </article>
+}
+
+function People() {
+  return <section id="people" className="section-shell scroll-mt-24 pt-20 sm:pt-40">
+    <SectionHeading eyebrow="People" title={<>The <em className="text-ube">people</em> behind<br />the work.</>}>
+      Every dataset, model, and line of code comes from someone working with a Philippine language.
+    </SectionHeading>
+    <Reveal className="person-grid">
+      {people.map((person) => <PersonCard key={person.name} person={person} />)}
+    </Reveal>
+  </section>
+}
+
 function PartnersAndFaq() {
   const faqs = [
     ['Which license applies?', 'Licenses are dataset-specific. The catalog intentionally lists the license shown on each public Hub card; MIT and the UP-DSP research license appear among the current datasets. Always read the dataset card and its terms before use.'],
@@ -949,7 +1039,7 @@ function App() {
   return <>
     <a href="#work" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2 focus:text-paper">Skip to content</a>
     <Nav theme={theme} onToggleTheme={toggleTheme} />
-    <main aria-label="SapinSapin AI — Open foundations for Philippine-language AI"><Hero /><Demo /><Problem /><Impact /><Datasets /><Models /><Openness /><Contribute /><PartnersAndFaq /><References /></main>
+    <main aria-label="SapinSapin AI — Open foundations for Philippine-language AI"><Hero /><Demo /><Problem /><Impact /><Datasets /><Models /><Openness /><People /><Contribute /><PartnersAndFaq /><References /></main>
     <Footer />
     <BackToTop />
     {/* The Ask Sappy chat is page chrome rather than demo furniture, so it cannot

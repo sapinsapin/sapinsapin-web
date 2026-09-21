@@ -107,7 +107,7 @@ src/
 ```
 
 `App.jsx` is one file containing every section as its own function component (`Hero`,
-`Demo`, `Problem`, `Impact`, `Datasets`, `Models`, `Openness`, `Contribute`,
+`Demo`, `Problem`, `Impact`, `Datasets`, `Models`, `Openness`, `Contribute`, `People`,
 `PartnersAndFaq`, `Footer`, plus shared helpers like `Cite`, `Reveal`, `CountUp`, `Nav`)
 rather than being split into per-file components. Follow that convention rather than
 introducing a new components directory for section content. `PhilippinesMap.jsx` and

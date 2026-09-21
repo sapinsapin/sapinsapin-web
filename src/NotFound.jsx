@@ -54,6 +54,11 @@ const destinations = [
     keywords: ['contribute', 'contributing', 'join', 'help', 'volunteer', 'community', 'contact', 'support', 'issues'],
   },
   {
+    id: 'people', kind: 'section', title: 'People', href: '/#people',
+    blurb: 'The people behind the work — portraits, roles, and how to reach them.',
+    keywords: ['people', 'team', 'contributors', 'contributor', 'founder', 'creators', 'authors', 'tim santos', 'marc ocampo', 'jc diamante', 'jcdiamante.com', 'about us'],
+  },
+  {
     id: 'faq', kind: 'section', title: 'Partners and FAQ', href: '/#faq',
     blurb: 'Licensing, commercial use, update cadence, roadmap, and the research partners behind the work.',
     keywords: ['faq', 'questions', 'partners', 'commercial', 'roadmap', 'up diliman', 'dsp', 'research'],
