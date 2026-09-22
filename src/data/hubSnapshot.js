@@ -2,54 +2,61 @@
 // Live state of https://huggingface.co/sapinsapin, read from the public Hub API.
 // `downloads` is the Hub's 30-day count, matching the org dashboard Space.
 export const syncedAt = "2026-09-22"
-export const hubTotals = {"models":51,"datasets":9,"modelDownloads":4376,"datasetDownloads":1469}
+export const hubTotals = {"models":47,"datasets":9,"modelDownloads":3440,"datasetDownloads":1488}
 export const hubModels = [
   {
     "name": "whisper-small-fsc",
     "task": "Speech recognition",
-    "downloads": 3173,
+    "downloads": 2453,
     "likes": 0,
     "updated": "2026-08-08"
   },
   {
     "name": "whisper-small-pld-ceb",
     "task": "Speech recognition",
-    "downloads": 118,
+    "downloads": 135,
     "likes": 0,
     "updated": "2026-09-15"
   },
   {
-    "name": "speecht5_tts-pld-fil",
-    "task": "Text to speech",
-    "downloads": 98,
-    "likes": 0,
-    "updated": "2026-08-08"
-  },
-  {
     "name": "whisper-small-fsc-ONNX",
     "task": "Speech recognition",
-    "downloads": 72,
+    "downloads": 78,
     "likes": 0,
     "updated": "2026-09-12"
   },
   {
     "name": "whisper-small-pld-fil",
     "task": "Speech recognition",
-    "downloads": 63,
+    "downloads": 72,
     "likes": 0,
     "updated": "2026-09-15"
   },
   {
-    "name": "speecht5_tts-pld-ceb",
-    "task": "Text to speech",
-    "downloads": 48,
-    "likes": 0,
-    "updated": "2026-08-08"
-  },
-  {
     "name": "whisper-small-pld-ilo",
     "task": "Speech recognition",
-    "downloads": 44,
+    "downloads": 53,
+    "likes": 0,
+    "updated": "2026-09-16"
+  },
+  {
+    "name": "whisper-small-pld-hil",
+    "task": "Speech recognition",
+    "downloads": 52,
+    "likes": 0,
+    "updated": "2026-09-16"
+  },
+  {
+    "name": "whisper-small-pld-eng",
+    "task": "Speech recognition",
+    "downloads": 51,
+    "likes": 0,
+    "updated": "2026-09-16"
+  },
+  {
+    "name": "whisper-small-pld-war",
+    "task": "Speech recognition",
+    "downloads": 45,
     "likes": 0,
     "updated": "2026-09-16"
   },
@@ -61,116 +68,67 @@ export const hubModels = [
     "updated": "2026-04-16"
   },
   {
-    "name": "whisper-small-pld-hil",
-    "task": "Speech recognition",
-    "downloads": 43,
-    "likes": 0,
-    "updated": "2026-09-16"
-  },
-  {
-    "name": "whisper-small-pld-eng",
-    "task": "Speech recognition",
-    "downloads": 42,
-    "likes": 0,
-    "updated": "2026-09-16"
-  },
-  {
-    "name": "whisper-small-pld-war",
-    "task": "Speech recognition",
-    "downloads": 39,
-    "likes": 0,
-    "updated": "2026-09-16"
-  },
-  {
-    "name": "speecht5_tts-fsc",
-    "task": "Text to speech",
-    "downloads": 37,
-    "likes": 0,
-    "updated": "2026-08-07"
-  },
-  {
     "name": "whisper-small-pld-tsg",
     "task": "Speech recognition",
-    "downloads": 37,
+    "downloads": 41,
     "likes": 0,
     "updated": "2026-09-16"
   },
   {
     "name": "whisper-small-pld-pam",
     "task": "Speech recognition",
-    "downloads": 36,
+    "downloads": 39,
     "likes": 0,
     "updated": "2026-09-16"
-  },
-  {
-    "name": "speecht5_tts-pld-eng",
-    "task": "Text to speech",
-    "downloads": 34,
-    "likes": 0,
-    "updated": "2026-08-08"
-  },
-  {
-    "name": "whisper-small-pld-pag",
-    "task": "Speech recognition",
-    "downloads": 32,
-    "likes": 0,
-    "updated": "2026-09-16"
-  },
-  {
-    "name": "speecht5_tts-pld-hil",
-    "task": "Text to speech",
-    "downloads": 31,
-    "likes": 0,
-    "updated": "2026-08-08"
-  },
-  {
-    "name": "speecht5_tts-pld-ilo",
-    "task": "Text to speech",
-    "downloads": 27,
-    "likes": 0,
-    "updated": "2026-08-08"
-  },
-  {
-    "name": "speecht5_tts-pld-pam",
-    "task": "Text to speech",
-    "downloads": 27,
-    "likes": 0,
-    "updated": "2026-08-08"
-  },
-  {
-    "name": "speecht5_tts-pld-tsg",
-    "task": "Text to speech",
-    "downloads": 27,
-    "likes": 0,
-    "updated": "2026-08-08"
-  },
-  {
-    "name": "speecht5_tts-pld-war",
-    "task": "Text to speech",
-    "downloads": 27,
-    "likes": 0,
-    "updated": "2026-08-08"
-  },
-  {
-    "name": "speecht5_tts-pld-bcl",
-    "task": "Text to speech",
-    "downloads": 26,
-    "likes": 0,
-    "updated": "2026-08-08"
-  },
-  {
-    "name": "whisper-small-pld-bcl",
-    "task": "Speech recognition",
-    "downloads": 26,
-    "likes": 0,
-    "updated": "2026-08-12"
   },
   {
     "name": "whisper-large-v3-pld-ceb",
     "task": "Speech recognition",
+    "downloads": 36,
+    "likes": 0,
+    "updated": "2026-09-22"
+  },
+  {
+    "name": "whisper-small-pld-bcl",
+    "task": "Speech recognition",
+    "downloads": 35,
+    "likes": 0,
+    "updated": "2026-08-12"
+  },
+  {
+    "name": "whisper-small-pld-pag",
+    "task": "Speech recognition",
+    "downloads": 35,
+    "likes": 0,
+    "updated": "2026-09-16"
+  },
+  {
+    "name": "whisper-large-v3-pld-pam",
+    "task": "Speech recognition",
+    "downloads": 34,
+    "likes": 0,
+    "updated": "2026-09-22"
+  },
+  {
+    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_ceb",
+    "task": "Speech recognition",
+    "downloads": 33,
+    "likes": 0,
+    "updated": "2026-09-22"
+  },
+  {
+    "name": "speecht5_tts-fsc",
+    "task": "Text to speech",
+    "downloads": 32,
+    "likes": 0,
+    "updated": "2026-08-07"
+  },
+  {
+    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_pam",
+    "task": "Speech recognition",
     "downloads": 26,
     "likes": 0,
-    "updated": "2026-09-18"
+    "updated": "2026-09-22"
   },
   {
     "name": "speecht5_tts-fsc-ONNX",
@@ -180,46 +138,11 @@ export const hubModels = [
     "updated": "2026-09-12"
   },
   {
-    "name": "whisper-large-v3-pld-pam",
-    "task": "Speech recognition",
-    "downloads": 24,
-    "likes": 0,
-    "updated": "2026-09-18"
-  },
-  {
-    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_ceb",
-    "task": "Speech recognition",
-    "downloads": 22,
-    "likes": 0,
-    "updated": "2026-09-18"
-  },
-  {
-    "name": "speecht5_tts-pld-pag",
-    "task": "Text to speech",
-    "downloads": 21,
-    "likes": 0,
-    "updated": "2026-08-08"
-  },
-  {
-    "name": "omniASR_W2V_1B_SSL-ctc-syllable-pld_ceb",
-    "task": "Speech recognition",
-    "downloads": 20,
-    "likes": 0,
-    "updated": "2026-09-18"
-  },
-  {
-    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_pam",
-    "task": "Speech recognition",
-    "downloads": 19,
-    "likes": 0,
-    "updated": "2026-09-18"
-  },
-  {
-    "name": "omniASR_W2V_1B_SSL-ctc-syllable-pld_pam",
+    "name": "omniASR_W2V_7B_SSL-ctc-char-pld_ceb",
     "task": "Speech recognition",
     "downloads": 17,
     "likes": 0,
-    "updated": "2026-09-18"
+    "updated": "2026-09-22"
   },
   {
     "name": "speecht5_vc-pld",
@@ -241,6 +164,34 @@ export const hubModels = [
     "downloads": 14,
     "likes": 0,
     "updated": "2025-12-24"
+  },
+  {
+    "name": "whisper-large-v3-pld-pam-norm",
+    "task": "Speech recognition",
+    "downloads": 14,
+    "likes": 0,
+    "updated": "2026-09-22"
+  },
+  {
+    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_pam-norm",
+    "task": "Speech recognition",
+    "downloads": 14,
+    "likes": 0,
+    "updated": "2026-09-22"
+  },
+  {
+    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_ceb-norm",
+    "task": "Speech recognition",
+    "downloads": 13,
+    "likes": 0,
+    "updated": "2026-09-22"
+  },
+  {
+    "name": "whisper-large-v3-pld-ceb-norm",
+    "task": "Speech recognition",
+    "downloads": 12,
+    "likes": 0,
+    "updated": "2026-09-22"
   },
   {
     "name": "bikoLLM",
@@ -268,104 +219,125 @@ export const hubModels = [
     "task": "Text to speech",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-ceb",
     "task": "Text to speech",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-eng",
     "task": "Text to speech",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-fil",
     "task": "Text to speech",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-hil",
     "task": "Text to speech",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-ilo",
     "task": "Text to speech",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-pam",
     "task": "Text to speech",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-tsg",
     "task": "Text to speech",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-war",
     "task": "Text to speech",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
-    "name": "omniASR_W2V_7B_SSL-ctc-char-pld_ceb",
+    "name": "halo-lid",
+    "task": "Text classification",
+    "downloads": 0,
+    "likes": 0,
+    "updated": "2026-09-22"
+  },
+  {
+    "name": "whisper-large-v3-pld-bcl-norm",
     "task": "Speech recognition",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
-    "name": "whisper-large-v3-pld-ceb-norm",
+    "name": "whisper-large-v3-pld-fil-norm",
     "task": "Speech recognition",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
-    "name": "whisper-large-v3-pld-pam-norm",
+    "name": "whisper-large-v3-pld-hil-norm",
     "task": "Speech recognition",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
-    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_ceb-norm",
+    "name": "whisper-large-v3-pld-ilo-norm",
     "task": "Speech recognition",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
   },
   {
-    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_pam-norm",
+    "name": "whisper-large-v3-pld-pag-norm",
     "task": "Speech recognition",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-21"
+    "updated": "2026-09-22"
+  },
+  {
+    "name": "whisper-large-v3-pld-tsg-norm",
+    "task": "Speech recognition",
+    "downloads": 0,
+    "likes": 0,
+    "updated": "2026-09-22"
+  },
+  {
+    "name": "whisper-large-v3-pld-war-norm",
+    "task": "Speech recognition",
+    "downloads": 0,
+    "likes": 0,
+    "updated": "2026-09-22"
   }
 ]
 export const hubDatasets = [
   {
     "id": "filipinospeechcorpus",
-    "downloads": 590,
+    "downloads": 602,
     "likes": 3,
     "updated": "2026-08-11",
     "gated": false,
@@ -373,17 +345,17 @@ export const hubDatasets = [
   },
   {
     "id": "pld",
-    "downloads": 446,
+    "downloads": 450,
     "likes": 0,
-    "updated": "2026-08-11",
+    "updated": "2026-09-22",
     "gated": false,
     "license": null
   },
   {
     "id": "halo-hil",
-    "downloads": 276,
+    "downloads": 274,
     "likes": 0,
-    "updated": "2026-03-27",
+    "updated": "2026-09-22",
     "gated": false,
     "license": "mit"
   },
@@ -396,20 +368,20 @@ export const hubDatasets = [
     "license": null
   },
   {
+    "id": "halo-tgl",
+    "downloads": 31,
+    "likes": 0,
+    "updated": "2026-03-27",
+    "gated": false,
+    "license": "mit"
+  },
+  {
     "id": "halo-bcl",
     "downloads": 30,
     "likes": 0,
     "updated": "2026-03-27",
     "gated": false,
     "license": null
-  },
-  {
-    "id": "halo-tgl",
-    "downloads": 29,
-    "likes": 0,
-    "updated": "2026-03-27",
-    "gated": false,
-    "license": "mit"
   },
   {
     "id": "kumu-livestream-raw",
@@ -421,7 +393,7 @@ export const hubDatasets = [
   },
   {
     "id": "kumu-livestream-segmented",
-    "downloads": 15,
+    "downloads": 16,
     "likes": 0,
     "updated": "2026-08-11",
     "gated": true,
@@ -429,7 +401,7 @@ export const hubDatasets = [
   },
   {
     "id": "halohalo",
-    "downloads": 11,
+    "downloads": 13,
     "likes": 0,
     "updated": "2026-03-28",
     "gated": false,
