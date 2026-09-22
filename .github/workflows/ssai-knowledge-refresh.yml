@@ -1,0 +1,162 @@
+name: SSAI Knowledge Refresh (RAG candidate)
+
+# Self-maintenance for Sappy's public knowledge base. This workflow only ever
+# touches files under knowledge/ in a branch + pull request — it NEVER
+# deploys anything to Cloudflare AI Search and NEVER auto-merges. Production
+# replacement is a separate, always-manual step documented in
+# docs/SAPPY-RAG-UPDATE-PROCEDURE.md and (if adopted) the separate
+# rag-deploy-production.yml workflow, which requires its own explicit
+# workflow_dispatch trigger and human approval.
+#
+# What this workflow does, in order:
+#   1. Refresh the structured public-state snapshot from live sources
+#      (Hugging Face API, GitHub API, the live site's own source file).
+#   2. Regenerate the candidate RAG Markdown from durable knowledge/base/*.md
+#      + the refreshed snapshot.
+#   3. Run deterministic validation (scripts/rag/validate-rag.mjs).
+#   4. Diff the regenerated candidate against the last committed version.
+#   5. If nothing meaningfully changed, stop — no branch, no PR, no noise.
+#   6. If something changed, open a PR summarizing exactly what changed and
+#      what the validator found, for Marc to review by hand.
+
+on:
+  schedule:
+    # Weekly: SapinSapin's own catalog-sync workflow (sync.yml) already runs
+    # daily and shows the org's own history moves in the order of days-to-a-
+    # couple-of-weeks between meaningful changes (new model/dataset batches),
+    # not hours. A daily cadence would mostly produce empty no-op runs; weekly
+    # keeps the workflow's signal-to-noise reasonable. Re-evaluate this cadence
+    # if the org starts publishing much more frequently.
+    # 06:00 Manila time (22:00 UTC previous day), a low-traffic hour, offset
+    # from sync.yml's own 05:17 Manila schedule to avoid any Hub API overlap.
+    - cron: '0 22 * * 0'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ssai-knowledge-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh-and-propose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Refresh live-source snapshot
+        run: node scripts/rag/refresh-sources.mjs
+
+      - name: Regenerate RAG candidate
+        run: node scripts/rag/generate-rag.mjs
+
+      - name: Validate generated candidate
+        id: validate
+        run: node scripts/rag/validate-rag.mjs
+
+      - name: Check for meaningful changes
+        id: diff
+        run: |
+          # The generated file always has a fresh generated_at timestamp, and
+          # the snapshot always has a fresh generated_at too — neither alone
+          # is a meaningful change. Compare with those two lines excluded, the
+          # same "discard a date-only change" pattern sync.yml already uses.
+          git add -A -- knowledge/
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No tracked files changed at all — nothing to propose."
+            exit 0
+          fi
+          substantive=$(git diff --cached -U0 -- knowledge/generated/ knowledge/snapshots/current-public-state.json \
+            | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' \
+            | grep -Ev 'generated_at' \
+            | grep -Ev '"generated_at"' \
+            || true)
+          # Base/manifest/QA files changing is always substantive (hand-edited).
+          base_changed=$(git diff --cached --name-only -- knowledge/base/ knowledge/rag-sources.yaml knowledge/qa/ || true)
+          if [ -z "$substantive" ] && [ -z "$base_changed" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Only volatile timestamps moved — the underlying facts are unchanged. Discarding."
+            git checkout -- knowledge/
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Meaningful knowledge change detected."
+          fi
+
+      - name: Summarize the change for the PR body
+        if: steps.diff.outputs.changed == 'true'
+        id: summary
+        run: |
+          {
+            echo "summary<<EOF"
+            echo "### What changed"
+            echo
+            echo '```diff'
+            git diff --cached -U1 -- knowledge/snapshots/current-public-state.json knowledge/base/ knowledge/rag-sources.yaml knowledge/qa/ | head -c 6000
+            echo '```'
+            echo
+            echo "### Generated RAG diff (excerpt)"
+            echo
+            echo '```diff'
+            git diff --cached -U1 -- knowledge/generated/ | grep -Ev '^\+generated_at|^\-generated_at' | head -c 6000
+            echo '```'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create branch and commit
+        if: steps.diff.outputs.changed == 'true'
+        id: commit
+        run: |
+          branch="ssai-knowledge-refresh/$(date -u +%Y-%m-%d)"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -b "$branch"
+          git commit -m "Refresh SSAI knowledge candidate ($(date -u +%Y-%m-%d))"
+          git push -u origin "$branch"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Open pull request
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat > /tmp/pr-body.md << 'BODY'
+          Automated knowledge refresh — candidate only, NOT deployed.
+
+          This PR was opened by the `SSAI Knowledge Refresh` workflow. It never
+          touches Cloudflare AI Search and never modifies the production RAG
+          item. Merging this PR only updates the checked-in candidate files
+          under `knowledge/` — a human must still run the separate,
+          explicitly-approved production deployment procedure in
+          `docs/SAPPY-RAG-UPDATE-PROCEDURE.md` before anything reaches Sappy.
+
+          **Validation:** `scripts/rag/validate-rag.mjs` passed (see the
+          workflow run's logs for any human-review warnings it flagged).
+
+          ${{ steps.summary.outputs.summary }}
+
+          ### Review checklist for Marc
+          - [ ] Any license/access-status change matches what the linked Hugging Face card actually shows
+          - [ ] Any team-roster change matches the live site
+          - [ ] No claim reads as stronger than the underlying source supports
+          - [ ] Validator warnings (if any, see workflow logs) have been read
+          - [ ] This PR is merged ONLY as a knowledge-candidate update — production deployment is a separate manual step
+          BODY
+          gh pr create \
+            --title "SSAI knowledge refresh: $(date -u +%Y-%m-%d)" \
+            --body-file /tmp/pr-body.md \
+            --base main \
+            --head "${{ steps.commit.outputs.branch }}" \
+            --label "ssai-rag-candidate" 2>&1 || \
+          echo "::warning title=PR creation failed::gh pr create failed — this usually means 'Allow GitHub Actions to create and approve pull requests' is disabled in repo Settings > Actions > General > Workflow permissions. See docs/SAPPY-RAG-UPDATE-PROCEDURE.md for the one-time fix. The refreshed branch was still pushed and can be turned into a PR manually."

@@ -1,0 +1,191 @@
+# RAG source manifest
+#
+# Machine-readable registry of every source that feeds Sappy's public knowledge
+# base. Follows the authority hierarchy in ssai/docs/KNOWLEDGE-SOURCES.md:
+#   1. current verified infrastructure/repository evidence
+#   2. current first-party SapinSapin website/repo/Hugging Face asset evidence
+#   3. canonical SSAI documentation (ssai/docs/*.md)
+#   4. the RAG-ready snapshot lineage (v1, v2)
+#   5. general research snapshot
+#   6. inference
+#
+# `may_auto_update` controls whether scripts/rag/refresh-sources.mjs is allowed
+# to let this source change facts in knowledge/snapshots/current-public-state.json
+# without a human re-reading the change. Even sources marked true only ever
+# affect the GENERATED CANDIDATE — no source in this file, regardless of tier,
+# is permitted to write to production Cloudflare AI Search. That is a separate,
+# always-manual step (see docs/SAPPY-RAG-UPDATE-PROCEDURE.md).
+
+version: 1
+last_reviewed: "2026-09-22"
+policy_reference: "ssai/docs/KNOWLEDGE-SOURCES.md"
+
+sources:
+  - id: huggingface-org-api
+    name: "Hugging Face organization API (sapinsapin)"
+    type: api
+    url: "https://huggingface.co/api/models?author=sapinsapin&full=true"
+    also: "https://huggingface.co/api/datasets?author=sapinsapin&full=true"
+    authority_tier: 1
+    liveness: live
+    refresh_strategy: "polled by scripts/rag/refresh-sources.mjs on every run"
+    may_auto_update: true
+    human_verification_required: false
+    supports_claim_types:
+      - dataset/model existence and count
+      - license tags (when present on the API)
+      - gated/access status
+      - last-modified dates
+    notes: >
+      Structured, deterministic, no LLM needed. Model license field is
+      routinely null at the API level for this org — the generator must not
+      infer a license when this source returns null; it must render
+      "not stated on the public card."
+
+  - id: huggingface-org-space
+    name: "Hugging Face Space: sapinsapin/halohalo-dashboard"
+    type: api
+    url: "https://huggingface.co/api/spaces?author=sapinsapin"
+    authority_tier: 1
+    liveness: live
+    refresh_strategy: "polled by scripts/rag/refresh-sources.mjs on every run"
+    may_auto_update: true
+    human_verification_required: false
+    supports_claim_types:
+      - existence of the public browser demo
+
+  - id: internetoftim-hf-account
+    name: "Tim Santos personal Hugging Face account (internetoftim)"
+    type: api
+    url: "https://huggingface.co/api/models?author=internetoftim&full=true"
+    authority_tier: 2
+    liveness: live
+    refresh_strategy: "polled by scripts/rag/refresh-sources.mjs on every run"
+    may_auto_update: true
+    human_verification_required: true
+    supports_claim_types:
+      - "existence of related personal-account artifacts (must be labeled personal, not org-catalog)"
+    notes: >
+      Tier 2, not tier 1: this is Tim Santos's personal account, not the
+      sapinsapin org. The generator may note its existence/count changed but
+      must not fold its models into official org catalog counts, and a human
+      should confirm the note's wording still matches the site's own framing
+      ("also publishes on Hugging Face") before a generated candidate ships.
+
+  - id: sapinsapin-web-repo
+    name: "sapinsapin-web GitHub repository (live site source)"
+    type: repository
+    url: "https://github.com/sapinsapin/sapinsapin-web"
+    local_path: "." # this manifest lives inside the repo itself
+    key_files:
+      - "src/App.jsx"           # People roster, FAQ, partner section, references
+      - "src/data/catalog.js"   # editorial dataset/model copy
+      - "src/data/hubSnapshot.js" # generated Hub sync (own separate build-time sync)
+    authority_tier: 1
+    liveness: live
+    refresh_strategy: "git pull + targeted parse by scripts/rag/refresh-sources.mjs on every run"
+    may_auto_update: true
+    human_verification_required: false
+    supports_claim_types:
+      - team roster and roles
+      - FAQ/partner wording
+      - reference citations (press/partner profiles)
+    notes: >
+      Highest-authority first-party source for anything about people/roles,
+      since it's what the project itself publishes about itself. The refresh
+      script parses the `people` array and `references` array directly from
+      src/App.jsx with a regex/AST extraction — see refresh-sources.mjs for
+      the exact method and its failure mode (falls back to the last known
+      snapshot and flags a warning, never silently guesses).
+
+  - id: github-org-repos
+    name: "GitHub organization sapinsapin (repository list)"
+    type: api
+    url: "https://api.github.com/orgs/sapinsapin/repos"
+    authority_tier: 1
+    liveness: live
+    refresh_strategy: "polled by scripts/rag/refresh-sources.mjs on every run (unauthenticated, rate-limited)"
+    may_auto_update: true
+    human_verification_required: false
+    supports_claim_types:
+      - which repositories exist under the org (names only; the RAG does not
+        need private-repo detail and the public API does not return it)
+
+  - id: featherless-partner-profile
+    name: "Featherless AI partner profile of Tim Santos"
+    type: external_page
+    url: "https://featherless.ai (No Language Forgotten partner program)"
+    authority_tier: 3
+    liveness: snapshot
+    refresh_strategy: "not polled automatically — re-check manually if cited facts are questioned"
+    may_auto_update: false
+    human_verification_required: true
+    supports_claim_types:
+      - "attributed background (Tim Santos's prior role, report authorship) — always cite as partner-reported"
+
+  - id: manila-times-profile
+    name: "Manila Times profile of Tim Santos"
+    type: external_page
+    url: "https://www.manilatimes.net/2026/05/24/tmt-newswire/global-ai-expert-tim-santos-leads-strategic-ai-masterclass-for-philippine-business-leaders/2350495"
+    authority_tier: 2
+    liveness: snapshot
+    refresh_strategy: "not polled automatically — press profile, re-check manually if disputed"
+    may_auto_update: false
+    human_verification_required: true
+    supports_claim_types:
+      - "press-corroborated background facts about Tim Santos"
+
+  - id: interview-transcript
+    name: "Supplied interview transcript (Santos, Diamante, Vidon, Alarcon, Lato)"
+    type: document
+    location: "ssai/research/source-snapshots/ (referenced within, not a standalone file)"
+    authority_tier: 4
+    liveness: snapshot
+    refresh_strategy: "static — this transcript will never be re-fetched; new transcripts would be added as new source entries"
+    may_auto_update: false
+    human_verification_required: true
+    supports_claim_types:
+      - "attributed individual perspectives only — never project fact or team-roster status"
+
+  - id: rag-v1-production
+    name: "Production RAG v1 (SapinSapin-knowledge-base-rag-ready.md)"
+    type: document
+    location: "ssai/research/source-snapshots/2026-09-18_SapinSapin-knowledge-base-rag-ready_deployed-to-ai-search.md"
+    authority_tier: 4
+    liveness: snapshot
+    refresh_strategy: "static archival copy — the live production item can be re-downloaded via the AI Search Items API if a fresh comparison copy is ever needed"
+    may_auto_update: false
+    human_verification_required: true
+    supports_claim_types:
+      - "historical baseline for changelog/diff purposes only"
+
+  - id: general-research-kb
+    name: "General SapinSapin research knowledge base (2026-09-18 snapshot)"
+    type: document
+    location: "ssai/research/source-snapshots/2026-09-18_SapinSapin-knowledge-base_general-research.md"
+    authority_tier: 5
+    liveness: snapshot
+    refresh_strategy: "static archival copy"
+    may_auto_update: false
+    human_verification_required: true
+    supports_claim_types:
+      - "narrative/motivational/historical context only — never overrides a live or tier 1-3 source"
+
+  - id: ssai-canonical-docs
+    name: "Canonical SSAI documentation (ssai/docs/*.md)"
+    type: document
+    location: "ssai/docs/"
+    authority_tier: 3
+    liveness: snapshot
+    refresh_strategy: "hand-maintained; treated as authoritative context, not re-derived automatically"
+    may_auto_update: false
+    human_verification_required: false
+    supports_claim_types:
+      - "architecture, resource-map, and operational facts — informs how the RAG describes Sappy's own existence, never the primary source for public catalog facts"
+
+# Fields the generator/validator both read from this file at runtime:
+#   - authority_tier: used to resolve conflicts (lower number wins)
+#   - may_auto_update: gates whether refresh-sources.mjs may write a changed
+#     value into current-public-state.json without a --confirm flag
+#   - human_verification_required: surfaced in the generated PR body as a
+#     checklist item when that source's data changed since the last snapshot

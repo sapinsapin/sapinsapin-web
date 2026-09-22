@@ -1,0 +1,23 @@
+{
+  "_comment": "Durable, hand-maintained editorial descriptions keyed by dataset/model short name (not the full org/name id). Mirrors the sapinsapin-web repo's own catalog.js pattern: prose here rarely changes; counts/licenses/dates are volatile and come from knowledge/snapshots/current-public-state.json instead. If the generator finds an asset in the snapshot with no entry here, it falls back to a generic 'not yet described here' line rather than inventing content — same honesty policy the live site itself uses for newly-published repos.",
+
+  "datasets": {
+    "pld": "Prompted 16 kHz speech, the flagship collection, recorded across nine Philippine languages plus English.",
+    "filipinospeechcorpus": "The Filipino Speech Corpus (Sagum) as segment-level 16 kHz audio — mostly isolated word tokens rather than full sentences.",
+    "kumu-livestream-segmented": "Taglish code-switched livestream speech, segmented for ASR/TTS research.",
+    "kumu-livestream-raw": "Unsegmented Taglish livestream source recordings.",
+    "BantayWika": "A FineWeb-compatible pretraining text corpus derived from UP Sentro ng Wikang Filipino and the UP-DSP Bantay-Wika collection.",
+    "halohalo": "A combined FineWeb-compatible web corpus merging the cleaned halo-tgl, halo-hil, and halo-bcl corpora.",
+    "halo-tgl": "A cleaned web-scraped Tagalog text corpus for LLM pretraining.",
+    "halo-hil": "A cleaned web-scraped Hiligaynon text corpus for LLM pretraining.",
+    "halo-bcl": "A cleaned web-scraped Bikol text corpus for LLM pretraining."
+  },
+
+  "model_family_notes": {
+    "text-generation": "Continually-pretrained or fine-tuned large language models adapted to Filipino/Philippine-language text (e.g. Llama 3.1 and gpt-oss checkpoints continued on Filipino news text, plus a Bikol-focused fine-tune).",
+    "unspecified": "Additional generation/vision-language checkpoints not yet tagged with a Hub pipeline type — check the specific model card for its actual task.",
+    "text-to-speech": "SpeechT5-based text-to-speech fine-tunes, mostly one model per Philippine language trained on the PLD dataset, plus a Filipino Speech Corpus fine-tune with a browser-deployable ONNX export.",
+    "automatic-speech-recognition": "Whisper- and OmniASR-based speech-recognition fine-tunes, mostly one model per Philippine language trained on the PLD dataset, plus Filipino Speech Corpus fine-tunes with browser-deployable ONNX exports.",
+    "audio-to-audio": "Voice-conversion models that re-speak existing audio in a different voice while preserving words and timing."
+  }
+}

@@ -1,0 +1,153 @@
+name: SSAI RAG Production Deployment (manual gate — NOT wired up yet)
+
+# THIS WORKFLOW IS INTENTIONALLY NOT RUNNABLE UNTIL MARC COMPLETES ONE-TIME SETUP.
+# See the "One-time setup required" section in docs/SAPPY-RAG-UPDATE-PROCEDURE.md.
+#
+# It replaces the Cloudflare AI Search production knowledge item for the
+# sappy-knowledge instance. This is the ONLY path in this repo that is even
+# capable of doing that — ssai-knowledge-refresh.yml never touches Cloudflare
+# at all, it only proposes a candidate via PR.
+#
+# Hard safety properties, all enforced below, not just documented:
+#   - workflow_dispatch ONLY. No schedule. No trigger on push/PR/merge.
+#   - Requires the operator to type the exact commit SHA being deployed AND
+#     the literal string "DEPLOY-TO-PRODUCTION" as separate confirmation
+#     inputs — a fat-fingered dispatch with default inputs does nothing.
+#   - Deploys the generated file exactly as committed at that SHA (via
+#     actions/checkout@<sha>), never the live working tree of whatever branch
+#     happens to be checked out — no deploying unreviewed content.
+#   - Runs validate-rag.mjs again at deploy time, on that exact checkout, as a
+#     final gate — a stale or hand-edited candidate cannot slip through.
+#   - Uses the repo's "Production" GitHub Environment, so once Marc adds a
+#     required reviewer to that environment (one-time setup, not done by this
+#     workflow), every run pauses for a human approval click before the
+#     deploy job executes, in addition to the confirmation inputs above.
+#   - Backs up the current production item bytes as a workflow artifact
+#     BEFORE writing anything, and automatically rolls back to that backup if
+#     any post-deploy verification step fails.
+#   - Cloudflare credentials are read only from GitHub Secrets
+#     (secrets.CLOUDFLARE_API_TOKEN, secrets.CLOUDFLARE_ACCOUNT_ID), never
+#     printed, never written into a job summary or artifact.
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'Exact commit SHA to deploy (must match the SHA this run was dispatched against)'
+        required: true
+        type: string
+      confirmation:
+        description: 'Type exactly: DEPLOY-TO-PRODUCTION'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ssai-rag-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      proceed: ${{ steps.check.outputs.proceed }}
+    steps:
+      - name: Verify confirmation inputs
+        id: check
+        run: |
+          if [ "${{ github.event.inputs.confirmation }}" != "DEPLOY-TO-PRODUCTION" ]; then
+            echo "::error::Confirmation string did not match exactly. Refusing to proceed."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          if [ "${{ github.event.inputs.commit_sha }}" != "${{ github.sha }}" ]; then
+            echo "::error::commit_sha input (${{ github.event.inputs.commit_sha }}) does not match the SHA this workflow was actually dispatched against (${{ github.sha }}). Refusing to proceed — this is the guard against deploying the wrong revision."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          echo "proceed=true" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: guard
+    if: needs.guard.outputs.proceed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Requires Marc to configure a required reviewer on this environment for
+    # the approval gate to actually pause the run — see one-time setup notes.
+    environment:
+      name: Production
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.commit_sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Re-validate the exact candidate being deployed
+        run: node scripts/rag/validate-rag.mjs
+
+      - name: Check required Cloudflare credentials are configured
+        id: creds
+        env:
+          CF_TOKEN_SET: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+          CF_ACCOUNT_SET: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+        run: |
+          if [ "$CF_TOKEN_SET" != "true" ] || [ "$CF_ACCOUNT_SET" != "true" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN and/or CLOUDFLARE_ACCOUNT_ID repo secrets are not configured. This is expected until Marc completes one-time setup — see docs/SAPPY-RAG-UPDATE-PROCEDURE.md. Refusing to proceed."
+            exit 1
+          fi
+
+      - name: Backup current production item
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "Step intentionally left as a documented placeholder."
+          echo "See docs/SAPPY-RAG-UPDATE-PROCEDURE.md step 1 for the exact"
+          echo "GET request against the AI Search Items API and where the"
+          echo "backup artifact should be written before any PUT is attempted."
+          exit 1
+
+      - name: Upload/update production item (same key, PUT)
+        run: |
+          echo "Not implemented — see docs/SAPPY-RAG-UPDATE-PROCEDURE.md step 4."
+          echo "This job intentionally fails closed rather than performing a"
+          echo "real production write until Marc has reviewed the exact PUT"
+          echo "call, the backup step above is implemented and tested against"
+          echo "a non-production item, and the CLOUDFLARE_API_TOKEN secret"
+          echo "scope has been confirmed as least-privilege (AI Search item"
+          echo "management only)."
+          exit 1
+
+      - name: Wait for indexing / verify item + chunk status
+        run: |
+          echo "Not implemented — see docs/SAPPY-RAG-UPDATE-PROCEDURE.md step 5-6."
+          exit 1
+
+      - name: Run retrieval QA
+        run: |
+          echo "Not implemented — see docs/SAPPY-RAG-UPDATE-PROCEDURE.md step 7."
+          exit 1
+
+      - name: Run Sappy end-to-end QA
+        run: |
+          echo "Not implemented — see docs/SAPPY-RAG-UPDATE-PROCEDURE.md step 8."
+          exit 1
+
+      - name: Automatic rollback on any prior step failure
+        if: failure()
+        run: |
+          echo "Not implemented — see docs/SAPPY-RAG-UPDATE-PROCEDURE.md step 9."
+          echo "Intent: re-PUT the backed-up pre-change bytes to the same key,"
+          echo "then re-verify, so a failed deploy never leaves production in"
+          echo "a partially-updated or broken state."
