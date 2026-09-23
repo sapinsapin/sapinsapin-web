@@ -97,7 +97,7 @@ const people = [
     image: '/portraits/marc.webp',
     links: [
       { kind: 'Website', href: 'https://marcocampo.com' },
-      { kind: 'LinkedIn', href: 'https://www.linkedin.com/in/mnco25/' },
+      { kind: 'LinkedIn', href: 'https://www.linkedin.com/in/marcxxv/' },
       { kind: 'Hugging Face', href: 'https://huggingface.co/marcxxv' },
     ],
   },
