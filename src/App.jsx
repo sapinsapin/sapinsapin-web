@@ -5,6 +5,7 @@ import { ArrowDown, ArrowUp, ArrowUpRight, CheckIcon, Code, CopyIcon, Dataset, D
 import ThemeToggle from './components/ThemeToggle'
 import DeferredOrb from './components/DeferredOrb'
 import PhilippinesMap from './components/PhilippinesMap'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import { useTheme } from './lib/theme'
 import { describeModel } from './data/modelNotes'
 import { languages as demoLanguages } from './data/spaceManifest'
@@ -1049,6 +1050,7 @@ function App() {
     <DeferredOrb load={() => import('./components/ChatWidget')} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(datasetsSchema) }} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(faqSchema) }} />
+    <SpeedInsights />
   </>
 }
 

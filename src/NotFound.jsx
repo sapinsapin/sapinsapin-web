@@ -4,6 +4,7 @@ import SignalTrace from './components/SignalTrace'
 import ThemeToggle from './components/ThemeToggle'
 import DeferredOrb from './components/DeferredOrb'
 import { useTheme } from './lib/theme'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 /* The 404 document. A separate Vite entry rather than a client-side route:
    the site is static with no router, so Vercel serves dist/404.html for any
@@ -426,5 +427,6 @@ export default function NotFound() {
 
     <Footer />
     <DeferredOrb load={() => import('./components/ChatWidget')} />
+    <SpeedInsights />
   </>
 }
