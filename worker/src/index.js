@@ -1,6 +1,7 @@
 const DISCORD_API = "https://discord.com/api/v10";
 
-const SAPPY_MODEL = "@cf/google/gemma-4-26b-a4b-it";
+const WORKERS_AI_MODEL = "@cf/google/gemma-4-26b-a4b-it";
+const NYO_CHAT_URL = "https://llm.nyolab.ai/api/public/v1/chat/completions";
 
 const MAX_DISCORD_RESPONSE_LENGTH = 1950;
 
@@ -1048,21 +1049,58 @@ function isSappySelfQuestion(question) {
 // MODEL RUNNER
 // ─────────────────────────────────────────────
 
+class SappyModelError extends Error {
+  constructor(status = 503, retryAfter) {
+    super(`Sappy model unavailable (${status})`);
+    this.status = status;
+    this.retryAfter = retryAfter;
+  }
+}
+
 async function runSappyModel(
   messages,
   env
 ) {
-  const response =
-    await env.AI.run(
-      SAPPY_MODEL,
-      {
-        messages,
-      }
-    );
+  if (env.SAPPY_MODEL_PROVIDER === "workers_ai") {
+    return extractModelAnswer(await env.AI.run(WORKERS_AI_MODEL, { messages }));
+  }
+  if (env.SAPPY_MODEL_PROVIDER !== "nyo" || !env.NYO_API_KEY || !env.SAPPY_NYO_MODEL) {
+    throw new SappyModelError();
+  }
 
-  return extractModelAnswer(
-    response
-  );
+  const response = await fetch(NYO_CHAT_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.NYO_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: env.SAPPY_NYO_MODEL,
+      messages,
+      max_tokens: 2048,
+      stream: false,
+    }),
+    signal: AbortSignal.timeout(45_000),
+  });
+
+  if (response.status === 422) {
+    const refusal = await response.json().catch(() => null);
+    if (refusal?.error?.type === "guardrail_rejected") {
+      return String(refusal.error.message || "I can't help with that request.").slice(0, 300);
+    }
+  }
+  if (!response.ok) {
+    const retryAfter = response.headers.get("Retry-After");
+    throw new SappyModelError(
+      response.status === 429 ? 429 : 503,
+      retryAfter && /^\d{1,4}$/.test(retryAfter) ? retryAfter : undefined
+    );
+  }
+  const answer = (await response.json())?.choices?.[0]?.message?.content;
+  if (typeof answer !== "string" || !answer.trim()) {
+    throw new SappyModelError();
+  }
+  return answer;
 }
 
 
@@ -2318,31 +2356,20 @@ export default {
         },
       }, { headers: corsHeaders });
     } catch (error) {
-      console.error(
-        "Sappy error:",
-        error
-      );
-
-
-      // ▲ CORS on the error response too, so the browser can read it.
+      console.error("Sappy error:", error instanceof SappyModelError ? error.message : error);
       return Response.json(
+        { error: error instanceof SappyModelError && error.status === 429
+          ? "Sappy is busy. Please try again shortly."
+          : "Sappy is temporarily unavailable. Please try again later." },
         {
-          error:
-            "Sappy ran into a problem.",
-
-          details:
-            String(
-              error?.message ??
-              error
-            ),
-        },
-        {
-          status:
-            500,
-
-          headers: corsHeaders,
+          status: error instanceof SappyModelError ? error.status : 503,
+          headers: {
+            ...corsHeaders,
+            ...(error instanceof SappyModelError && error.retryAfter
+              ? { "Retry-After": error.retryAfter } : {}),
+          },
         }
       );
     }
   },
-};
+};
