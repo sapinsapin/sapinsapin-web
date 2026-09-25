@@ -1045,6 +1045,31 @@ function isSappySelfQuestion(question) {
 }
 
 
+function isSappyModelQuestion(question) {
+  const text = String(question ?? "").trim();
+  const projectTask = /\b(?:speech|recognition|transcription|tts|voice|audio|synthesis|train|training|fine-tun\w*|dataset|translation|research)\b/i.test(text);
+  const excludesSpeech = /\b(?:not|rather than|instead of)\s+(?:the\s+)?(?:speech|recognition|transcription|tts|voice|audio)\s+model\b/i.test(text);
+  if (projectTask && !excludesSpeech) {
+    return false;
+  }
+  const self = /\b(?:you|your|sappy|this bot|this assistant)\b/i.test(text);
+  const model = /\b(?:model|llm|nyo|glm|gemma)\b/i.test(text);
+  const operation = /\b(?:run|runs|running|use|uses|using|power|powers|powered|powering|based|behind)\b/i.test(text);
+  const possessive = /\b(?:your|sappy's)\s+(?:current\s+)?(?:model|llm)\b/i.test(text);
+  const directProvider = /^\s*(?:are|is)\s+(?:you|sappy)\s+(?:using\s+)?(?:nyo|glm|gemma)\b/i.test(text);
+  return self && model && (operation || possessive || directProvider || /\bwhat (?:ai )?model (?:are you|is sappy)\b/i.test(text));
+}
+
+function describeSappyModel(env) {
+  if (env.SAPPY_MODEL_PROVIDER === "nyo" && env.SAPPY_NYO_MODEL && env.NYO_API_KEY) {
+    return `I'm Sappy. My answer-generation route is NYO's API router with the public model ID \`${env.SAPPY_NYO_MODEL}\`. NYO controls the underlying backend, so I can't verify a more specific build from here.`;
+  }
+  if (env.SAPPY_MODEL_PROVIDER === "workers_ai") {
+    return `I'm Sappy. My answer-generation model is \`${WORKERS_AI_MODEL}\` through Cloudflare Workers AI.`;
+  }
+  return "I'm Sappy, but I can't verify an active answer-generation model right now.";
+}
+
 // ─────────────────────────────────────────────
 // MODEL RUNNER
 // ─────────────────────────────────────────────
@@ -1440,6 +1465,14 @@ async function answerSappyQuestion(
     };
   }
 
+
+  if (isSappyModelQuestion(cleanQuestion)) {
+    return {
+      answer: describeSappyModel(env),
+      chunksFound: 0,
+      mode: "self",
+    };
+  }
 
   // ───────────────────────────────────────────
   // SIMPLE GREETING
