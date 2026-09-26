@@ -144,8 +144,8 @@ test('speech and training model questions are not misidentified as the chat mode
 test('Discord mention path discloses the same runtime model', async () => {
   globalThis.fetch = async () => { throw new Error('model identity should not need a provider request') }
   const response = await worker.fetch(
-    new Request('https://sappy-ai.primary-bd7.workers.dev/test-message?q=What%20model%20powers%20you%3F'),
-    env({ DISCORD_APPLICATION_ID: '1550091743003811842' }),
+    new Request('https://sappy-ai.primary-bd7.workers.dev/test-message?q=What%20model%20powers%20you%3F', { headers: { 'X-Sappy-Secret': 'test_only_bridge_secret' } }),
+    env({ DISCORD_APPLICATION_ID: '1550091743003811842', BOTGHOST_SHARED_SECRET: 'test_only_bridge_secret' }),
     {},
   )
   assert.equal(response.status, 200)
@@ -189,4 +189,55 @@ test('Workers AI remains an explicit rollback mode', async () => {
   assert.equal(response.status, 200)
   assert.equal((await response.json()).answer, 'Gemma answered.')
   assert.equal(calledModel, '@cf/google/gemma-4-26b-a4b-it')
+})
+
+test('simple Filipino greeting and thanks use natural Filipino replies', async () => {
+  globalThis.fetch = async () => { throw new Error('short social replies should not call NYO') }
+  for (const [question, expected] of [
+    ['Kumusta?', /Kumusta|Kamusta/i],
+    ['Salamat!', /Walang anuman/i],
+  ]) {
+    const response = await worker.fetch(request(question), env(), {})
+    assert.equal(response.status, 200)
+    const body = await response.json()
+    assert.equal(body.mode, 'conversation')
+    assert.match(body.answer, expected)
+  }
+})
+
+test('model instructions match the user language without forcing deep or formal Tagalog', async () => {
+  let messages
+  globalThis.fetch = async (_url, options) => {
+    messages = JSON.parse(options.body).messages
+    return Response.json({ choices: [{ message: { content: 'Maikling sagot.' } }] })
+  }
+  const response = await worker.fetch(request('Ano ang ginagawa ng SapinSapin AI?'), env(), {})
+  assert.equal(response.status, 200)
+  assert.equal((await response.json()).mode, 'project_rag')
+  const system = messages.find(message => message.role === 'system').content
+  assert.match(system, /respond in the user(?:'s)? language/i)
+  assert.match(system, /Taglish/i)
+  assert.match(system, /avoid overly formal or deep Filipino/i)
+})
+
+test('Filipino question about Sappy model is disclosed deterministically in Filipino', async () => {
+  globalThis.fetch = async () => { throw new Error('self model should not call NYO or web search') }
+  const response = await worker.fetch(request('Anong model ang gamit mo?'), env(), {})
+  const body = await response.json()
+  assert.equal(body.mode, 'self')
+  assert.match(body.answer, /NYO/)
+  assert.match(body.answer, /glm-5\.3-flash/)
+  assert.match(body.answer, /gamit|sagot|modelo/i)
+})
+
+test('Filipino self-description uses self mode rather than searching the web', async () => {
+  let calls = 0
+  globalThis.fetch = async (url) => {
+    assert.equal(String(url), 'https://llm.nyolab.ai/api/public/v1/chat/completions')
+    calls++
+    return Response.json({ choices: [{ message: { content: 'Ako si Sappy.' } }] })
+  }
+  const response = await worker.fetch(request('Sino ka?'), env(), {})
+  assert.equal((await response.json()).mode, 'self')
+  assert.equal(calls, 1)
 })
