@@ -1,0 +1,818 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-22T15:44:12.657Z",
+  "sources_manifest_ref": "knowledge/rag-sources.yaml",
+  "totals": {
+    "models": 51,
+    "datasets": 9
+  },
+  "datasets": [
+    {
+      "id": "sapinsapin/halo-tgl",
+      "name": "halo-tgl",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-03-27T19:47:06.000Z",
+      "license": "mit",
+      "license_name": null,
+      "languages": [
+        "tl"
+      ]
+    },
+    {
+      "id": "sapinsapin/halo-bcl",
+      "name": "halo-bcl",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-03-27T19:45:53.000Z",
+      "license": null,
+      "license_name": null,
+      "languages": null
+    },
+    {
+      "id": "sapinsapin/halo-hil",
+      "name": "halo-hil",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-03-27T19:35:32.000Z",
+      "license": "mit",
+      "license_name": null,
+      "languages": [
+        "hil"
+      ]
+    },
+    {
+      "id": "sapinsapin/BantayWika",
+      "name": "BantayWika",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-03-14T03:55:45.000Z",
+      "license": null,
+      "license_name": null,
+      "languages": [
+        "fil",
+        "ceb",
+        "ilo"
+      ]
+    },
+    {
+      "id": "sapinsapin/filipinospeechcorpus",
+      "name": "filipinospeechcorpus",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-11T14:00:41.000Z",
+      "license": "mit",
+      "license_name": null,
+      "languages": [
+        "fil",
+        "tl"
+      ]
+    },
+    {
+      "id": "sapinsapin/halohalo",
+      "name": "halohalo",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-03-28T04:17:53.000Z",
+      "license": null,
+      "license_name": null,
+      "languages": null
+    },
+    {
+      "id": "sapinsapin/kumu-livestream-segmented",
+      "name": "kumu-livestream-segmented",
+      "gated": "auto-gate",
+      "private": false,
+      "lastModified": "2026-08-11T14:00:43.000Z",
+      "license": null,
+      "license_name": null,
+      "languages": [
+        "tl",
+        "fil",
+        "en"
+      ]
+    },
+    {
+      "id": "sapinsapin/pld",
+      "name": "pld",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-11T14:00:44.000Z",
+      "license": "other",
+      "license_name": "up-dsp-research",
+      "languages": [
+        "bcl",
+        "ceb",
+        "eng",
+        "fil",
+        "hil",
+        "ilo",
+        "pag",
+        "pam",
+        "tsg",
+        "war"
+      ]
+    },
+    {
+      "id": "sapinsapin/kumu-livestream-raw",
+      "name": "kumu-livestream-raw",
+      "gated": "auto-gate",
+      "private": false,
+      "lastModified": "2026-09-12T06:04:24.000Z",
+      "license": null,
+      "license_name": null,
+      "languages": [
+        "tl",
+        "fil",
+        "en"
+      ]
+    }
+  ],
+  "models": [
+    {
+      "id": "sapinsapin/qwen3vl-balitanlp-news-writer",
+      "name": "qwen3vl-balitanlp-news-writer",
+      "pipeline_tag": null,
+      "gated": false,
+      "private": false,
+      "lastModified": "2025-12-14T07:12:18.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/llama31-8b-balitanlp-cpt",
+      "name": "llama31-8b-balitanlp-cpt",
+      "pipeline_tag": "text-generation",
+      "gated": false,
+      "private": false,
+      "lastModified": "2025-12-24T14:08:34.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/llama31-8b-balitanlp-IT",
+      "name": "llama31-8b-balitanlp-IT",
+      "pipeline_tag": null,
+      "gated": false,
+      "private": false,
+      "lastModified": "2025-12-16T02:12:32.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/gpt-oss-20b-balitanlp-cpt",
+      "name": "gpt-oss-20b-balitanlp-cpt",
+      "pipeline_tag": "text-generation",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-04-16T14:26:05.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/bikoLLM",
+      "name": "bikoLLM",
+      "pipeline_tag": "text-generation",
+      "gated": false,
+      "private": false,
+      "lastModified": "2025-12-28T00:36:08.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_tts-fsc",
+      "name": "speecht5_tts-fsc",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-07T23:23:31.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-fsc",
+      "name": "whisper-small-fsc",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-08T11:46:00.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_tts-pld-bcl",
+      "name": "speecht5_tts-pld-bcl",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-08T14:49:53.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_tts-pld-ceb",
+      "name": "speecht5_tts-pld-ceb",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-08T15:29:19.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_tts-pld-eng",
+      "name": "speecht5_tts-pld-eng",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-08T16:13:02.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_tts-pld-fil",
+      "name": "speecht5_tts-pld-fil",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-08T16:49:56.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_tts-pld-hil",
+      "name": "speecht5_tts-pld-hil",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-08T17:26:35.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_tts-pld-ilo",
+      "name": "speecht5_tts-pld-ilo",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-08T18:06:51.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_tts-pld-pag",
+      "name": "speecht5_tts-pld-pag",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-08T18:44:41.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_tts-pld-pam",
+      "name": "speecht5_tts-pld-pam",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-08T19:22:20.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_tts-pld-tsg",
+      "name": "speecht5_tts-pld-tsg",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-08T19:57:31.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_tts-pld-war",
+      "name": "speecht5_tts-pld-war",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-08T20:33:55.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_vc-pld",
+      "name": "speecht5_vc-pld",
+      "pipeline_tag": "audio-to-audio",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-08T22:36:53.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-pld-bcl",
+      "name": "whisper-small-pld-bcl",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-08-12T12:53:59.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-pld-ceb",
+      "name": "whisper-small-pld-ceb",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-15T08:40:34.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-pld-eng",
+      "name": "whisper-small-pld-eng",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-16T09:18:19.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-pld-fil",
+      "name": "whisper-small-pld-fil",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-15T12:26:58.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-pld-hil",
+      "name": "whisper-small-pld-hil",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-16T12:08:18.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-pld-ilo",
+      "name": "whisper-small-pld-ilo",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-16T15:05:20.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-pld-pag",
+      "name": "whisper-small-pld-pag",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-16T17:42:50.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-pld-pam",
+      "name": "whisper-small-pld-pam",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-16T03:50:28.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-pld-tsg",
+      "name": "whisper-small-pld-tsg",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-16T20:14:40.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-pld-war",
+      "name": "whisper-small-pld-war",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-16T01:19:33.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/speecht5_tts-fsc-ONNX",
+      "name": "speecht5_tts-fsc-ONNX",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-12T06:08:54.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-fsc-ONNX",
+      "name": "whisper-small-fsc-ONNX",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-12T06:06:43.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-small-fsc-pld-fil",
+      "name": "whisper-small-fsc-pld-fil",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-16T13:34:22.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-large-v3-pld-ceb",
+      "name": "whisper-large-v3-pld-ceb",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-18T06:45:16.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-large-v3-pld-pam",
+      "name": "whisper-large-v3-pld-pam",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-18T06:45:47.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_ceb",
+      "name": "omniASR_W2V_1B_SSL-ctc-char-pld_ceb",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-18T06:48:17.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_pam",
+      "name": "omniASR_W2V_1B_SSL-ctc-char-pld_pam",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-18T06:50:42.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/omniASR_W2V_1B_SSL-ctc-syllable-pld_ceb",
+      "name": "omniASR_W2V_1B_SSL-ctc-syllable-pld_ceb",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-18T06:51:07.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/omniASR_W2V_1B_SSL-ctc-syllable-pld_pam",
+      "name": "omniASR_W2V_1B_SSL-ctc-syllable-pld_pam",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-18T06:54:04.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/orpheus-3b-0.1-pretrained-char-pld-bcl",
+      "name": "orpheus-3b-0.1-pretrained-char-pld-bcl",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T14:07:33.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/orpheus-3b-0.1-pretrained-char-pld-ceb",
+      "name": "orpheus-3b-0.1-pretrained-char-pld-ceb",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T14:07:39.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/orpheus-3b-0.1-pretrained-char-pld-eng",
+      "name": "orpheus-3b-0.1-pretrained-char-pld-eng",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T14:07:46.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/orpheus-3b-0.1-pretrained-char-pld-fil",
+      "name": "orpheus-3b-0.1-pretrained-char-pld-fil",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T14:07:52.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/orpheus-3b-0.1-pretrained-char-pld-hil",
+      "name": "orpheus-3b-0.1-pretrained-char-pld-hil",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T14:08:00.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/orpheus-3b-0.1-pretrained-char-pld-ilo",
+      "name": "orpheus-3b-0.1-pretrained-char-pld-ilo",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T14:08:07.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/orpheus-3b-0.1-pretrained-char-pld-pam",
+      "name": "orpheus-3b-0.1-pretrained-char-pld-pam",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T14:08:25.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/orpheus-3b-0.1-pretrained-char-pld-tsg",
+      "name": "orpheus-3b-0.1-pretrained-char-pld-tsg",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T14:08:32.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/orpheus-3b-0.1-pretrained-char-pld-war",
+      "name": "orpheus-3b-0.1-pretrained-char-pld-war",
+      "pipeline_tag": "text-to-speech",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T14:08:39.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/omniASR_W2V_7B_SSL-ctc-char-pld_ceb",
+      "name": "omniASR_W2V_7B_SSL-ctc-char-pld_ceb",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T14:10:19.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-large-v3-pld-ceb-norm",
+      "name": "whisper-large-v3-pld-ceb-norm",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T23:23:54.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/whisper-large-v3-pld-pam-norm",
+      "name": "whisper-large-v3-pld-pam-norm",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T23:24:32.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_ceb-norm",
+      "name": "omniASR_W2V_1B_SSL-ctc-char-pld_ceb-norm",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T23:27:03.000Z",
+      "license": null
+    },
+    {
+      "id": "sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_pam-norm",
+      "name": "omniASR_W2V_1B_SSL-ctc-char-pld_pam-norm",
+      "pipeline_tag": "automatic-speech-recognition",
+      "gated": false,
+      "private": false,
+      "lastModified": "2026-09-21T23:27:30.000Z",
+      "license": null
+    }
+  ],
+  "spaces": [
+    {
+      "id": "sapinsapin/halohalo-dashboard",
+      "sdk": "gradio",
+      "createdAt": "2025-12-30T16:53:44.000Z"
+    }
+  ],
+  "internetoftim_personal_models": [
+    {
+      "id": "internetoftim/upload_test",
+      "name": "upload_test",
+      "lastModified": "2022-03-14T18:24:09.000Z"
+    },
+    {
+      "id": "internetoftim/demo",
+      "name": "demo",
+      "lastModified": "2022-03-17T12:22:09.000Z"
+    },
+    {
+      "id": "internetoftim/pushit",
+      "name": "pushit",
+      "lastModified": "2022-03-16T18:24:08.000Z"
+    },
+    {
+      "id": "internetoftim/BERT-Finetuning-Demo",
+      "name": "BERT-Finetuning-Demo",
+      "lastModified": "2022-04-02T17:32:16.000Z"
+    },
+    {
+      "id": "internetoftim/bert-large-uncased-squad",
+      "name": "bert-large-uncased-squad",
+      "lastModified": "2022-04-01T18:11:31.000Z"
+    },
+    {
+      "id": "internetoftim/roberta-base-finetuned-cola",
+      "name": "roberta-base-finetuned-cola",
+      "lastModified": "2022-08-02T20:59:59.000Z"
+    },
+    {
+      "id": "internetoftim/test-pth",
+      "name": "test-pth",
+      "lastModified": "2022-08-10T11:57:02.000Z"
+    },
+    {
+      "id": "internetoftim/gpt2-finetuned-wikitext2",
+      "name": "gpt2-finetuned-wikitext2",
+      "lastModified": "2022-11-11T12:40:27.000Z"
+    },
+    {
+      "id": "internetoftim/gc-sd2",
+      "name": "gc-sd2",
+      "lastModified": "2023-06-14T07:46:40.000Z"
+    },
+    {
+      "id": "internetoftim/dino-vitb16-eurosat",
+      "name": "dino-vitb16-eurosat",
+      "lastModified": "2023-06-22T04:59:39.000Z"
+    },
+    {
+      "id": "internetoftim/dinov2-base",
+      "name": "dinov2-base",
+      "lastModified": "2023-06-21T23:56:34.000Z"
+    },
+    {
+      "id": "internetoftim/dinov2-base-eurosat",
+      "name": "dinov2-base-eurosat",
+      "lastModified": "2023-06-29T12:59:18.000Z"
+    },
+    {
+      "id": "internetoftim/dinov1-base-eurosat",
+      "name": "dinov1-base-eurosat",
+      "lastModified": "2023-06-30T00:20:42.000Z"
+    },
+    {
+      "id": "internetoftim/gpt-oss-20b-balitanlp-cpt-mxfp4-fsdp",
+      "name": "gpt-oss-20b-balitanlp-cpt-mxfp4-fsdp",
+      "lastModified": "2025-12-23T11:13:28.000Z"
+    },
+    {
+      "id": "internetoftim/llama31-8b-balitanlp-deepspeed-cpt",
+      "name": "llama31-8b-balitanlp-deepspeed-cpt",
+      "lastModified": "2025-12-24T11:49:09.000Z"
+    },
+    {
+      "id": "internetoftim/llama31-8b-balitanlp-sweep-fanciful-sweep-2",
+      "name": "llama31-8b-balitanlp-sweep-fanciful-sweep-2",
+      "lastModified": "2025-12-25T11:05:12.000Z"
+    },
+    {
+      "id": "internetoftim/gpt-oss-20b-balitanlp-sweep-distinctive-sweep-1",
+      "name": "gpt-oss-20b-balitanlp-sweep-distinctive-sweep-1",
+      "lastModified": "2025-12-25T11:38:29.000Z"
+    },
+    {
+      "id": "internetoftim/llama31-8b-balitanlp-cpt",
+      "name": "llama31-8b-balitanlp-cpt",
+      "lastModified": "2025-12-28T17:35:37.000Z"
+    },
+    {
+      "id": "internetoftim/gpt-oss-20b-balitanlp-cpt",
+      "name": "gpt-oss-20b-balitanlp-cpt",
+      "lastModified": "2026-01-20T18:51:30.000Z"
+    },
+    {
+      "id": "internetoftim/gpt-oss-20b-balitanlp-cpt-GGUF",
+      "name": "gpt-oss-20b-balitanlp-cpt-GGUF",
+      "lastModified": "2026-05-18T07:45:44.000Z"
+    },
+    {
+      "id": "internetoftim/Kimi-VL-A3B-Instruct-mlx-4bit",
+      "name": "Kimi-VL-A3B-Instruct-mlx-4bit",
+      "lastModified": "2026-08-08T12:10:50.000Z"
+    },
+    {
+      "id": "internetoftim/whisper-small-pld-fil-ONNX",
+      "name": "whisper-small-pld-fil-ONNX",
+      "lastModified": "2026-09-12T23:42:00.000Z"
+    },
+    {
+      "id": "internetoftim/speecht5_tts-pld-fil-ONNX",
+      "name": "speecht5_tts-pld-fil-ONNX",
+      "lastModified": "2026-09-12T23:40:44.000Z"
+    }
+  ],
+  "github_repos": [
+    {
+      "name": "halohalo",
+      "private": false,
+      "archived": false,
+      "description": "Pre-training dataset for Philippine Languages"
+    },
+    {
+      "name": "webllm-assistant",
+      "private": false,
+      "archived": false,
+      "description": null
+    },
+    {
+      "name": "sapinsapin-web",
+      "private": false,
+      "archived": false,
+      "description": null
+    }
+  ],
+  "team": [
+    {
+      "name": "Tim Santos",
+      "role": "Founder",
+      "links": [
+        {
+          "kind": "LinkedIn",
+          "href": "https://www.linkedin.com/in/internetoftim/"
+        },
+        {
+          "kind": "Hugging Face",
+          "href": "https://huggingface.co/internetoftim"
+        }
+      ]
+    },
+    {
+      "name": "Marc Ocampo",
+      "role": "Core team",
+      "links": [
+        {
+          "kind": "Website",
+          "href": "https://marcocampo.com"
+        },
+        {
+          "kind": "LinkedIn",
+          "href": "https://www.linkedin.com/in/mnco25/"
+        },
+        {
+          "kind": "Hugging Face",
+          "href": "https://huggingface.co/marcxxv"
+        }
+      ]
+    },
+    {
+      "name": "JC Diamante",
+      "role": "Core team",
+      "links": [
+        {
+          "kind": "Website",
+          "href": "https://jcdiamante.com"
+        },
+        {
+          "kind": "LinkedIn",
+          "href": "https://www.linkedin.com/in/jcdiamante/"
+        },
+        {
+          "kind": "Hugging Face",
+          "href": "https://huggingface.co/zeraphim"
+        }
+      ]
+    }
+  ],
+  "site_references": [
+    {
+      "id": "joshi",
+      "title": "The State and Fate of Linguistic Diversity and Inclusion in the NLP World",
+      "authors": "Joshi, Santy, Budhiraja, Bali & Choudhury",
+      "where": "ACL 2020",
+      "href": "https://aclanthology.org/2020.acl-main.560/"
+    },
+    {
+      "id": "blasi",
+      "title": "Systematic Inequalities in Language Technology Performance across the World’s Languages",
+      "authors": "Blasi, Anastasopoulos & Neubig",
+      "where": "ACL 2022",
+      "href": "https://aclanthology.org/2022.acl-long.376/"
+    },
+    {
+      "id": "ethnologue",
+      "title": "Languages of the Philippines",
+      "authors": "Ethnologue (SIL International)",
+      "where": "Country profile",
+      "href": "https://www.ethnologue.com/country/PH/"
+    },
+    {
+      "id": "initiative",
+      "title": "The Sapin-Sapin initiative — Sariling AI PINas",
+      "authors": "Tim Santos",
+      "where": "Announcement, 2026",
+      "href": "https://www.linkedin.com/posts/internetoftim_currently-in-ai-engineer-singapore-will-activity-7461251671738978304-eazx/"
+    }
+  ]
+}

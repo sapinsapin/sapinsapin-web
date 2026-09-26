@@ -1,0 +1,90 @@
+{
+  "_comment": "Maintained retrieval-oriented QA test set for the generated RAG candidate. Used by scripts/rag/validate-rag.mjs for keyword-presence sanity checks (a cheap, deterministic proxy for 'is this answerable at all'), and intended for human/manual re-verification against live AI Search after deployment (see docs/SAPPY-RAG-UPDATE-PROCEDURE.md step 7). Not a substitute for that live retrieval test — vector retrieval quality cannot be validated without an actual AI Search instance.",
+
+  "questions": [
+    {
+      "id": "what-is-sapinsapin",
+      "question": "What is SapinSapin AI?",
+      "must_mention_any": ["open research initiative", "Philippine languages", "datasets"],
+      "must_not_mention": ["Marc founded", "Marc leads", "government-deployed"]
+    },
+    {
+      "id": "who-leads",
+      "question": "Who leads SapinSapin AI / who is on the team?",
+      "must_mention_any": ["Tim Santos", "Founder"],
+      "must_not_mention": ["Marc Ocampo — Founder", "Marc founded"]
+    },
+    {
+      "id": "who-is-marc",
+      "question": "Who is Marc Ocampo?",
+      "must_mention_any": ["Marc Ocampo", "Core team"],
+      "must_not_mention": ["Marc Ocampo — Founder", "Marc founded SapinSapin"]
+    },
+    {
+      "id": "supported-languages",
+      "question": "What languages does SapinSapin AI support?",
+      "must_mention_any": ["Bikol", "Cebuano", "Tagalog", "Hiligaynon"],
+      "must_not_mention": ["fully supports all Philippine languages", "supports every Filipino language"]
+    },
+    {
+      "id": "datasets",
+      "question": "What datasets does SapinSapin AI publish?",
+      "must_mention_any": ["pld", "filipinospeechcorpus", "halohalo"],
+      "must_not_mention": []
+    },
+    {
+      "id": "models",
+      "question": "What models has SapinSapin AI released?",
+      "must_mention_any": ["Whisper", "SpeechT5", "text generation", "speech recognition"],
+      "must_not_mention": ["is state of the art", "is production-ready"]
+    },
+    {
+      "id": "licensing",
+      "question": "What license is the data under? Can I use it commercially?",
+      "must_mention_any": ["MIT", "not stated on the public card", "up-dsp-research", "license"],
+      "must_not_mention": ["all data is free to use", "no restrictions apply"]
+    },
+    {
+      "id": "speech-capabilities",
+      "question": "Can SapinSapin AI models do speech recognition or text-to-speech?",
+      "must_mention_any": ["Whisper", "SpeechT5", "speech recognition", "text-to-speech"],
+      "must_not_mention": ["perfect accuracy", "human-level accuracy"]
+    },
+    {
+      "id": "motivation",
+      "question": "Why did SapinSapin AI start / what problem is it solving?",
+      "must_mention_any": ["Philippine AI Report", "represent", "Philippine languages"],
+      "must_not_mention": []
+    },
+    {
+      "id": "contributors",
+      "question": "What do contributors say about the project?",
+      "must_mention_any": ["JC Diamante", "has argued", "has suggested", "has observed"],
+      "must_not_mention": ["the SapinSapin AI team believes", "official team position"]
+    },
+    {
+      "id": "partnerships",
+      "question": "Who are SapinSapin AI's partners?",
+      "must_mention_any": ["UP Diliman", "restrained", "verified list"],
+      "must_not_mention": []
+    },
+    {
+      "id": "healthcare-government",
+      "question": "Does SapinSapin AI have a healthcare or government product?",
+      "must_mention_any": ["no such deployment is confirmed", "discussed", "possible future application", "not established"],
+      "must_not_mention": ["SapinSapin AI provides healthcare", "deployed in government", "used by the Philippine government"]
+    },
+    {
+      "id": "production-readiness",
+      "question": "Are SapinSapin AI's models production-ready and benchmarked?",
+      "must_mention_any": ["not evidence", "benchmarked", "public repository existing"],
+      "must_not_mention": ["proven production-ready", "state of the art accuracy"]
+    },
+    {
+      "id": "how-to-participate",
+      "question": "How can I contribute to or participate in SapinSapin AI?",
+      "must_mention_any": ["issue", "discussion", "GitHub repository"],
+      "must_not_mention": ["apply through our formal membership program"]
+    }
+  ]
+}
