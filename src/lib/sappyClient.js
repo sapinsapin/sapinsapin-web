@@ -1,7 +1,7 @@
 // The two legs of the "Talk to Sappy" voice capability and its text-only twin:
 // a single pointed call to the sapinsapin/sappy-ai Cloudflare Worker, which
-// answers from the project knowledge base (Cloudflare AI Search) and writes the
-// reply with Workers AI.
+// answers from the project knowledge base (Cloudflare AI Search) and sends
+// the answer-generation step through the server-side model provider.
 //
 // This is the second runtime fetch on the page. Unlike the Hub API it is not
 // CORS-locked to huggingface.co, so the browser may call it directly; unlike
