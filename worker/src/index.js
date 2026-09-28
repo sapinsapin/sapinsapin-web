@@ -282,6 +282,7 @@ Do not automatically begin with filler such as:
 - "Great question!"
 - "Absolutely!"
 - "Certainly!"
+The same holds in Filipino — "Magandang tanong!", "Sige!", "Tiyak!", "Oo, siyempre". A Filipino answer that opens with the banned English and then switches languages is doing precisely what the ban exists to prevent, and a question that cannot be answered is a better opening than a compliment about it.
 
 Use such phrases only when they naturally fit.
 
@@ -1336,7 +1337,7 @@ async function askSappyProject(
    * can resolve "those".
    */
 
-  const retrievalQuery =
+  const retrievalQuery = expandRetrievalQuery(
     previousSappyMessage
       ? `${question}
 
@@ -1345,7 +1346,8 @@ ${truncateContext(
   previousSappyMessage,
   2200
 )}`
-      : question;
+      : question
+  );
 
 
   const searchResults =
@@ -1484,6 +1486,58 @@ ${question}`,
 // path with nothing retrieved and the model is told not to invent, so it
 // degrades to an honest "I don't have that" — which is why these patterns
 // lean towards catching Filipino phrasings rather than staying strict.
+// The knowledge base is written in English and the questions arrive in Filipino,
+// so a Tagalog question can retrieve nothing from a corpus that answers it —
+// measured in production: "Ano ang license ng mga dataset?" returned the
+// per-dataset licence table, while "May bayad ba ang mga datos?" retrieved
+// chunks and then said it had nothing to go on. Both are the same question, and
+// both were answered, so the gap is in the query rather than the index.
+//
+// So retrieval runs on the question plus the English terms it means. Only the
+// search string is expanded: the model still sees the visitor's own words, which
+// is also what keeps the answer phrased the way they asked.
+const FILIPINO_RETRIEVAL_TERMS = {
+  bayad: "price pricing cost free",
+  magkano: "price pricing cost",
+  presyo: "price pricing cost",
+  libre: "free",
+  datos: "dataset datasets",
+  dataset: "dataset datasets",
+  lisensya: "license licensing",
+  modelo: "model models",
+  modelyo: "model models",
+  ambag: "contribute contribution contributing",
+  magbigay: "contribute contribution",
+  sumulong: "contribute join",
+  tumulong: "contribute help",
+  makakatulong: "contribute help",
+  pagsasalaysay: "transcribe transcription speech",
+  transkripsyon: "transcription transcript",
+  boses: "voice voices",
+  tinig: "voice",
+  wika: "language languages",
+  pagsasanay: "training train",
+  pagsusuri: "research",
+  espasyo: "space",
+};
+
+function expandRetrievalQuery(query) {
+  const text = String(query ?? "");
+  const present = new Set(text.toLowerCase().match(/[a-z]+/g) ?? []);
+  const extra = [];
+  for (const [filipino, english] of Object.entries(FILIPINO_RETRIEVAL_TERMS)) {
+    if (!present.has(filipino.toLowerCase())) continue;
+    // Skip glosses the question already contains, so an English question does
+    // not get its own words repeated back at the index.
+    for (const term of english.split(" ")) {
+      if (present.has(term) || extra.includes(term)) continue;
+      extra.push(term);
+    }
+  }
+  if (extra.length === 0) return text;
+  return `${text}\n\nAlso search for: ${extra.join(", ")}`;
+}
+
 function isProjectQuestion(question, previousSappyMessage = "") {
   const subject = String(question ?? "")
     .replace(/^\s*sappy\b[\s,:!?-]*/i, "")

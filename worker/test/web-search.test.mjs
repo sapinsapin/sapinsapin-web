@@ -75,6 +75,31 @@ test('the search path still works when it is deliberately switched on', async ()
   assert.equal(noKey.mode, 'web_search_unavailable')
 })
 
+test('retrieval carries the English terms a Filipino question means', async () => {
+  // Measured in production: the English phrasing of these questions retrieved
+  // the licence and contribution sections, while the Filipino phrasings
+  // retrieved nothing and the model then said it had no information. The
+  // index is English; the questions are not, so the search string has to be.
+  const queries = []
+  globalThis.fetch = async () => modelResponse('Grounded answer.')
+  const knowledge = { search: async ({ query }) => { queries.push(query); return { chunks: [{ content: 'Licence and contribution details.' }] } } }
+  for (const q of ['May bayad ba ang mga datos?', 'Paano ako makakapag-ambag?', 'What is the license of the datasets?']) {
+    await worker.fetch(request(q), env({ SAPPY_KNOWLEDGE: knowledge }), {})
+  }
+  const [pricing, contribute, alreadyEnglish] = queries
+
+  // "May bayad" is a question about cost and about being free.
+  assert.match(pricing, /price|free/i)
+  assert.match(pricing, /dataset/i)
+  // The visitor's own words are still there, not replaced.
+  assert.match(pricing, /May bayad ba ang mga datos\?/)
+
+  assert.match(contribute, /contribut/i)
+
+  // An English question is not padded with its own words back at it.
+  assert.doesNotMatch(alreadyEnglish, /Also search for/i)
+})
+
 test('general factual questions search web and attach actual source URLs to Discord replies', async () => {
   const calls = []
   globalThis.fetch = async (url, options) => {
