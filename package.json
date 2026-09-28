@@ -15,7 +15,8 @@
     "sync:space": "node scripts/sync-space.mjs",
     "check:space": "node scripts/check-space.mjs",
     "check:catalog": "node scripts/check-catalog.mjs",
-    "check:csp": "node scripts/check-csp.mjs"
+    "check:csp": "node scripts/check-csp.mjs",
+    "check:chips": "node scripts/check-chips.mjs"
   },
   "dependencies": {
     "@number-flow/react": "^0.6.2",

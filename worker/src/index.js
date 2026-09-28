@@ -198,6 +198,8 @@ GROUNDING AND ACCURACY
 - Base factual SapinSapin AI claims on the project knowledge supplied to you.
 - Never invent, assume, or fill in missing project facts.
 - If available knowledge does not establish something, clearly say that you do not have enough verified information.
+- When it does not, stop there. Do not redirect the person somewhere else to find out: not "ask in the Discord", not "ask Marc", not "check the issues or pull requests", not "the community can help". Sending someone to a person or a channel because you cannot answer is worse than saying you do not know, because it costs them the round trip and implies the answer was available. Mention another channel only when the knowledge supplied to you documents that specific channel, and even then present it as documented rather than as a way to avoid the question.
+- Never suggest that Sappy cannot answer, or that a different question would help, when the knowledge you were given does answer the one you were asked.
 - Distinguish confirmed facts from contributor perspectives, experimental work, aspirations, proposals, and unknown information.
 - Never turn planned, proposed, or aspirational work into an accomplished capability.
 - Never assume a public model, dataset, checkpoint, repository, experiment, or demo is production-ready.
@@ -1545,16 +1547,22 @@ function isProjectQuestion(question, previousSappyMessage = "") {
   if (/\bsapin[ -]?sapin\b/i.test(subject)) return true;
   if (/\bproject\s+[A-Z][a-z]+\b/.test(subject)) return false;
   // "mga datos" is the site's own phrase for the datasets; "data" alone is not
-  // here, because it is too generic to mean a project asset.
-  const asset = String.raw`(?:datasets?|datos|models?|modelo|licen[sc]e?s?|lisensya)`;
+  // here, because it is too generic to mean a project asset. "wika" is here and
+  // "language" is not, for the same reason in the other direction: in a
+  // Filipino-first product "wika" is nearly always about the project's own
+  // coverage, while "language" is a word every question in the world uses.
+  const asset = String.raw`(?:datasets?|datos|models?|modelo|licen[sc]e?s?|lisensya|wika|wikang)`;
   const ours = String.raw`(?:do we|we|our|your|you|amin|ating|atin|natin|inyo|in your|ninyo|kayo|nyo)`;
   const specific = /\b(?:tim santos|sappy|proyekto|proyektong|our (?:projects?|teams?|datasets?|models?|licenses?)|the project|this project|philippine[- ]language (?:datasets?|models?))\b/i;
   if (specific.test(subject)) return true;
   if (new RegExp(String.raw`\b${asset}\b.{0,40}\b${ours}\b`, "i").test(subject) ||
     new RegExp(String.raw`\b${ours}\b.{0,40}\b${asset}\b`, "i").test(subject)) return true;
   // A definite asset phrase with no possessive at all: "the license of the
-  // datasets", "ang license ng mga dataset", "mayroon kayong datos".
-  if (new RegExp(String.raw`\b(?:the|our|your|mga|ang|ating|amin)\s+${asset}\b`, "i").test(subject)) return true;
+  // datasets", "ang license ng mga dataset", "mayroon kayong datos", and the
+  // "ilang wika" counting form, where the determiner is separated from the
+  // noun by a function word.
+  const determiner = String.raw`(?:the|our|your|mga|ang|ating|amin|ilang)`;
+  if (new RegExp(String.raw`\b${determiner}(?:\s+(?:may|isang|ba|rin)){0,2}\s+${asset}\b`, "i").test(subject)) return true;
   if (/\b(?:you|your|kayo|inyo)\b.{0,70}\b(?:speech|recognition|translation|training|dataset|datos|model|modelo)\b/i.test(subject)) return true;
   // Contributing, joining, helping: the project's own process, not the web's.
   if (/\b(?:ambag|magkatulong|sumulong|magbigay|contribut(?:e|ion|ing)|join)\b/i.test(subject)) return true;
@@ -2410,6 +2418,11 @@ async function answerDiscordInteraction(
 // ─────────────────────────────────────────────
 // WORKER
 // ─────────────────────────────────────────────
+
+// Named alongside the default export so the build-time check that every
+// suggestion chip is a project question (scripts/check-chips.mjs) can use the
+// real matcher rather than a copy of its vocabulary, which would drift.
+export { isProjectQuestion };
 
 export default {
   async fetch(
