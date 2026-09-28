@@ -2,14 +2,19 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { askSappy, callSappyVoice } from '../lib/sappyClient'
 import { canRecord, startRecording } from '../lib/audio'
 
-// The floating "Ask Sappy" chat, fixed in the bottom-right corner of every
-// page (index and 404). It is *the* Ask Sappy experience: a text conversation
-// and a press-and-hold voice line into the same assistant — Whisper-small
-// hears Filipino, the sapinsapin/sappy-ai Worker answers from the project
-// knowledge base, and a Filipino corpus speaker reads the reply back aloud.
-// The voice legs queue through spaceClient like the demo's own requests; the
-// Worker leg is a single pointed GET. It is mounted by DeferredOrb a beat
-// after paint so its chunk stays off the first-paint path.
+// The "Ask Sappy" chat on every page (index and 404): a launcher fixed in
+// the bottom-right corner that opens into a full-height right rail — top to
+// bottom of the viewport, like a page panel. It is *the* Ask Sappy
+// experience: a text conversation and a press-and-hold voice line into the
+// same assistant — Whisper-small hears Filipino, the sapinsapin/sappy-ai
+// Worker answers from the project knowledge base, and a Filipino corpus
+// speaker reads the reply back aloud. The voice legs queue through
+// spaceClient like the demo's own requests; the Worker leg is a single
+// pointed GET. It is mounted by DeferredOrb a beat after paint so its chunk
+// stays off the first-paint path. While open, the body[data-chat-open] flag
+// lets index.css slide the page (sticky nav included) left by the rail's
+// width on wide screens; narrower viewports keep the rail as a full-height
+// overlay.
 
 const SUGGESTIONS = ['Ano ang SapinSapin AI?', 'Paano ako makakapag-ambag?', 'May bayad ba ang mga datos?']
 
@@ -308,6 +313,16 @@ export default function ChatWidget() {
     prevOpenRef.current = open
   }, [open])
 
+  /* The open chat is a full-height right rail, not a corner card. The body
+     flag lets index.css shift the whole page — sticky nav included — left
+     by the rail's width while it is open, and give the space back on close
+     or unmount. */
+  useEffect(() => {
+    if (!open) return undefined
+    document.body.dataset.chatOpen = 'true'
+    return () => { delete document.body.dataset.chatOpen }
+  }, [open])
+
   useEffect(() => {
     if (!open) return undefined
     const el = cardRef.current
@@ -534,7 +549,7 @@ export default function ChatWidget() {
   const shown = visible || open
 
   return (
-    <div className="chat-root" data-visible={shown}>
+    <div className="chat-root" data-visible={shown} data-open={open}>
       {open ? (
         <section className="chat-card" role="dialog" aria-label="Ask Sappy — chat" aria-modal="false" ref={cardRef}>
           <header className="chat-head">

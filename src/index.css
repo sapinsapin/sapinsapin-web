@@ -1266,14 +1266,19 @@
   .sappy-mic-glyph { width: 1.05rem; height: 1.05rem; }
 
 /* --------------------------------------------------- the Ask Sappy chat */
-  /* The floating "Ask Sappy" chat (ChatWidget.jsx): a launcher that opens a
-     compact conversation card, anchored to the bottom-right corner of every
-     page; the back-to-top button stacks above it. The launcher's one-line
-     invitation shows only on hover or keyboard focus. Like that button it
-     hides in the hero and only materialises once the reader scrolls past the
-     first screen — an open card is never hidden. The card reuses the demo's
-     .sappy-* conversation styles, so the floating chat
-     and the demo's results speak the same visual language. */
+  /* The "Ask Sappy" chat (ChatWidget.jsx): a launcher anchored to the
+     bottom-right corner of every page that opens into a full-height right
+     rail — flush with the viewport's top, right, and bottom edges, top to
+     bottom. While the rail is open, body[data-chat-open] slides the page
+     behind it (sticky nav included) left by the rail's width on wide
+     screens; on narrower viewports the rail stands as a full-height overlay
+     instead. The launcher's one-line invitation shows only on hover or
+     keyboard focus. Like the back-to-top button it hides in the hero and
+     only materialises once the reader scrolls past the first screen — an
+     open rail is never hidden. The card reuses the demo's .sappy-*
+     conversation styles, so the chat and the demo's results speak the same
+     visual language. The back-to-top button stacks above the closed
+     launcher and steps aside while the rail is open. */
   .chat-root {
     /* Brand fills (launcher + avatar) share this ancestry, so the mark is one
        brand wherever it renders: ube-to-pandan on light paper, a smoky plum
@@ -1295,6 +1300,19 @@
       right: max(1.75rem, env(safe-area-inset-right));
       bottom: max(1.75rem, env(safe-area-inset-bottom));
     }
+  }
+
+  /* Open, the chat stops hovering and stands as a full-height right rail:
+     flush with the viewport's top, right, and bottom edges. The corner
+     insets that float the closed launcher (safe-area padding included) are
+     overridden — a flush panel keeps none of them — and the z-index climbs
+     above the sticky header (50) so the rail owns the right edge at every
+     scroll depth. */
+  .chat-root[data-open='true'] {
+    inset-block: 0;
+    right: 0;
+    z-index: 55;
+    align-items: stretch;
   }
 
   .chat-btn {
@@ -1366,19 +1384,37 @@
   .chat-card {
     display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
     grid-template-columns: minmax(0, 1fr); gap: .55rem;
-    width: min(22rem, calc(100vw - 2.4rem));
-    max-height: min(63vh, 30rem);
+    width: min(var(--sappy-rail, 24rem), 100vw);
+    height: 100%;
     border: 1px solid var(--border-soft);
-    border-radius: 1rem;
+    border-right: 0; border-top: 0; border-bottom: 0;
+    border-radius: 0;
     background: rgb(var(--c-paper) / .97);
-    padding: .8rem .85rem .75rem;
-    box-shadow: var(--shadow-float);
+    padding: .8rem .85rem max(.75rem, env(safe-area-inset-bottom));
+    box-shadow: -1.6rem 0 2.6rem -1.4rem rgb(0 0 0 / .35), var(--shadow-float);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    animation: chat-in .24s cubic-bezier(.22, 1, .36, 1) both;
+    animation: chat-rail-in .3s cubic-bezier(.22, 1, .36, 1) both;
   }
-  @keyframes chat-in {
-    from { opacity: 0; transform: translateY(8px) scale(.98); }
+  @keyframes chat-rail-in {
+    from { opacity: 0; transform: translateX(1.2rem); }
     to { opacity: 1; transform: none; }
+  }
+
+  /* The rail takes real layout space: while it is open the page behind it —
+     sticky nav included — slides left by the rail's width, so nothing it
+     covers is lost. Only wide screens can spare the room; narrower viewports
+     keep the rail as a full-height overlay (no shift, the panel simply
+     covers) so the nav never has to squeeze into half a tablet. */
+  body { --sappy-rail: 24rem; }
+  @media (min-width: 1280px) {
+    body { transition: padding-right .3s cubic-bezier(.22, 1, .36, 1); }
+    body[data-chat-open='true'] { padding-right: var(--sappy-rail); }
+  }
+  /* The corner's other resident steps aside while the rail is open — its spot
+     is inside the panel, and a back-to-top peeking from under a sidebar
+     reads as a bug rather than a control. */
+  body[data-chat-open='true'] .back-to-top {
+    opacity: 0; visibility: hidden; pointer-events: none;
   }
 
   .chat-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
@@ -1516,6 +1552,7 @@
   @media (prefers-reduced-motion: reduce) {
     .chat-root { transition: opacity .15s ease; }
     .chat-tip, .chat-card { animation: none; }
+    body { transition: none; }
   }
 
   /* Custom player. The browser's own controls are the one element that would
