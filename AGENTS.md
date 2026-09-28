@@ -250,6 +250,15 @@ instead of sending near-silence down the model path. Transaction state lives in 
    The compact card sets neither, so it never moves the page and never hides the
    back-to-top. `close()` clears both, so the next open starts in the corner.
 
+ - **The header is the tightest row in the card, in both sizes.** A 2rem
+   avatar, the kicker, the meta line and — since the rail toggle landed — two
+   32px controls share one 45px-tall band, and the meta line already wraps to
+   two lines at every width. The `BETA` label after "Ask Sappy" is sized and
+   tracked to disappear into that row rather than push it: 8px caps on the
+   kicker's baseline, and `rgb(var(--c-ink) / .62)` because .38 measures
+   2.46:1 on the light card and an 8px label is text, not decoration. Lower
+   it and it stops being readable; the minimalism has to come from the size.
+
  The message list needs `align-content: start` on `.chat-history` and must keep it. The
  history is a grid, and a grid's `align-content: normal` is `stretch` — which is invisible
  in the compact card (its own height is content-driven) and glaring in the rail, where a

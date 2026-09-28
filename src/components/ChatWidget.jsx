@@ -581,7 +581,10 @@ export default function ChatWidget() {
             <div className="chat-head-brand">
               <span className="chat-avatar" aria-hidden="true"><ChatMark className="chat-avatar-glyph" /></span>
               <span className="chat-head-copy">
-                <span className="chat-kicker">Ask Sappy</span>
+                <span className="chat-head-title">
+                  <span className="chat-kicker">Ask Sappy</span>
+                  <span className="chat-beta">BETA</span>
+                </span>
                 <span className="chat-sub">Answers from the project knowledge base · Filipino</span>
               </span>
             </div>

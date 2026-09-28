@@ -1457,9 +1457,31 @@
     /* The kicker and the meta line must stack, never sit side by side. */
     display: grid; gap: .05rem; min-width: 0;
   }
+  /* The name and its status share a baseline, so BETA reads as a note on
+     "Ask Sappy" rather than a fourth block in the header. */
+  .chat-head-title { display: flex; align-items: baseline; gap: .4rem; min-width: 0; }
   .chat-kicker {
     font-size: .6rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
     color: rgb(var(--c-ube));
+  }
+  /* A beta label earns its place by being quieter than the name it sits
+     after: no pill, no border, no fill — just small tracked caps in muted
+     ink. The kicker already carries the brand colour and the header's only
+     other ink is the meta line below, so anything with a shape to it would
+     read as a third thing to look at in a 2rem-tall row. Sits on the
+     kicker's baseline rather than its centre, which is what makes it look
+     set into the line instead of pasted onto it.
+
+     The quiet comes from the size and the tracking, not from the opacity.
+     At .38 the label measured 2.46:1 on the light card — under even the 3:1
+     floor for non-text — and it is 8px, where the 4.5:1 text bar applies, so
+     "minimalist" cannot mean "faded into the paper". .62 is the lowest
+     opacity that clears AA in both themes (4.88:1 light, 6.88:1 dark); it
+     still reads as a soft grey tag because it is two sizes down from the
+     kicker. */
+  .chat-beta {
+    font-size: .5rem; font-weight: 700; letter-spacing: .18em;
+    color: rgb(var(--c-ink) / .62);
   }
   .chat-sub { font-size: .66rem; font-weight: 600; line-height: 1.4; color: rgb(var(--c-ink) / .52); }
   /* The two header controls read as one object, so they are grouped rather
