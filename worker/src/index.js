@@ -923,26 +923,30 @@ async function resolveReplyToSappy(
 // QUESTION CLASSIFICATION
 // ─────────────────────────────────────────────
 
-function isSimpleGreeting(question) {
-  const text =
-    String(question ?? "")
-      .trim()
-      .toLowerCase();
+// Filipino courtesy rides at the end of a message as a matter of politeness,
+// and these two matchers are anchored on `[!?.,\s]*$`, so the particles have
+// to come off first. Without this "Salamat po!" — the ordinary way to say
+// thanks — misses isSimpleThanks, misses isSimpleGreeting, and falls all the
+// way through to web search, which has no key in production. The reply text
+// still keys off the original question, so this only affects matching.
+function withoutCourtesy(question) {
+  return String(question ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[!.,?\s]+$/, "")
+    .replace(/\s+(?:po|sana|ata|rin|pls|please)\.?$/, "");
+}
 
-  return /^(hi|hello|hey|hiya|yo|sup|good morning|good afternoon|good evening|kumusta|kamusta)[!?.,\s]*$/i.test(
-    text
+function isSimpleGreeting(question) {
+  return /^(?:hi|hello|hey|hiya|yo|sup|good (?:morning|afternoon|evening|day)|kumusta|kamusta|magandang(?: (?:umaga|araw|gabi|tanghali))?)[!?.,\s]*$/i.test(
+    withoutCourtesy(question)
   );
 }
 
 
 function isSimpleThanks(question) {
-  const text =
-    String(question ?? "")
-      .trim()
-      .toLowerCase();
-
-  return /^(thanks|thank you|thank you sappy|thanks sappy|ty|salamat|salamat sappy)[!?.,\s]*$/i.test(
-    text
+  return /^(?:thanks|thank you|thank you sappy|thanks sappy|ty|salamat|salamat sappy)[!?.,\s]*$/i.test(
+    withoutCourtesy(question)
   );
 }
 
@@ -1471,17 +1475,35 @@ ${question}`,
 
 // Only project-specific questions use curated project knowledge. General
 // factual questions must not be answered from that unrelated corpus.
+//
+// The list is in two languages because the site is Filipino-first, and the
+// cost of a miss is not symmetric: a project question that falls through goes
+// to web search, which has no key in production, so it comes back as "I can't
+// verify this on the live web" for a question the knowledge base answers from
+// its own licence table. A general question misrouted here lands in the RAG
+// path with nothing retrieved and the model is told not to invent, so it
+// degrades to an honest "I don't have that" — which is why these patterns
+// lean towards catching Filipino phrasings rather than staying strict.
 function isProjectQuestion(question, previousSappyMessage = "") {
   const subject = String(question ?? "")
     .replace(/^\s*sappy\b[\s,:!?-]*/i, "")
     .replace(/[,!?\s]+sappy[!?.,\s]*$/i, "");
   if (/\bsapin[ -]?sapin\b/i.test(subject)) return true;
   if (/\bproject\s+[A-Z][a-z]+\b/.test(subject)) return false;
-  const specific = /\b(?:tim santos|sappy|proyekto|our (?:project|team|dataset|model|license)|the project|this project|philippine[- ]language (?:dataset|model))\b/i;
+  // "mga datos" is the site's own phrase for the datasets; "data" alone is not
+  // here, because it is too generic to mean a project asset.
+  const asset = String.raw`(?:datasets?|datos|models?|modelo|licen[sc]e?s?|lisensya)`;
+  const ours = String.raw`(?:do we|we|our|your|you|amin|ating|atin|natin|inyo|in your|ninyo|kayo|nyo)`;
+  const specific = /\b(?:tim santos|sappy|proyekto|proyektong|our (?:projects?|teams?|datasets?|models?|licenses?)|the project|this project|philippine[- ]language (?:datasets?|models?))\b/i;
   if (specific.test(subject)) return true;
-  if (/\b(?:datasets?|models?|licenses?)\b.{0,40}\b(?:do we|we|our|natin|atin)\b/i.test(subject) ||
-    /\b(?:our|we|natin|atin)\b.{0,40}\b(?:datasets?|models?|licenses?)\b/i.test(subject)) return true;
-  if (/\b(?:you|your)\b.{0,70}\b(?:speech|recognition|translation|training|dataset|model)\b/i.test(subject)) return true;
+  if (new RegExp(String.raw`\b${asset}\b.{0,40}\b${ours}\b`, "i").test(subject) ||
+    new RegExp(String.raw`\b${ours}\b.{0,40}\b${asset}\b`, "i").test(subject)) return true;
+  // A definite asset phrase with no possessive at all: "the license of the
+  // datasets", "ang license ng mga dataset", "mayroon kayong datos".
+  if (new RegExp(String.raw`\b(?:the|our|your|mga|ang|ating|amin)\s+${asset}\b`, "i").test(subject)) return true;
+  if (/\b(?:you|your|kayo|inyo)\b.{0,70}\b(?:speech|recognition|translation|training|dataset|datos|model|modelo)\b/i.test(subject)) return true;
+  // Contributing, joining, helping: the project's own process, not the web's.
+  if (/\b(?:ambag|magkatulong|sumulong|magbigay|contribut(?:e|ion|ing)|join)\b/i.test(subject)) return true;
   const referential = /\b(?:those|that|which one|tell me more|sila|iyon|nito)\b/i.test(subject);
   return referential && specific.test(previousSappyMessage);
 }
@@ -1538,7 +1560,10 @@ function validWebSource(result) {
 }
 
 function webUnavailable(question) {
-  const filipino = /\b(?:ano|sino|kailan|paano|balita|ngayon|pinakabagong|hanapin)\b/i.test(question);
+  // The particle list, not just question words: "Salamat po!" carries no
+  // question word at all, and it used to get the English apology in reply to
+  // a Filipino thank-you.
+  const filipino = /\b(?:ano|sino|kailan|paano|balita|ngayon|pinakabagong|hanapin|mga|ang|sa|ng|na|po|ba|kayo|inyo|natin)\b/i.test(question);
   return {
     answer: filipino
       ? "Hindi ko ma-verify ito sa live web ngayon. Puwede mo bang subukan ulit mamaya?"

@@ -295,3 +295,59 @@ test('latest available official statistic may be older than a month with its dat
   assert.equal((await response.json()).mode, 'web_search')
   assert.match(messages.at(-1).content, /Published date: \d{4}-\d{2}-\d{2}/)
 })
+
+// The router was English-only while the page is Filipino-first, and the asset
+// nouns were listed singular-only, so both of these questions fell through to
+// web search. In production that search has no key, so a question the knowledge
+// base answers from its own licence table came back as "I can't verify this on
+// the live web right now." These pin the routing itself, with the knowledge
+// mock empty so a miss cannot be masked by a lucky chunk.
+test('Filipino project questions reach curated knowledge instead of web search', async () => {
+  for (const q of [
+    'May bayad ba ang mga datos?',
+    'Paano ako makakapag-ambag?',
+    'Magkano ang presyo ng mga datos?',
+    'Ilan ang datos na mayroon kayo?',
+    'Ano ang license ng mga dataset?',
+    'Ano ang modelo na ginagamit ninyo?',
+  ]) {
+    globalThis.fetch = async (url) => {
+      assert.ok(!String(url).includes('api.tavily.com/search'), `${q} must not search the web`)
+      return modelResponse('Consult the project knowledge.')
+    }
+    const response = await worker.fetch(request(q), env({ TAVILY_API_KEY: '' }), {})
+    assert.equal((await response.json()).mode, 'project_rag', q)
+  }
+})
+
+test('plural asset nouns are project questions, not web searches', async () => {
+  for (const q of ['Are your datasets free?', 'What is the license of the datasets?', 'How many models do we have?']) {
+    globalThis.fetch = async (url) => {
+      assert.ok(!String(url).includes('api.tavily.com/search'), `${q} must not search the web`)
+      return modelResponse('Consult the project knowledge.')
+    }
+    const response = await worker.fetch(request(q), env({ TAVILY_API_KEY: '' }), {})
+    assert.equal((await response.json()).mode, 'project_rag', q)
+  }
+})
+
+test('general questions with no project subject still go to web search', async () => {
+  // Guards the vocabulary additions above against over-matching: "data" on its
+  // own is too generic to treat as a project asset noun. The assertion is that
+  // the project knowledge base is never consulted, not which web mode the
+  // question lands in — that depends on whether a source scores high enough.
+  for (const q of ['What is the population of Manila?', 'Who won the basketball game last night?']) {
+    let searched = false
+    let consultedKnowledge = false
+    globalThis.fetch = async (url) => {
+      if (String(url).includes('api.tavily.com/search')) { searched = true; return Response.json({ results: [] }) }
+      return modelResponse('An answer from the web.')
+    }
+    const knowledge = { search: async () => { consultedKnowledge = true; return { chunks: [] } } }
+    const response = await worker.fetch(request(q), env({ SAPPY_KNOWLEDGE: knowledge }), {})
+    const body = await response.json()
+    assert.equal(body.mode !== 'project_rag', true, q)
+    assert.equal(searched, true, `${q} should attempt web search`)
+    assert.equal(consultedKnowledge, false, `${q} must not consult project knowledge`)
+  }
+})

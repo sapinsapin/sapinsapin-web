@@ -241,3 +241,22 @@ test('Filipino self-description uses self mode rather than searching the web', a
   assert.equal((await response.json()).mode, 'self')
   assert.equal(calls, 1)
 })
+
+test('the Filipino courtesy particle and magandang greetings stay in conversation', async () => {
+  // `po` is how courtesy is actually written in Filipino, and the greeting and
+  // thanks matchers were anchored on `[!?.,\s]*$`, so "Salamat po!" — the
+  // ordinary way to say thanks — missed both and fell through to the web path.
+  globalThis.fetch = async () => { throw new Error('greetings and thanks should not call the model or search') }
+  for (const [question, expected] of [
+    ['Salamat po!', /Walang anuman/i],
+    ['Salamat sana!', /Walang anuman/i],
+    ['Magandang araw!', /Sappy/i],
+    ['Magandang gabi!', /Sappy/i],
+    ['Magandang umaga!', /Sappy/i],
+  ]) {
+    const response = await worker.fetch(request(question), env(), {})
+    const body = await response.json()
+    assert.equal(body.mode, 'conversation', question)
+    assert.match(body.answer, expected, question)
+  }
+})
