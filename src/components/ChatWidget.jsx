@@ -28,7 +28,16 @@ const VAD_OFF = 0.012
 const VAD_HANGOVER_MS = 700
 const TAP_MS = 300
 
-const clamp = (text, limit = 240) =>
+/* Error copy only, never an answer. Sappy's replies are complete where they
+   stop — a single "Ano ang SapinSapin AI?" is ~1.5k characters of intro,
+   dataset list, model list and a follow-up question, all of it load-bearing —
+   so a length cap on an answer does not tidy it up, it deletes the payload
+   and the reader gets a confident-looking sentence that stops mid-list. This
+   helper did exactly that once: it capped `reply.answer` at 240 characters,
+   which threw away 84% of a real answer and appended the "…" that read as the
+   model running out. The Worker's own max_tokens is the real bound on how long
+   a reply can get, and that is where the belt belongs. */
+const clampError = (text, limit = 240) =>
   typeof text === 'string' && text.length > limit ? `${text.slice(0, limit).trimEnd()}…` : text
 
 let uid = 0
@@ -385,7 +394,7 @@ export default function ChatWidget() {
         push({
           id: nextId(),
           role: 'sappy',
-          text: clamp(reply.answer),
+          text: reply.answer,
           caption:
             reply.mode === 'project_rag'
               ? `Answered from the project knowledge base${Number.isInteger(reply.chunks) && reply.chunks > 0 ? ` · ${reply.chunks} referenced passages` : ''}`
@@ -394,7 +403,7 @@ export default function ChatWidget() {
       } catch (caught) {
         if (caught?.kind === 'cancelled' || caught?.name === 'AbortError') return
         if (controllerRef.current === controller) {
-          push({ id: nextId(), role: 'sappy', text: clamp(caught?.message ?? 'Something went wrong — try again.'), caption: 'Not answered' })
+          push({ id: nextId(), role: 'sappy', text: clampError(caught?.message ?? 'Something went wrong — try again.'), caption: 'Not answered' })
         }
       } finally {
         if (controllerRef.current === controller) controllerRef.current = null
@@ -633,7 +642,7 @@ export default function ChatWidget() {
                   <span className="sappy-dot" />
                 </div>
               )}
-              {error && !busy && <p className="sappy-error" role="alert">{clamp(error.message, 220)}</p>}
+              {error && !busy && <p className="sappy-error" role="alert">{clampError(error.message, 220)}</p>}
             </div>
             {chat.length === 0 && !busy && (
               <div className="chat-suggest">
