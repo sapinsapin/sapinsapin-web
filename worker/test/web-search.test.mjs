@@ -10,6 +10,10 @@ function env(overrides = {}) {
   return {
     SAPPY_MODEL_PROVIDER: 'nyo', SAPPY_NYO_MODEL: 'glm-5.3-flash', NYO_API_KEY: 'rk_live_test_only',
     TAVILY_API_KEY: 'tvly_test_only',
+    // Web search is off by default in the Worker, so these tests — the only
+    // coverage the search path has — have to switch it on explicitly. The
+    // default is pinned separately below.
+    WEB_SEARCH_ENABLED: 'true',
     BOTGHOST_SHARED_SECRET: 'test_only_bridge_secret',
     SAPPY_KNOWLEDGE: { search: async () => ({ chunks: [{ content: 'SapinSapin AI builds Philippine-language AI resources.' }] }) },
     ...overrides,
@@ -23,6 +27,53 @@ function request(q, path = '/') {
 const modelResponse = (content) => Response.json({ choices: [{ message: { content } }] })
 
 test.afterEach(() => { globalThis.fetch = originalFetch })
+
+test('web search is off by default: the project boundary answers in the right language and contacts nothing', async () => {
+  const off = { ...env() }
+  delete off.WEB_SEARCH_ENABLED
+
+  for (const [q, expected] of [
+    ['What is the weather in Manila today?', /only know about SapinSapin AI/],
+    ['Magkano ang bilihid ng bigat ng 5k na Karnata? Edgarr one?', /Alam ko lang ang mga detalye tungkol sa SapinSapin AI/],
+  ]) {
+    // Nothing may be fetched at all: no search, and no model call either — the
+    // boundary answer is a fixed string, so a model call here would mean the
+    // Worker's own knowledge was the only thing holding the line.
+    let calls = 0
+    globalThis.fetch = async () => { calls++; throw new Error('network must not be reached') }
+    const response = await worker.fetch(request(q), off, {})
+    const body = await response.json()
+    assert.equal(body.mode, 'project_only', q)
+    assert.match(body.answer, expected)
+    assert.equal(calls, 0, `${q} should contact no network`)
+  }
+})
+
+test('a project question is still answered while web search is off', async () => {
+  const off = { ...env() }
+  delete off.WEB_SEARCH_ENABLED
+  let searched = false
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('api.tavily.com/search')) { searched = true; throw new Error('web search must stay off') }
+    return modelResponse('It is a Filipino AI dataset.')
+  }
+  const body = await (await worker.fetch(request('Ano ang license ng mga datos?'), off, {})).json()
+  assert.equal(body.mode, 'project_rag')
+  assert.equal(searched, false)
+})
+
+test('the search path still works when it is deliberately switched on', async () => {
+  globalThis.fetch = async (url) => String(url).includes('api.tavily.com/search')
+    ? Response.json({ results: [source] })
+    : modelResponse('It is the Philippine Statistics Authority.')
+  const body = await (await worker.fetch(request('Which agency publishes Philippine population data?'), env(), {})).json()
+  assert.equal(body.mode, 'web_search')
+  // The flag and the key are separate failures, and they deserve separate
+  // words: with the switch on but no key, the honest answer is that search is
+  // broken right now — not that Sappy never had that capability.
+  const noKey = await (await worker.fetch(request('Which agency publishes Philippine population data?'), env({ TAVILY_API_KEY: '' }), {})).json()
+  assert.equal(noKey.mode, 'web_search_unavailable')
+})
 
 test('general factual questions search web and attach actual source URLs to Discord replies', async () => {
   const calls = []
@@ -130,10 +181,18 @@ test('self-description reports web-search availability from the actual Worker co
     prompts.push(JSON.parse(options.body).messages[0].content)
     return modelResponse('I can check the web only when search is enabled.')
   }
+  const off = { ...env() }
+  delete off.WEB_SEARCH_ENABLED
   await worker.fetch(request('Can you search the web?'), env(), {})
   await worker.fetch(request('Can you search the web?'), env({ TAVILY_API_KEY: '' }), {})
+  await worker.fetch(request('Can you search the web?'), off, {})
   assert.match(prompts[0], /web search status: enabled/i)
   assert.match(prompts[1], /web search status: unavailable/i)
+  // The default state gets the strongest wording: not "unavailable" as if a
+  // search had broken, but an explicit boundary, so the model cannot describe
+  // it as a temporary failure and send the reader off to retry.
+  assert.match(prompts[2], /web search status: unavailable/i)
+  assert.match(prompts[2], /only know about SapinSapin AI/i)
 })
 
 test('untrusted web text cannot make the Discord bot ping everyone or a role', async () => {

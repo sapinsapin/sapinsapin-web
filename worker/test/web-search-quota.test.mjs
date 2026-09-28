@@ -13,7 +13,9 @@ test('a burst of Discord searches has a bounded per-isolate search budget', asyn
       }
       return Response.json({ choices: [{ message: { content: 'The PSA publishes census data.' } }] })
     }
-    const env = { SAPPY_MODEL_PROVIDER: 'nyo', SAPPY_NYO_MODEL: 'glm-5.3-flash', NYO_API_KEY: 'test_model_only', TAVILY_API_KEY: 'test_search_only' }
+    // The search budget only spends itself while web search is switched on, so
+    // this test has to opt in — see web-search.test.mjs.
+    const env = { SAPPY_MODEL_PROVIDER: 'nyo', SAPPY_NYO_MODEL: 'glm-5.3-flash', NYO_API_KEY: 'test_model_only', TAVILY_API_KEY: 'test_search_only', WEB_SEARCH_ENABLED: 'true' }
     let throttled = false
     for (let i = 0; i < 25; i++) {
       const request = new Request('https://sappy-ai.primary-bd7.workers.dev/?q=Which%20agency%20publishes%20Philippine%20population%20data%3F', { headers: { 'CF-Connecting-IP': `192.0.2.${i + 1}` } })

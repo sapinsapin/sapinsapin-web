@@ -570,3 +570,25 @@ curl -s -D - -H "Origin: https://sapinsapin-web.vercel.app" \
 Expect `200` + `access-control-allow-origin: https://sapinsapin-web.vercel.app` + a JSON
 body with an `answer` key. Keep the workers.dev origin in the site's CSP `connect-src`
 (check-csp) in step with any origin change here.
+
+**Web search is switched off, and that is the default, not an omission.**
+`WEB_SEARCH_ENABLED` is unset in production, so a question outside the project is
+answered from a fixed sentence — `mode: "project_only"` — that names the boundary
+instead of failing. Three things about that are easy to undo by accident:
+
+- **The gate is the flag alone; the key is a separate check.** `webSearchEnabled()` decides
+  whether a question may leave the project, and `webSearchReady()` adds the key. They are
+  split because the failures differ: with the switch on and no key, searching is broken
+  *now* and the Worker says so (`web_search_unavailable`) rather than pretending it was
+  never a capability. Collapsing the two makes Sappy claim a search it cannot run.
+- **A missing var is `undefined`, so nothing is on by default.** Adding `WEB_SEARCH_ENABLED`
+  to `wrangler.toml` re-enables Tavily for every general question in one deploy. That is
+  deliberate, and reversible the same way.
+- **`TAVILY_API_KEY` is a third secret, and it is not set.** `wrangler secret list` is the
+  only way to check; nothing in the toml reports it. The search code, its per-isolate
+  budget, and the source-relevance scoring all still exist and are still tested — the tests
+  opt in with `WEB_SEARCH_ENABLED: 'true'` — so re-enabling is a config change, not a
+  rewrite.
+
+Turn the switch on only with a key behind it, and expect the boundary answer to become
+`web_search` in the tests that pin the default.

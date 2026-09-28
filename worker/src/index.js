@@ -1246,7 +1246,7 @@ async function answerSappySelfQuestion(
 SELF-KNOWLEDGE MODE
 
 The user is asking about Sappy itself.
-WEB SEARCH STATUS: ${env.TAVILY_API_KEY ? "enabled" : "unavailable"}. Describe web search as available only when enabled, and never claim to browse arbitrary pages or inspect private systems.
+WEB SEARCH STATUS: ${webSearchReady(env) ? "enabled" : "unavailable"}. Describe web search as available only when the status line says enabled, and never claim to browse arbitrary pages or inspect private systems.${webSearchEnabled(env) ? "" : " Web search is switched off, so your world is this project's curated knowledge. If asked something outside it, say plainly that you only know about SapinSapin AI and invite a question about the project. Do not describe this as a temporary failure and do not suggest trying again later."}
 
 Answer using Sappy's identity, creator information, current capabilities, and current limitations defined above.
 
@@ -1559,11 +1559,53 @@ function validWebSource(result) {
   }
 }
 
+// Web search is off by default, and stays off until someone deliberately turns
+// it on with WEB_SEARCH_ENABLED. Two reasons, one of them permanent: Tavily has
+// no key in production, so every web question already ended in a dead end, and
+// a project assistant answering general questions from an open web search is a
+// different and much weaker product than one that knows its own project
+// properly. The capability is kept rather than deleted so it can come back as
+// one env var, and the key is still required so enabling the flag without a key
+// reports "unavailable" instead of pretending.
+// The switch, on its own. This is the only thing that decides whether a
+// question may leave the project at all.
+function webSearchEnabled(env) {
+  return env.WEB_SEARCH_ENABLED === "true" || env.WEB_SEARCH_ENABLED === true;
+}
+
+// The switch *and* a key. Kept separate because the two failures are not the
+// same event: with the switch on and no key, searching is broken right now,
+// and Sappy has to be able to say so — claiming a search it cannot run is
+// worse than having none.
+function webSearchReady(env) {
+  return webSearchEnabled(env) && Boolean(env.TAVILY_API_KEY);
+}
+
+// The particle list, not just question words: "Salamat po!" carries no
+// question word at all, and picking a language from question words alone sent
+// the English apology to a Filipino speaker.
+function isFilipino(question) {
+  return /\b(?:ano|sino|kailan|paano|balita|ngayon|pinakabagong|hanapin|mga|ang|sa|ng|na|po|ba|kayo|inyo|natin)\b/i
+    .test(String(question ?? ""));
+}
+
+// The honest answer to a question outside the project's scope while web search
+// is switched off. This is a boundary, not an outage, and the wording matters:
+// "I can't verify this on the live web right now" described a failure that
+// explains nothing here, invited the reader to keep retrying, and was sent to
+// Filipino speakers in English.
+function projectOnlyAnswer(question) {
+  return {
+    answer: isFilipino(question)
+      ? "Alam ko lang ang mga detalye tungkol sa SapinSapin AI. Magtanong ka sa akin tungkol sa proyekto."
+      : "I only know about SapinSapin AI. Ask me anything about the project.",
+    chunksFound: 0,
+    mode: "project_only",
+  };
+}
+
 function webUnavailable(question) {
-  // The particle list, not just question words: "Salamat po!" carries no
-  // question word at all, and it used to get the English apology in reply to
-  // a Filipino thank-you.
-  const filipino = /\b(?:ano|sino|kailan|paano|balita|ngayon|pinakabagong|hanapin|mga|ang|sa|ng|na|po|ba|kayo|inyo|natin)\b/i.test(question);
+  const filipino = isFilipino(question);
   return {
     answer: filipino
       ? "Hindi ko ma-verify ito sa live web ngayon. Puwede mo bang subukan ulit mamaya?"
@@ -1763,6 +1805,9 @@ async function answerSappyQuestion(
   }
 
   if (!isProjectQuestion(cleanQuestion, previousSappyMessage)) {
+    // The only question in this dispatcher that may leave the project, and it
+    // may only do so when web search has been switched on deliberately.
+    if (!webSearchEnabled(env)) return projectOnlyAnswer(cleanQuestion);
     return await answerWebQuestion(cleanQuestion, env);
   }
 
