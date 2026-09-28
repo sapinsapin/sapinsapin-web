@@ -1133,7 +1133,12 @@ async function runSappyModel(
     body: JSON.stringify({
       model: env.SAPPY_NYO_MODEL,
       messages,
-      max_tokens: 2048,
+      // NYO reasoning tokens share this budget with the visible answer.
+      // glm-5.3-flash reasoning alone can consume 1400-1700+ tokens on
+      // detail-heavy RAG prompts; 2048 starved the answer (empty → 503,
+      // truncated → cut-off responses). 8192 verified to fit full
+      // reasoning + ~3000-token answers with finish_reason "stop".
+      max_tokens: 8192,
       stream: false,
     }),
     signal: AbortSignal.timeout(45_000),
