@@ -226,9 +226,35 @@ instead of sending near-silence down the model path. Transaction state lives in 
  into a card, a suggestion-chip row before the first ask, and a compose row with field,
  mic and send.
  The card reuses the demo's `.sappy-*` conversation classes for the bubbles and its own
- `.chat-*` shell and controls. `Escape` closes it, Tab is trapped inside the card while it
- is open, and focus returns to the launcher when it closes. The 404 mount is why the
- widget lives in `components/` like every other thing shared between the two roots.
+ `.chat-*` shell and controls. `Escape` backs out one step at a time and Tab is trapped
+ inside the card while it is open, with focus returning to the launcher when it closes. The
+ 404 mount is why the widget lives in `components/` like every other thing shared between
+ the two roots.
+
+ **The card has two sizes, and the second one is not the default.** Opening gives the
+ compact corner card (22rem, capped at `min(63vh, 30rem)`, floating over the page at the
+ launcher's z-index). A toggle beside the close button promotes it to a full-height right
+ rail — flush with the viewport's top, right and bottom edges, `z-index: 55`, above the
+ sticky nav — and `ChatWidget` sets `body[data-chat-rail]` while it is up, which is what
+ slides the page left by `--sappy-rail` on viewports ≥1280px and hides the back-to-top
+ control. Two things there are load-bearing and easy to undo:
+
+ - **The unlayered touch block must exclude the rail.** `.chat-root` gets its corner insets
+   from `@media (pointer: coarse)`-adjacent rules near the bottom of `index.css`, and
+   unlayered declarations beat layered ones no matter the specificity — so a plain
+   `.chat-root { right: …; bottom: … }` there silently overrides the rail's own
+   `inset-block: 0; right: 0` and floats the panel 17.6–28px off two edges. It is written
+   `.chat-root:not([data-rail='true'])` for exactly that reason.
+ - **`data-rail` and the body flag mean different things.** `data-rail` is this widget's
+   own layout switch; `data-chat-rail` on `<body>` is the page-wide signal CSS reacts to.
+   The compact card sets neither, so it never moves the page and never hides the
+   back-to-top. `close()` clears both, so the next open starts in the corner.
+
+ The message list needs `align-content: start` on `.chat-history` and must keep it. The
+ history is a grid, and a grid's `align-content: normal` is `stretch` — which is invisible
+ in the compact card (its own height is content-driven) and glaring in the rail, where a
+ short conversation leaves the panel hundreds of pixels spare and every bubble inflates to
+ the space it was given. Pack the rows to the top and the rail keeps the height instead.
 
  Stacking is deliberate: the chat owns the corner at `z-index: 45` — below the sticky nav
  (`z-50`) — and the back-to-top control (`z-40`) stacks **above** it, offset by the
@@ -444,9 +470,11 @@ site in a mobile Chromium context and assert three things at 320/360/375/390/414
 `document.documentElement.scrollWidth === window.innerWidth` (no horizontal overflow),
 no `input`/`select`/`textarea` with a computed `font-size` under 16px, and no interactive
 element under 44px tall. Also switch through all three demo tabs (and the Voice conversion
-tab's three audio sources) and open the floating chat's card at the same widths — its
+tab's three audio sources) and open the floating chat's card at the same widths — in both
+sizes, compact and rail — since the toggle only exists in the card's header and the header
+is the tightest row in it. Its
 controls carry their own 16px/44px coarse rules (`.chat-compose input`, `.chat-close`,
-`.chat-chip`, and a 3.75rem `.chat-btn`), and the fixed launcher must not pick a corner
+`.chat-expand`, `.chat-chip`, and a 3.75rem `.chat-btn`), and the fixed launcher must not pick a corner
 collision with `.back-to-top` at 320px. Check both knight controls hide in the hero and
 reappear once the page is scrolled, and that the back-to-top emerges from the launcher on
 a downward scroll and sinks back into it on an upward one.

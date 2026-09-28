@@ -1267,18 +1267,19 @@
 
 /* --------------------------------------------------- the Ask Sappy chat */
   /* The "Ask Sappy" chat (ChatWidget.jsx): a launcher anchored to the
-     bottom-right corner of every page that opens into a full-height right
-     rail — flush with the viewport's top, right, and bottom edges, top to
-     bottom. While the rail is open, body[data-chat-open] slides the page
-     behind it (sticky nav included) left by the rail's width on wide
-     screens; on narrower viewports the rail stands as a full-height overlay
-     instead. The launcher's one-line invitation shows only on hover or
-     keyboard focus. Like the back-to-top button it hides in the hero and
-     only materialises once the reader scrolls past the first screen — an
-     open rail is never hidden. The card reuses the demo's .sappy-*
-     conversation styles, so the chat and the demo's results speak the same
-     visual language. The back-to-top button stacks above the closed
-     launcher and steps aside while the rail is open. */
+     bottom-right corner of every page that opens into a compact conversation
+     card — the default — which a control in the card's own header expands
+     into a full-height right rail, flush with the viewport's top, right, and
+     bottom edges. While the rail is up, body[data-chat-rail] slides the page
+     behind it (sticky nav included) left by the rail's width on wide screens;
+     on narrower viewports the rail stands as a full-height overlay instead.
+     The launcher's one-line invitation shows only on hover or keyboard focus.
+     Like the back-to-top button it hides in the hero and only materialises
+     once the reader scrolls past the first screen — an open card is never
+     hidden. The card reuses the demo's .sappy-* conversation styles, so the
+     chat and the demo's results speak the same visual language. The
+     back-to-top button stacks above the closed launcher and steps aside while
+     the rail is open. */
   .chat-root {
     /* Brand fills (launcher + avatar) share this ancestry, so the mark is one
        brand wherever it renders: ube-to-pandan on light paper, a smoky plum
@@ -1302,13 +1303,15 @@
     }
   }
 
-  /* Open, the chat stops hovering and stands as a full-height right rail:
-     flush with the viewport's top, right, and bottom edges. The corner
+  /* Expanded, the card stops hovering and stands as a full-height right
+     rail: flush with the viewport's top, right, and bottom edges. The corner
      insets that float the closed launcher (safe-area padding included) are
      overridden — a flush panel keeps none of them — and the z-index climbs
      above the sticky header (50) so the rail owns the right edge at every
-     scroll depth. */
-  .chat-root[data-open='true'] {
+     scroll depth. This is the *rail* flag rather than the open one: the
+     compact card keeps the launcher's insets and the launcher's z-index, so
+     a card is a card. */
+  .chat-root[data-rail='true'] {
     inset-block: 0;
     right: 0;
     z-index: 55;
@@ -1381,18 +1384,40 @@
     .chat-tip { display: none; }
   }
 
+  /* The default: a compact card in the corner, capped so a long conversation
+     grows upward from the launcher instead of off the top of the screen. */
   .chat-card {
     display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
     grid-template-columns: minmax(0, 1fr); gap: .55rem;
-    width: min(var(--sappy-rail, 24rem), 100vw);
-    height: 100%;
+    width: min(22rem, calc(100vw - 2.4rem));
+    max-height: min(63vh, 30rem);
     border: 1px solid var(--border-soft);
+    border-radius: 1rem;
+    background: rgb(var(--c-paper) / .97);
+    padding: .8rem .85rem .75rem;
+    box-shadow: var(--shadow-float);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    animation: chat-in .24s cubic-bezier(.22, 1, .36, 1) both;
+  }
+  @keyframes chat-in {
+    from { opacity: 0; transform: translateY(8px) scale(.98); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* The rail is the same card, stretched: a fixed width, the full height of
+     the viewport, square flush edges so it reads as a panel of the page rather
+     than a card floating over it, and a safe-area-aware bottom padding now
+     that there is a home indicator under it. Its slide-in replaces the
+     card's rise, and the deeper shadow is what separates a full-height panel
+     from the page sliding away behind it. */
+  .chat-root[data-rail='true'] .chat-card {
+    width: min(var(--sappy-rail, 24rem), 100vw);
+    max-height: none;
+    height: 100%;
     border-right: 0; border-top: 0; border-bottom: 0;
     border-radius: 0;
-    background: rgb(var(--c-paper) / .97);
     padding: .8rem .85rem max(.75rem, env(safe-area-inset-bottom));
     box-shadow: -1.6rem 0 2.6rem -1.4rem rgb(0 0 0 / .35), var(--shadow-float);
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     animation: chat-rail-in .3s cubic-bezier(.22, 1, .36, 1) both;
   }
   @keyframes chat-rail-in {
@@ -1400,7 +1425,7 @@
     to { opacity: 1; transform: none; }
   }
 
-  /* The rail takes real layout space: while it is open the page behind it —
+  /* The rail takes real layout space: while it is up the page behind it —
      sticky nav included — slides left by the rail's width, so nothing it
      covers is lost. Only wide screens can spare the room; narrower viewports
      keep the rail as a full-height overlay (no shift, the panel simply
@@ -1408,12 +1433,13 @@
   body { --sappy-rail: 24rem; }
   @media (min-width: 1280px) {
     body { transition: padding-right .3s cubic-bezier(.22, 1, .36, 1); }
-    body[data-chat-open='true'] { padding-right: var(--sappy-rail); }
+    body[data-chat-rail='true'] { padding-right: var(--sappy-rail); }
   }
-  /* The corner's other resident steps aside while the rail is open — its spot
+  /* The corner's other resident steps aside while the rail is up — its spot
      is inside the panel, and a back-to-top peeking from under a sidebar
-     reads as a bug rather than a control. */
-  body[data-chat-open='true'] .back-to-top {
+     reads as a bug rather than a control. The compact card is not flush with
+     the corner, so it leaves the button where it is. */
+  body[data-chat-rail='true'] .back-to-top {
     opacity: 0; visibility: hidden; pointer-events: none;
   }
 
@@ -1436,16 +1462,29 @@
     color: rgb(var(--c-ube));
   }
   .chat-sub { font-size: .66rem; font-weight: 600; line-height: 1.4; color: rgb(var(--c-ink) / .52); }
-  .chat-close {
+  /* The two header controls read as one object, so they are grouped rather
+     than left to the header's own gap. */
+  .chat-head-actions { display: flex; align-items: center; gap: .25rem; flex: none; }
+  .chat-close,
+  .chat-expand {
     position: relative; flex: none; display: grid; place-items: center;
     width: 2rem; height: 2rem; border-radius: 999px;
     border: 1px solid transparent;
     background: transparent; color: rgb(var(--c-ink) / .45);
     cursor: pointer; transition: color .2s, border-color .2s, background-color .2s;
   }
-  .chat-close:hover { color: rgb(var(--c-ink) / .8); border-color: var(--border-soft); background: rgb(var(--c-paper) / .6); }
-  .chat-close:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(var(--c-paper)), 0 0 0 6px rgb(var(--c-ube) / .6); }
+  .chat-close:hover,
+  .chat-expand:hover { color: rgb(var(--c-ink) / .8); border-color: var(--border-soft); background: rgb(var(--c-paper) / .6); }
+  .chat-close:focus-visible,
+  .chat-expand:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(var(--c-paper)), 0 0 0 6px rgb(var(--c-ube) / .6); }
   .chat-close svg { width: .72rem; height: .72rem; }
+  /* The rail toggle. Only the glyph changes between the two states — corners
+     pushed out to the panel's edges, corners pulled back in — and it swaps on
+     the same flag that moves the card, so the control always says what it
+     does next rather than which state it is in. The strokes are drawn heavier
+     than the close button's because this 24-box glyph is scaled down further
+     than that 16-box one. */
+  .chat-expand svg { width: .95rem; height: .95rem; }
 
   /* The card owns its height (grid row minmax 0). Body splits its row in two:
      the history scrolls, the suggestion chips stay planted below it — chips
@@ -1455,7 +1494,14 @@
     grid-template-columns: minmax(0, 1fr); gap: .55rem;
     min-height: 0; padding-right: .15rem;
   }
-  .chat-history { max-height: none; min-width: 0; min-height: 0; }
+  /* The history is a grid, and a grid's `align-content: normal` is `stretch`:
+     the rail is a full-height panel and a short conversation leaves it hundreds
+     of pixels spare, all of which goes to the rows — so every bubble inflates
+     to the space it was given and the first message starts halfway down the
+     panel. Packing the rows to the top hands the spare height back to the rail
+     (the history still scrolls once the conversation is long enough to need
+     it) and keeps each bubble the height of its own text. */
+  .chat-history { max-height: none; min-width: 0; min-height: 0; align-content: start; }
   .chat-suggest { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
   .chat-suggest-label {
     font-size: .66rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
@@ -2482,10 +2528,11 @@
   .chat-btn { width: 3.75rem; height: 3.75rem; }
   /* The toggle stays the launcher's twin on touch too — same 3.75rem circle. */
   .back-to-top { height: 3.75rem; width: 3.75rem; }
-  /* The close button's drawn size is doing design work in the header row, so
-     the box stays 2.1rem and only the touchable area grows. */
-  .chat-close { position: relative; min-height: 0; }
-  .chat-close::before {
+  /* The header buttons' drawn size is doing design work in the header row,
+     so the box stays 2rem and only the touchable area grows. */
+  .chat-close, .chat-expand { position: relative; min-height: 0; }
+  .chat-close::before,
+  .chat-expand::before {
     content: ''; position: absolute; inset: -.45rem; border-radius: inherit;
   }
   .chat-chip { min-height: 2.75rem; }
@@ -2610,8 +2657,13 @@ main,
 /* The two fixed corner controls that would otherwise sit under the Android
    gesture bar and the iPhone's home indicator. The launcher owns the inset;
    the back-to-top stacks above it and steals the same inset so the gap between
-   them survives a device with a thick home indicator. */
-.chat-root {
+   them survives a device with a thick home indicator. The rail is excluded
+   from the chat's insets deliberately: a panel flush with the viewport's
+   edges keeps none of them (it carries the safe-area padding on its own
+   instead), and this block is unlayered, so a plain `.chat-root` here would
+   beat the rail's own `inset-block: 0; right: 0` and float it off both
+   edges. */
+.chat-root:not([data-rail='true']) {
    right: max(1.1rem, env(safe-area-inset-right));
    bottom: max(1.1rem, env(safe-area-inset-bottom));
  }
@@ -2620,7 +2672,7 @@ main,
    bottom: calc(max(1.1rem, env(safe-area-inset-bottom)) + 4.3rem);
  }
  @media (min-width: 640px) {
-   .chat-root {
+   .chat-root:not([data-rail='true']) {
      right: max(1.75rem, env(safe-area-inset-right));
      bottom: max(1.75rem, env(safe-area-inset-bottom));
    }

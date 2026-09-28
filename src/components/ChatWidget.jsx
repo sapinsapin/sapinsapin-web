@@ -3,18 +3,19 @@ import { askSappy, callSappyVoice } from '../lib/sappyClient'
 import { canRecord, startRecording } from '../lib/audio'
 
 // The "Ask Sappy" chat on every page (index and 404): a launcher fixed in
-// the bottom-right corner that opens into a full-height right rail — top to
-// bottom of the viewport, like a page panel. It is *the* Ask Sappy
-// experience: a text conversation and a press-and-hold voice line into the
-// same assistant — Whisper-small hears Filipino, the sapinsapin/sappy-ai
-// Worker answers from the project knowledge base, and a Filipino corpus
-// speaker reads the reply back aloud. The voice legs queue through
-// spaceClient like the demo's own requests; the Worker leg is a single
-// pointed GET. It is mounted by DeferredOrb a beat after paint so its chunk
-// stays off the first-paint path. While open, the body[data-chat-open] flag
-// lets index.css slide the page (sticky nav included) left by the rail's
-// width on wide screens; narrower viewports keep the rail as a full-height
-// overlay.
+// the bottom-right corner that opens the compact conversation card — the
+// default, exactly as it always floated. A toggle beside the close button
+// expands the card into a full-height right rail, top to bottom of the
+// viewport, like a page panel. It is *the* Ask Sappy experience: a text
+// conversation and a press-and-hold voice line into the same assistant —
+// Whisper-small hears Filipino, the sapinsapin/sappy-ai Worker answers from
+// the project knowledge base, and a Filipino corpus speaker reads the reply
+// back aloud. The voice legs queue through spaceClient like the demo's own
+// requests; the Worker leg is a single pointed GET. It is mounted by
+// DeferredOrb a beat after paint so its chunk stays off the first-paint
+// path. While the rail is up, the body[data-chat-rail] flag lets index.css
+// slide the page (sticky nav included) left by the rail's width on wide
+// screens; narrower viewports keep the rail as a full-height overlay.
 
 const SUGGESTIONS = ['Ano ang SapinSapin AI?', 'Paano ako makakapag-ambag?', 'May bayad ba ang mga datos?']
 
@@ -243,6 +244,10 @@ function RichText({ text }) {
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false)
+  // The card is the compact corner one until the reader asks for the rail, and
+  // closing it drops the rail with it: the next open starts in the corner
+  // again rather than inheriting a panel the reader has forgotten about.
+  const [rail, setRail] = useState(false)
   const [visible, setVisible] = useState(false)
   const [chat, setChat] = useState([])
   const [draft, setDraft] = useState('')
@@ -313,15 +318,15 @@ export default function ChatWidget() {
     prevOpenRef.current = open
   }, [open])
 
-  /* The open chat is a full-height right rail, not a corner card. The body
-     flag lets index.css shift the whole page — sticky nav included — left
-     by the rail's width while it is open, and give the space back on close
-     or unmount. */
+  /* Only the rail takes real layout space: while it is up the body flag lets
+     index.css shift the whole page — sticky nav included — left by the rail's
+     width, and give the space back on collapse, close or unmount. The compact
+     card floats over the corner, so it never moves the page. */
   useEffect(() => {
-    if (!open) return undefined
-    document.body.dataset.chatOpen = 'true'
-    return () => { delete document.body.dataset.chatOpen }
-  }, [open])
+    if (!rail) return undefined
+    document.body.dataset.chatRail = 'true'
+    return () => { delete document.body.dataset.chatRail }
+  }, [rail])
 
   useEffect(() => {
     if (!open) return undefined
@@ -419,7 +424,25 @@ export default function ChatWidget() {
   const stop = useCallback(() => controllerRef.current?.abort(), [])
 
   const toggle = useCallback(() => setOpen((was) => !was), [])
-  const close = useCallback(() => setOpen(false), [])
+  const close = useCallback(() => { setRail(false); setOpen(false) }, [])
+
+  /* Escape backs out one step: off the rail into the card, off the card
+     entirely. It listens on the card rather than on the compose field, so it
+     answers from the rail toggle and the close button too — Tab is trapped in
+     here, and a key that only works from one control goes unanswered the
+     moment the reader lands anywhere else. */
+  useEffect(() => {
+    if (!open) return undefined
+    const el = cardRef.current
+    if (!el) return undefined
+    const onKeyDown = (event) => {
+      if (event.key !== 'Escape') return
+      if (rail) setRail(false)
+      else close()
+    }
+    el.addEventListener('keydown', onKeyDown)
+    return () => el.removeEventListener('keydown', onKeyDown)
+  }, [close, open, rail])
 
   const openAndAsk = useCallback(
     (text) => {
@@ -427,13 +450,6 @@ export default function ChatWidget() {
       run(text)
     },
     [run],
-  )
-
-  const onComposeKeyDown = useCallback(
-    (event) => {
-      if (event.key === 'Escape') close()
-    },
-    [close],
   )
 
   /* --------------------------------------------- press-and-hold voice line */
@@ -549,7 +565,7 @@ export default function ChatWidget() {
   const shown = visible || open
 
   return (
-    <div className="chat-root" data-visible={shown} data-open={open}>
+    <div className="chat-root" data-visible={shown} data-rail={open && rail}>
       {open ? (
         <section className="chat-card" role="dialog" aria-label="Ask Sappy — chat" aria-modal="false" ref={cardRef}>
           <header className="chat-head">
@@ -560,9 +576,29 @@ export default function ChatWidget() {
                 <span className="chat-sub">Answers from the project knowledge base · Filipino</span>
               </span>
             </div>
-            <button type="button" className="chat-close" onClick={close} aria-label="Close chat">
-              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
-            </button>
+            <div className="chat-head-actions">
+              <button
+                type="button"
+                className="chat-expand"
+                onClick={() => setRail((was) => !was)}
+                aria-pressed={rail}
+                aria-label={rail ? 'Shrink the chat back to a corner card' : 'Expand the chat into a full-height rail'}
+                title={rail ? 'Corner card' : 'Full-height rail'}
+              >
+                {rail ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                  </svg>
+                )}
+              </button>
+              <button type="button" className="chat-close" onClick={close} aria-label="Close chat">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+              </button>
+            </div>
           </header>
 
           <div className="chat-body">
@@ -622,7 +658,6 @@ export default function ChatWidget() {
                 type="text"
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
-                onKeyDown={onComposeKeyDown}
                 placeholder="Magtanong sa Filipino…"
                 autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false}
                 maxLength={220}
