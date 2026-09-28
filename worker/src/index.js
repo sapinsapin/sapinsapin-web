@@ -1488,37 +1488,41 @@ ${question}`,
 // path with nothing retrieved and the model is told not to invent, so it
 // degrades to an honest "I don't have that" — which is why these patterns
 // lean towards catching Filipino phrasings rather than staying strict.
-// The knowledge base is written in English and the questions arrive in Filipino,
-// so a Tagalog question can retrieve nothing from a corpus that answers it —
-// measured in production: "Ano ang license ng mga dataset?" returned the
-// per-dataset licence table, while "May bayad ba ang mga datos?" retrieved
-// chunks and then said it had nothing to go on. Both are the same question, and
-// both were answered, so the gap is in the query rather than the index.
+// Measured against the live index, because the shape of this mattered more than
+// it looks. The instance is vector-only (`keyword: false`, no hybrid) running
+// qwen3-embedding-0.6b, and that embedding does not bridge Tagalog to English
+// content: "Paano ako makakapag-ambag?" retrieved *zero* chunks while "How can
+// I contribute to SapinSapin AI?" retrieved ten. Appending the English terms to
+// the visitor's own sentence barely helped (0.415, two chunks) — the Tagalog
+// text still dominates the vector. Leading with them, anchored to the project,
+// is what works: 0.706 with the participation section at rank one.
 //
-// So retrieval runs on the question plus the English terms it means. Only the
-// search string is expanded: the model still sees the visitor's own words, which
-// is also what keeps the answer phrased the way they asked.
+// So when a Filipino term maps to something, the search runs on the mapped
+// English and drops the original sentence. That is safe because only the search
+// string changes — the model is still handed the visitor's own words, which is
+// what keeps the answer phrased the way they asked. A question with no mapping
+// is passed through untouched.
 const FILIPINO_RETRIEVAL_TERMS = {
   bayad: "price pricing cost free",
   magkano: "price pricing cost",
   presyo: "price pricing cost",
   libre: "free",
-  datos: "dataset datasets",
-  dataset: "dataset datasets",
-  lisensya: "license licensing",
-  modelo: "model models",
-  modelyo: "model models",
-  ambag: "contribute contribution contributing",
+  datos: "dataset",
+  dataset: "dataset",
+  lisensya: "license",
+  modelo: "model",
+  modelyo: "model",
+  ambag: "contribute contribution",
   magbigay: "contribute contribution",
   sumulong: "contribute join",
   tumulong: "contribute help",
   makakatulong: "contribute help",
   pagsasalaysay: "transcribe transcription speech",
   transkripsyon: "transcription transcript",
-  boses: "voice voices",
+  boses: "voice",
   tinig: "voice",
-  wika: "language languages",
-  pagsasanay: "training train",
+  wika: "language coverage",
+  pagsasanay: "training",
   pagsusuri: "research",
   espasyo: "space",
 };
@@ -1528,16 +1532,14 @@ function expandRetrievalQuery(query) {
   const present = new Set(text.toLowerCase().match(/[a-z]+/g) ?? []);
   const extra = [];
   for (const [filipino, english] of Object.entries(FILIPINO_RETRIEVAL_TERMS)) {
-    if (!present.has(filipino.toLowerCase())) continue;
-    // Skip glosses the question already contains, so an English question does
-    // not get its own words repeated back at the index.
+    if (!present.has(filipino)) continue;
     for (const term of english.split(" ")) {
       if (present.has(term) || extra.includes(term)) continue;
       extra.push(term);
     }
   }
   if (extra.length === 0) return text;
-  return `${text}\n\nAlso search for: ${extra.join(", ")}`;
+  return `SapinSapin AI ${extra.join(" ")}`;
 }
 
 function isProjectQuestion(question, previousSappyMessage = "") {

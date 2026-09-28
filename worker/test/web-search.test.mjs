@@ -88,12 +88,16 @@ test('retrieval carries the English terms a Filipino question means', async () =
   }
   const [pricing, contribute, alreadyEnglish] = queries
 
-  // "May bayad" is a question about cost and about being free.
+  // The search leads with the mapped English rather than carrying the Tagalog
+  // along: appending it to the visitor's sentence measurably diluted the
+  // vector (0.415 vs 0.706 against the live index) and the Tagalog text
+  // dominated the embedding.
+  assert.match(pricing, /^SapinSapin AI /)
   assert.match(pricing, /price|free/i)
   assert.match(pricing, /dataset/i)
-  // The visitor's own words are still there, not replaced.
-  assert.match(pricing, /May bayad ba ang mga datos\?/)
+  assert.doesNotMatch(pricing, /May bayad ba ang mga datos\?/)
 
+  assert.match(contribute, /^SapinSapin AI /)
   assert.match(contribute, /contribut/i)
 
   // An English question is not padded with its own words back at it.
