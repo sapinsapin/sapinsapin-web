@@ -75,7 +75,7 @@ function stripDiscordMentions(text) {
 // ─────────────────────────────────────────────
 
 const SAPPY_CORE_PROMPT = `
-You are Sappy, the AI assistant for the SapinSapin AI Discord community.
+You are Sappy, the AI assistant and friendly companion of the SapinSapin AI Discord community. SapinSapin AI is your specialty, but you are happy to help with anything else too.
 
 IDENTITY
 
@@ -1250,7 +1250,7 @@ async function answerSappySelfQuestion(
 SELF-KNOWLEDGE MODE
 
 The user is asking about Sappy itself.
-WEB SEARCH STATUS: ${webSearchReady(env) ? "enabled" : "unavailable"}. Describe web search as available only when the status line says enabled, and never claim to browse arbitrary pages or inspect private systems.${webSearchEnabled(env) ? "" : " Web search is switched off, so your world is this project's curated knowledge. If asked something outside it, say plainly that you only know about SapinSapin AI and invite a question about the project. Do not describe this as a temporary failure and do not suggest trying again later."}
+WEB SEARCH STATUS: ${webSearchReady(env) ? "enabled" : "unavailable"}. Describe web search as available only when the status line says enabled, and never claim to browse arbitrary pages or inspect private systems.${webSearchEnabled(env) ? "" : " Web search is switched off, so your world is this project's curated knowledge. You can still chat and help with general questions from your own general knowledge, but you cannot look things up live. Do not describe this as a temporary failure and do not suggest trying again later."}
 
 Answer using Sappy's identity, creator information, current capabilities, and current limitations defined above.
 
@@ -1659,14 +1659,33 @@ function isFilipino(question) {
 // "I can't verify this on the live web right now" described a failure that
 // explains nothing here, invited the reader to keep retrying, and was sent to
 // Filipino speakers in English.
-function projectOnlyAnswer(question) {
-  return {
-    answer: isFilipino(question)
-      ? "Alam ko lang ang mga detalye tungkol sa SapinSapin AI. Magtanong ka sa akin tungkol sa proyekto."
-      : "I only know about SapinSapin AI. Ask me anything about the project.",
-    chunksFound: 0,
-    mode: "project_only",
-  };
+async function projectOnlyAnswer(question, env, previousSappyMessage = "") {
+  // Outside the project and web search is off: Sappy still helps as a friendly
+  // general assistant, from its own knowledge only. Nothing leaves the Worker
+  // except the model call, and live/real-time facts are explicitly disclaimed.
+  const messages = [
+    {
+      role: "system",
+      content: `${SAPPY_CORE_PROMPT}
+
+GENERAL HELPER MODE
+
+The user asked something outside SapinSapin AI. Help them anyway, like a friendly, knowledgeable community member.
+
+- Answer from general knowledge in the user's language (English, Filipino, or Taglish, matching them).
+- Be warm, concise, and natural for Discord.
+- You cannot browse the web or look anything up live. For live or fast-changing things (weather, prices, news, scores, schedules, "today"/"latest"), say plainly you cannot check that live and offer what general help you can.
+- Never invent facts, sources, links, prices, or statistics. If unsure, say so.
+- Do not present general answers as SapinSapin AI project facts.
+- For medical, legal, or financial questions give general information and suggest a qualified professional where it matters.
+- Decline harmful or unsafe requests briefly.
+- Do not claim abilities you do not have.`,
+    },
+  ];
+  if (previousSappyMessage) messages.push({ role: "assistant", content: previousSappyMessage });
+  messages.push({ role: "user", content: question });
+  const answer = await runSappyModel(messages, env);
+  return { answer, chunksFound: 0, mode: "general_chat" };
 }
 
 function webUnavailable(question) {
@@ -1791,8 +1810,8 @@ async function answerSappyQuestion(
     return {
       answer:
         /^(?:kumusta|kamusta)\b/i.test(cleanQuestion)
-          ? "Kumusta! 👋 Ako si Sappy. May tanong ka tungkol sa SapinSapin AI?"
-          : "Hey! 👋 I'm Sappy, the AI assistant for the SapinSapin AI community. Ask me something about the project whenever you're ready.",
+          ? "Kumusta! 👋 Sappy here. Ano'ng maitutulong ko sa'yo?"
+          : "Hey! 👋 Sappy here. What can I help you with?",
 
       chunksFound: 0,
 
@@ -1872,7 +1891,7 @@ async function answerSappyQuestion(
   if (!isProjectQuestion(cleanQuestion, previousSappyMessage)) {
     // The only question in this dispatcher that may leave the project, and it
     // may only do so when web search has been switched on deliberately.
-    if (!webSearchEnabled(env)) return projectOnlyAnswer(cleanQuestion);
+    if (!webSearchEnabled(env)) return await projectOnlyAnswer(cleanQuestion, env, previousSappyMessage);
     return await answerWebQuestion(cleanQuestion, env);
   }
 

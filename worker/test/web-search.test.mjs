@@ -28,24 +28,23 @@ const modelResponse = (content) => Response.json({ choices: [{ message: { conten
 
 test.afterEach(() => { globalThis.fetch = originalFetch })
 
-test('web search is off by default: the project boundary answers in the right language and contacts nothing', async () => {
+test('web search off: off-topic questions get a general answer from the model and never touch search', async () => {
   const off = { ...env() }
   delete off.WEB_SEARCH_ENABLED
-
-  for (const [q, expected] of [
-    ['What is the weather in Manila today?', /only know about SapinSapin AI/],
-    ['Magkano ang bilihid ng bigat ng 5k na Karnata? Edgarr one?', /Alam ko lang ang mga detalye tungkol sa SapinSapin AI/],
-  ]) {
-    // Nothing may be fetched at all: no search, and no model call either — the
-    // boundary answer is a fixed string, so a model call here would mean the
-    // Worker's own knowledge was the only thing holding the line.
-    let calls = 0
-    globalThis.fetch = async () => { calls++; throw new Error('network must not be reached') }
-    const response = await worker.fetch(request(q), off, {})
-    const body = await response.json()
-    assert.equal(body.mode, 'project_only', q)
-    assert.match(body.answer, expected)
-    assert.equal(calls, 0, `${q} should contact no network`)
+  for (const q of ['What is the weather in Manila today?', 'Paano magluto ng adobo?']) {
+    let searched = false
+    let system = ''
+    globalThis.fetch = async (url, options) => {
+      if (String(url).includes('api.tavily.com/search')) { searched = true; throw new Error('web search must stay off') }
+      system = JSON.parse(options.body).messages[0].content
+      return modelResponse('Happy to help with that.')
+    }
+    const body = await (await worker.fetch(request(q), off, {})).json()
+    assert.equal(body.mode, 'general_chat', q)
+    assert.equal(body.answer, 'Happy to help with that.')
+    assert.equal(searched, false)
+    assert.match(system, /GENERAL HELPER MODE/)
+    assert.match(system, /cannot browse the web/i)
   }
 })
 
@@ -221,7 +220,7 @@ test('self-description reports web-search availability from the actual Worker co
   // search had broken, but an explicit boundary, so the model cannot describe
   // it as a temporary failure and send the reader off to retry.
   assert.match(prompts[2], /web search status: unavailable/i)
-  assert.match(prompts[2], /only know about SapinSapin AI/i)
+  assert.match(prompts[2], /cannot look things up live/i)
 })
 
 test('untrusted web text cannot make the Discord bot ping everyone or a role', async () => {
