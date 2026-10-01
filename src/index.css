@@ -924,18 +924,20 @@
      chunk landed — which is the jump the placeholder exists to prevent. The
      steps below are the measured heights at each breakpoint; see "Touch and
      small screens" for the others. */
-  .demo-placeholder { min-height: 72.3rem; border-top: 1px solid var(--border-soft); background: var(--surface-panel); }
-  @media (min-width: 22.5rem) { .demo-placeholder { min-height: 69.2rem; } }
-  @media (min-width: 27rem) { .demo-placeholder { min-height: 64.8rem; } }
-  @media (min-width: 40rem) { .demo-placeholder { min-height: 63.4rem; } }
-  @media (min-width: 48rem) { .demo-placeholder { min-height: 52.8rem; } }
-  @media (min-width: 64rem) { .demo-placeholder { min-height: 47.6rem; } }
-  @media (min-width: 80rem) { .demo-placeholder { min-height: 47.6rem; } }
-  /* A finger costs the console roughly 40–90px of extra control height, so
-     the touch reservation at the two-column breakpoints is its own number. */
-  @media (pointer: coarse) and (min-width: 40rem) { .demo-placeholder { min-height: 70.4rem; } }
-  @media (pointer: coarse) and (min-width: 48rem) { .demo-placeholder { min-height: 58.8rem; } }
-  @media (pointer: coarse) and (min-width: 64rem) { .demo-placeholder { min-height: 51.4rem; } }
+  /* Re-measured Oct 2026 after Synthesize — the default tab — gained the
+     published-voices comparison and became the tallest panel. */
+  .demo-placeholder { min-height: 122.9rem; border-top: 1px solid var(--border-soft); background: var(--surface-panel); }
+  @media (min-width: 22.5rem) { .demo-placeholder { min-height: 116.8rem; } }
+  @media (min-width: 27rem) { .demo-placeholder { min-height: 108.2rem; } }
+  @media (min-width: 40rem) { .demo-placeholder { min-height: 89.1rem; } }
+  @media (min-width: 48rem) { .demo-placeholder { min-height: 82.9rem; } }
+  @media (min-width: 64rem) { .demo-placeholder { min-height: 78.8rem; } }
+  @media (min-width: 80rem) { .demo-placeholder { min-height: 71.3rem; } }
+  /* A finger costs the console extra control height, so the touch
+     reservation at the wider breakpoints is its own number. */
+  @media (pointer: coarse) and (min-width: 40rem) { .demo-placeholder { min-height: 94.8rem; } }
+  @media (pointer: coarse) and (min-width: 48rem) { .demo-placeholder { min-height: 88.3rem; } }
+  @media (pointer: coarse) and (min-width: 64rem) { .demo-placeholder { min-height: 86.2rem; } }
 
   /* The capability switcher. Cards rather than pills: each one carries a label
      and a plain-language subtitle, which is what makes three unfamiliar model
@@ -3015,4 +3017,236 @@ main,
     transition-duration: .01ms !important;
   }
   ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }
+}
+
+
+/* ==========================================================================
+   Live demo, second pass (Oct 2026)
+
+   Unlayered and last, so these settle the demo's layout over the component
+   rules above without a specificity contest. What changed, and why:
+
+   - The three capabilities sit in ONE row at every width. On a phone the old
+     two-up grid left "Voice conversion" alone on a second row, which read as
+     a different kind of control. Below 600px each tab is an icon over a
+     one-word label.
+   - Language moved out of the panels into a shared bar under the tabs. It is
+     the one choice that resets every other field, and on a phone it used to
+     sit a full screen below them.
+   - On a phone the language bar is one swipeable row instead of four wrapped
+     rows of pills, and the input/result order is unchanged but the run
+     button sticks to the bottom of the viewport while the inputs are on
+     screen, so the action is never a scroll away.
+   - Synthesize leads with the published Orpheus voices (pre-rendered), then
+     the live baseline.
+   ========================================================================== */
+
+.demo-switch,
+.demo-switch[style] { grid-template-columns: repeat(var(--demo-cols, 3), minmax(0, 1fr)); }
+.demo-switch button:last-child:nth-child(odd) { grid-column: auto; }
+.demo-switch button {
+  display: flex; align-items: center; gap: .75rem; justify-items: initial;
+}
+.demo-switch-icon { flex: none; width: 1.15rem; height: 1.15rem; fill: currentColor; opacity: .55; transition: opacity .3s ease, color .3s ease; }
+.demo-switch button.is-active .demo-switch-icon { opacity: 1; color: rgb(var(--c-ube)); }
+.demo-switch-text { display: grid; gap: .2rem; min-width: 0; }
+.demo-switch-short { display: none; }
+@media (max-width: 599px) {
+  .demo-switch button {
+    flex-direction: column; justify-content: center; gap: .3rem;
+    padding: .75rem .25rem; text-align: center; min-height: 3.6rem;
+  }
+  .demo-switch-text { display: none; }
+  .demo-switch-short { display: block; font-size: .74rem; font-weight: 650; letter-spacing: -.01em; }
+  .demo-switch-icon { width: 1.25rem; height: 1.25rem; }
+}
+
+/* ------------------------------------------------------------ language bar */
+.demo-lang-bar {
+  display: flex; align-items: center; gap: .85rem;
+  padding: .9rem 1.5rem; border-bottom: 1px solid var(--border-soft);
+  background: rgb(var(--c-paper) / .35);
+}
+.demo-lang-bar .demo-label { flex: none; }
+.demo-lang-bar .demo-langs { flex: 1; min-width: 0; }
+@media (min-width: 64rem) { .demo-lang-bar { padding-inline: 2rem; } }
+@media (max-width: 767px) {
+  /* One swipeable row with a fade at the edge that says "there is more". */
+  .demo-lang-bar { padding: .7rem 0 .7rem 1.15rem; gap: .6rem; }
+  .demo-lang-bar .demo-langs {
+    flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x proximity;
+    scrollbar-width: none; padding: .15rem 1.15rem .15rem 0;
+    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
+            mask-image: linear-gradient(90deg, #000 85%, transparent);
+  }
+  .demo-lang-bar .demo-langs::-webkit-scrollbar { display: none; }
+  .demo-lang-bar .demo-langs button { flex: none; scroll-snap-align: center; white-space: nowrap; }
+}
+
+/* ----------------------------------------------------------- field details */
+.demo-field { border: 0; margin: 0; padding: 0; min-width: 0; }
+.demo-field legend { padding: 0; float: left; }
+.demo-field-head + * { clear: both; }
+.demo-field-aside { margin-left: auto; font-size: .66rem; color: rgb(var(--c-ink) / .45); font-variant-numeric: tabular-nums; }
+
+.demo-segmented { display: flex; width: 100%; }
+.demo-segmented button { flex: 1; padding-block: .45rem; font-size: .74rem; }
+.demo-segmented button:disabled { opacity: .5; }
+
+.demo-model-detail { display: grid; gap: .3rem; padding: .1rem .15rem 0; }
+.demo-model-detail code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .66rem; color: rgb(var(--c-ink) / .55); overflow-wrap: anywhere; }
+.demo-model-tags { display: flex; flex-wrap: wrap; gap: .3rem; }
+.demo-model-tags span {
+  border-radius: 999px; background: rgb(var(--c-ube) / .09); color: rgb(var(--c-ink) / .72);
+  padding: .14rem .5rem; font-size: .66rem; font-weight: 550;
+}
+
+.demo-add {
+  justify-self: start; font-size: .74rem; font-weight: 600; color: rgb(var(--c-ube));
+  padding: .3rem 0; text-underline-offset: .18em;
+}
+.demo-add:hover { text-decoration: underline; }
+
+/* ----------------------------------------------------------------- recorder */
+.demo-recorder { display: grid; gap: .45rem; }
+.demo-record {
+  width: 100%; justify-content: center; align-self: stretch;
+  height: 3.1rem; font-size: .86rem; gap: .6rem; position: relative; overflow: hidden;
+}
+.demo-record svg { width: 1.1rem; height: 1.1rem; fill: rgb(var(--c-ube)); }
+.demo-record.is-live { background: rgb(var(--c-ube) / .08); }
+.demo-rec-dot { animation: demo-rec-pulse 1.2s ease-in-out infinite; }
+@keyframes demo-rec-pulse { 50% { opacity: .35; } }
+.demo-rec-meter {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgb(var(--c-ube) / .15);
+}
+.demo-rec-meter i {
+  display: block; height: 100%; background: rgb(var(--c-ube));
+  transform-origin: left; transform: scaleX(var(--level, 0)); transition: transform .1s linear;
+}
+@media (prefers-reduced-motion: reduce) { .demo-rec-dot { animation: none; } }
+
+/* -------------------------------------------------------------- upload drop */
+.demo-drop {
+  display: flex; align-items: center; gap: .8rem; cursor: pointer;
+  border: 1.5px dashed var(--border-strong); border-radius: .9rem;
+  padding: .9rem 1rem; background: rgb(var(--c-paper) / .5);
+  transition: border-color .2s ease, background-color .2s ease;
+}
+.demo-drop:hover, .demo-drop.is-over { border-color: rgb(var(--c-ube) / .6); background: rgb(var(--c-ube) / .05); }
+.demo-drop:focus-within { border-color: rgb(var(--c-ube) / .6); box-shadow: 0 0 0 3px rgb(var(--c-ube) / .14); }
+.demo-drop.is-disabled { opacity: .5; pointer-events: none; }
+.demo-drop svg { flex: none; width: 1.4rem; height: 1.4rem; fill: rgb(var(--c-ube)); }
+.demo-drop span { display: grid; gap: .1rem; }
+.demo-drop b { font-size: .84rem; font-weight: 600; color: rgb(var(--c-ink)); }
+.demo-drop small { font-size: .7rem; color: rgb(var(--c-ink) / .55); }
+
+/* ------------------------------------------------------------ corpus clips */
+.demo-clips { display: grid; gap: .4rem; }
+.demo-clips button {
+  display: flex; align-items: center; gap: .65rem; text-align: left; min-width: 0;
+  border-radius: .75rem; border: 1px solid var(--border-soft); background: rgb(var(--c-paper) / .6);
+  padding: .6rem .75rem; font-size: .78rem; line-height: 1.35; color: rgb(var(--c-ink) / .82);
+  transition: border-color .2s ease, background-color .2s ease;
+}
+.demo-clips button > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+.demo-clips button:hover:not(:disabled) { border-color: rgb(var(--c-ube) / .45); }
+.demo-clips button.is-active { border-color: rgb(var(--c-ube)); background: rgb(var(--c-ube) / .07); color: rgb(var(--c-ink)); }
+.demo-clips button:disabled { opacity: .6; }
+.demo-clip-mark {
+  flex: none; display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 999px;
+  background: rgb(var(--c-ube) / .12); color: rgb(var(--c-ube)); font-size: .6rem;
+}
+
+/* -------------------------------------------------------------- run button */
+.demo-run-wrap { display: grid; gap: .4rem; margin-top: .35rem; }
+.demo-run { margin-top: 0; display: inline-flex; align-items: center; justify-content: center; gap: .55rem; min-height: 3rem; }
+.demo-run svg { width: 1.05rem; height: 1.05rem; fill: currentColor; }
+.demo-run-why { text-align: center; }
+.demo-spinner {
+  width: .95rem; height: .95rem; border-radius: 999px;
+  border: 2px solid currentColor; border-right-color: transparent;
+  animation: demo-spin .8s linear infinite;
+}
+@keyframes demo-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .demo-spinner { animation: none; border-right-color: currentColor; opacity: .6; } }
+
+/* ------------------------------------------------------------------ result */
+.demo-compare { display: grid; gap: .4rem; padding-top: .55rem; border-top: 1px solid var(--border-soft); }
+.demo-compare b, .demo-result .demo-caption b { font-weight: 650; color: rgb(var(--c-ink) / .75); }
+.demo-score { display: flex; align-items: center; gap: .55rem; font-size: .74rem; font-weight: 600; color: rgb(var(--c-ink) / .75); }
+.demo-score-bar { flex: 0 0 5rem; height: 5px; border-radius: 999px; background: rgb(var(--c-ink) / .1); overflow: hidden; }
+.demo-score-bar i { display: block; height: 100%; background: rgb(var(--c-ube)); transform-origin: left; transition: transform .5s ease; }
+.demo-copy { justify-self: start; }
+
+/* --------------------------------------------------------- published voices */
+.demo-voices,
+.demo-live-head { grid-column: 1 / -1; }
+.demo-voices {
+  display: grid; gap: .85rem; border-radius: 1rem; border: 1px solid var(--border-soft);
+  background: var(--surface-sunken); padding: 1.1rem;
+}
+.demo-voices-head { display: grid; gap: .45rem; }
+.demo-voices-head h4 { margin-top: .2rem; font-size: 1rem; font-weight: 650; letter-spacing: -.02em; color: rgb(var(--c-ink)); }
+@media (min-width: 64rem) {
+  .demo-voices { padding: 1.35rem; }
+  .demo-voices-head { grid-template-columns: 1fr 1fr; align-items: end; gap: 2rem; }
+}
+.demo-sentences { display: flex; flex-wrap: wrap; gap: .3rem; }
+.demo-sentences button {
+  min-width: 2.2rem; height: 2.2rem; border-radius: 999px; border: 1px solid var(--border-soft);
+  background: rgb(var(--c-paper) / .6); font-size: .74rem; font-weight: 650; color: rgb(var(--c-ink) / .7);
+  font-variant-numeric: tabular-nums;
+}
+.demo-sentences button.is-active { background: rgb(var(--c-ink)); border-color: rgb(var(--c-ink)); color: rgb(var(--c-paper)); }
+.demo-sentence {
+  margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 1.1rem; line-height: 1.45;
+  letter-spacing: -.02em; color: rgb(var(--c-ink)); overflow-wrap: anywhere;
+}
+.demo-voice-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+@media (min-width: 48rem) { .demo-voice-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 80rem) { .demo-voice-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.demo-voice-list li {
+  display: grid; gap: .45rem; min-width: 0; border-radius: .85rem; border: 1px solid var(--border-soft);
+  background: var(--surface-panel); padding: .65rem .7rem;
+}
+.demo-voice-list li.is-ours { border-color: rgb(var(--c-ube) / .55); box-shadow: 0 0 0 3px rgb(var(--c-ube) / .08); }
+.demo-voice-name { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .5rem; font-size: .78rem; font-weight: 600; color: rgb(var(--c-ink) / .85); }
+.demo-voice-name small { margin-left: auto; font-size: .66rem; font-weight: 600; color: rgb(var(--c-ink) / .5); font-variant-numeric: tabular-nums; }
+.demo-pill { border-radius: 999px; background: rgb(var(--c-ube)); color: #fbf7f0; padding: .1rem .45rem; font-size: .6rem; font-weight: 700; letter-spacing: .02em; }
+.demo-voice-list .demo-player { padding: .35rem .5rem; }
+.demo-lazy {
+  display: flex; align-items: center; gap: .6rem; width: 100%; text-align: left;
+  border-radius: .8rem; border: 1px solid var(--border-soft); background: rgb(var(--c-paper) / .55);
+  padding: .35rem .5rem; font-size: .76rem; font-weight: 600; color: rgb(var(--c-ink) / .72);
+}
+.demo-lazy:hover:not(:disabled) { border-color: rgb(var(--c-ube) / .45); }
+.demo-live-head { display: grid; gap: .25rem; padding-top: .35rem; }
+
+/* ------------------------------------------------------------------- phone */
+@media (max-width: 767px) {
+  .demo-panel-head { padding: 1.15rem 1.15rem 0; }
+  .demo-panel-title { font-size: 1.35rem; }
+  .demo-panel-copy { font-size: .84rem; }
+  .demo-workspace { gap: 1rem; }
+  .demo-voices { padding: .9rem; }
+  .demo-sentence { font-size: 1rem; }
+  /* The run button follows the visitor down the inputs, so a long form never
+     hides the action. It stops at the end of the inputs column. */
+  .demo-run-wrap {
+    position: sticky; bottom: max(.75rem, env(safe-area-inset-bottom)); z-index: 5;
+  }
+  .demo-run { width: 100%; box-shadow: 0 8px 24px rgb(0 0 0 / .18); }
+  .demo-stage { min-height: 0; }
+  .demo-stage-body { min-height: 6rem; }
+  .demo-stage-head { flex-wrap: wrap; }
+  .demo-stage-model { text-align: left; }
+  .demo-transcript { font-size: 1.02rem; }
+}
+@media (pointer: coarse) {
+  .demo-clips button { min-height: 2.75rem; }
+  .demo-sentences button { min-width: 2.75rem; height: 2.75rem; }
+  .demo-lazy { min-height: 2.75rem; }
+  .demo-add { min-height: 2.75rem; }
+  .demo-segmented button { min-height: 2.75rem; }
 }

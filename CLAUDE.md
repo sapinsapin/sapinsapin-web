@@ -241,7 +241,8 @@ change falls in tells you whether it needs a deploy.
 |---|---|
 | a **clip** is added, renamed or removed | corrects itself — refreshed from `/_on_lang` when the dropdown is focused |
 | a **voice** is added, renamed or removed | corrects itself — refreshed from `/lambda`, and a selection that no longer exists falls back to a real one instead of failing at submit |
-| a **model** is added, renamed or removed | corrects itself — refreshed from `/_on_lang`, and a selection that no longer exists falls back to the first real one instead of failing at submit |
+| a **model** is added, renamed or removed | corrects itself — refreshed from `/_on_lang`. Models are matched by **id**, never by the full label (`src/lib/modelLabels.js`): the Space rewrites labels whenever a score changes ("★ RECOMMENDED · …", "CER 10.8% frozen-disjoint"), and comparing whole labels is what broke the scheduled sync from 23 Sep to 1 Oct 2026. The default is the whisper-small baseline found by id, not by position |
+| a **published-voice comparison** changes | corrects itself — `/lambda_1` is read live and parsed by shape (labelled update = clip, unlabelled = sentence) |
 | an **output shape** changes | keeps working — every result is read positionally through `pick()` with fallbacks |
 | the Space **restarts** and forgets the session | recovers — one silent retry on a fresh session |
 | a **language** is added | ignores it until `npm run sync`; the model badge is dropped rather than printed as `…-undefined` |
@@ -253,11 +254,14 @@ The lazy refreshes fire on focus rather than on mount on purpose: requests are s
 one at a time, so confirming lists eagerly would put two round trips ahead of whatever the
 visitor actually pressed.
 
-Run `npm run sync` before any deploy and the first four rows never come up. If the Space is
+Run `npm run sync` before any deploy and the first four rows never come up. `sync.yml` runs
+the syncs every six hours and opens/updates a "Site sync is degraded" GitHub issue whenever
+the Space sync or contract check fails — those steps are non-fatal, so before this a red
+step hid inside a green run for eight days. `ci.yml` runs the build gates on every push/PR. If the Space is
 asleep at build time the sync fails loudly — the committed manifest is still on disk, so
 `npm run build` alone will still produce a working site with slightly stale lists.
 
-`npm run check:space` asserts the facts above against the live Space — CORS, the six
+`npm run check:space` asserts the facts above against the live Space — CORS, the seven
 endpoints and their parameter order, manifest agreement, and that session-scoped choices are
 still required. It is the closest thing here to a test for the demo; run it in CI or before a
 deploy. It fails with the specific fact that moved, and its last two checks would start

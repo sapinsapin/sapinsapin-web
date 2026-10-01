@@ -24,8 +24,12 @@ const sitemapPath = resolve('public/sitemap.xml')
 // The field sets differ per kind: pipeline_tag is models-only and asking for it
 // on datasets returns HTTP 400.
 const expandFields = {
-  models: ['downloads', 'likes', 'lastModified', 'private', 'gated', 'pipeline_tag'],
-  datasets: ['downloads', 'likes', 'lastModified', 'private', 'gated', 'tags'],
+  // cardData carries the model card's own YAML front matter — base_model and
+  // datasets — so lineage reaches the page by sync instead of waiting for
+  // someone to hand-edit catalog.js. Without it, every model published after
+  // the last edit rendered "Not stated on the Hub" even though its card says.
+  models: ['downloads', 'likes', 'lastModified', 'createdAt', 'private', 'gated', 'pipeline_tag', 'cardData'],
+  datasets: ['downloads', 'likes', 'lastModified', 'createdAt', 'private', 'gated', 'tags'],
 }
 
 async function listRepos(kind) {
@@ -64,6 +68,14 @@ const labelTask = (tag) => {
 }
 const day = (value) => (value ? value.slice(0, 10) : null)
 
+// Card front matter is free-form YAML: base_model and datasets may be a string,
+// a list, or absent. Only the first entry is kept — that is what the table has
+// room for — and nothing is inferred when the card is silent.
+const firstOf = (value) => {
+  const item = Array.isArray(value) ? value[0] : value
+  return typeof item === 'string' && item.trim() ? item.trim() : null
+}
+
 const [models, datasets] = await Promise.all([listRepos('models'), listRepos('datasets')])
 
 const modelRows = models
@@ -73,6 +85,10 @@ const modelRows = models
     downloads: model.downloads ?? 0,
     likes: model.likes ?? 0,
     updated: day(model.lastModified),
+    created: day(model.createdAt),
+    base: firstOf(model.cardData?.base_model),
+    data: firstOf(model.cardData?.datasets),
+    license: firstOf(model.cardData?.license),
   }))
   .sort((a, b) => b.downloads - a.downloads)
 
@@ -82,10 +98,17 @@ const datasetRows = datasets
     downloads: dataset.downloads ?? 0,
     likes: dataset.likes ?? 0,
     updated: day(dataset.lastModified),
+    created: day(dataset.createdAt),
     gated: Boolean(dataset.gated),
     license: licenseOf(dataset.tags),
   }))
   .sort((a, b) => b.downloads - a.downloads)
+
+// Guard rail: an empty list from a healthy-looking 200 would otherwise publish
+// a page that says "0 models". The org has never had zero of either.
+if (!modelRows.length || !datasetRows.length) {
+  throw new Error(`refusing to write an empty catalog (${modelRows.length} models, ${datasetRows.length} datasets)`)
+}
 
 const totals = {
   models: modelRows.length,

@@ -6,7 +6,7 @@
 export const spaceId = "sapinsapin/halohalo-dashboard"
 export const spaceOrigin = "https://sapinsapin-halohalo-dashboard.hf.space"
 export const gradioVersion = "6.22.0"
-export const syncedAt = "2026-09-23"
+export const syncedAt = "2026-10-01"
 export const languages = [
   {
     "name": "Bikol",
@@ -20,8 +20,8 @@ export const languages = [
       "2. Siya ang nagbakal dati, dati sing naguupod pa sa bangakang N"
     ],
     "models": [
-      "whisper-small-pld-bcl · 242M · CER 4.0% in-domain",
-      "whisper-large-v3-pld-bcl-norm · 1543M · CER 4.6% frozen-disjoint normalised"
+      "★ RECOMMENDED · whisper-large-v3-pld-bcl-norm · 1543M · CER 4.6% frozen-disjoint normalised",
+      "fast baseline · whisper-small-pld-bcl · 242M · CER 4.0% in-domain"
     ]
   },
   {
@@ -36,11 +36,11 @@ export const languages = [
       "2. Waláy mogubâ sa púthaw kun dílì ang kaugalíngong tayâ."
     ],
     "models": [
-      "whisper-small-pld-ceb · 242M · CER 2.6% in-domain",
-      "omniASR_W2V_1B_SSL-ctc-char-pld_ceb-norm · 963M · CER 12.6% frozen-disjoint normalised",
-      "omniASR_W2V_1B_SSL-ctc-char-pld_ceb · 963M · CER 17.0% frozen-disjoint",
-      "whisper-large-v3-pld-ceb · 1543M · CER 16.4% frozen-disjoint",
-      "whisper-large-v3-pld-ceb-norm · 1543M · CER 10.8% frozen-disjoint normalised"
+      "★ RECOMMENDED · whisper-large-v3-pld-ceb-norm · 1543M · CER 10.8% frozen-disjoint normalised",
+      "fast baseline · whisper-small-pld-ceb · 242M · CER 2.6% in-domain",
+      "research · omniASR_W2V_1B_SSL-ctc-char-pld_ceb-norm · 963M · CER 12.6% frozen-disjoint normalised",
+      "research · omniASR_W2V_1B_SSL-ctc-char-pld_ceb · 963M · CER 17.0% frozen-disjoint",
+      "research · whisper-large-v3-pld-ceb · 1543M · CER 16.4% frozen-disjoint"
     ]
   },
   {
@@ -55,7 +55,7 @@ export const languages = [
       "2. The Artemis Vulgaris, more commonly known as damong maria."
     ],
     "models": [
-      "whisper-small-pld-eng · 242M · CER 1.6% in-domain"
+      "fast baseline · whisper-small-pld-eng · 242M · CER 1.6% in-domain"
     ]
   },
   {
@@ -70,10 +70,10 @@ export const languages = [
       "2. Hindi na kayo magkakaanak"
     ],
     "models": [
-      "whisper-small-pld-fil · 242M · CER 3.6% in-domain",
-      "whisper-small-fsc · 242M · CER 7.1% in-domain",
-      "whisper-small-fsc-pld-fil · 242M · CER 6.9% in-domain",
-      "whisper-large-v3-pld-fil-norm · 1543M · CER 5.0% frozen-disjoint normalised"
+      "★ RECOMMENDED · whisper-large-v3-pld-fil-norm · 1543M · CER 5.0% frozen-disjoint normalised",
+      "fast baseline · whisper-small-pld-fil · 242M · CER 3.6% in-domain",
+      "research · whisper-small-fsc · 242M · CER 7.1% in-domain",
+      "research · whisper-small-fsc-pld-fil · 242M · CER 6.9% in-domain"
     ]
   },
   {
@@ -88,8 +88,8 @@ export const languages = [
       "2. Ibutang ang notebook sa table kag markahan ko"
     ],
     "models": [
-      "whisper-small-pld-hil · 242M · CER 7.1% in-domain",
-      "whisper-large-v3-pld-hil-norm · 1543M · CER 9.3% frozen-disjoint normalised"
+      "★ RECOMMENDED · whisper-large-v3-pld-hil-norm · 1543M · CER 9.3% frozen-disjoint normalised",
+      "fast baseline · whisper-small-pld-hil · 242M · CER 7.1% in-domain"
     ]
   },
   {
@@ -104,8 +104,8 @@ export const languages = [
       "2. Nanggeg ko nga agkaiwara iti tuberculosis idiay"
     ],
     "models": [
-      "whisper-small-pld-ilo · 242M · CER 3.3% in-domain",
-      "whisper-large-v3-pld-ilo-norm · 1543M · CER 5.8% frozen-disjoint normalised"
+      "★ RECOMMENDED · whisper-large-v3-pld-ilo-norm · 1543M · CER 5.8% frozen-disjoint normalised",
+      "fast baseline · whisper-small-pld-ilo · 242M · CER 3.3% in-domain"
     ]
   },
   {
@@ -120,8 +120,8 @@ export const languages = [
       "2. Isulat yoy ngaran yo."
     ],
     "models": [
-      "whisper-small-pld-pag · 242M · CER 10.8% in-domain",
-      "whisper-large-v3-pld-pag-norm · 1543M · CER 16.0% frozen-disjoint normalised"
+      "★ RECOMMENDED · whisper-large-v3-pld-pag-norm · 1543M · CER 16.0% frozen-disjoint normalised",
+      "fast baseline · whisper-small-pld-pag · 242M · CER 10.8% in-domain"
     ]
   },
   {
@@ -136,11 +136,11 @@ export const languages = [
       "2. Cuanan taya ing kecong timbang"
     ],
     "models": [
-      "whisper-small-pld-pam · 242M · CER 7.9% in-domain",
-      "omniASR_W2V_1B_SSL-ctc-char-pld_pam-norm · 963M · CER 8.5% frozen-disjoint normalised",
-      "omniASR_W2V_1B_SSL-ctc-char-pld_pam · 963M · CER 10.2% frozen-disjoint",
-      "whisper-large-v3-pld-pam · 1543M · CER 5.8% frozen-disjoint",
-      "whisper-large-v3-pld-pam-norm · 1543M · CER 5.1% frozen-disjoint normalised"
+      "★ RECOMMENDED · whisper-large-v3-pld-pam-norm · 1543M · CER 5.1% frozen-disjoint normalised",
+      "fast baseline · whisper-small-pld-pam · 242M · CER 7.9% in-domain",
+      "research · omniASR_W2V_1B_SSL-ctc-char-pld_pam-norm · 963M · CER 8.5% frozen-disjoint normalised",
+      "research · omniASR_W2V_1B_SSL-ctc-char-pld_pam · 963M · CER 10.2% frozen-disjoint",
+      "research · whisper-large-v3-pld-pam · 1543M · CER 5.8% frozen-disjoint"
     ]
   },
   {
@@ -155,8 +155,8 @@ export const languages = [
       "2. Awn tiyu-tiyu hinglaw mu"
     ],
     "models": [
-      "whisper-small-pld-tsg · 242M · CER 4.8% in-domain",
-      "whisper-large-v3-pld-tsg-norm · 1543M · CER 6.6% frozen-disjoint normalised"
+      "★ RECOMMENDED · whisper-large-v3-pld-tsg-norm · 1543M · CER 6.6% frozen-disjoint normalised",
+      "fast baseline · whisper-small-pld-tsg · 242M · CER 4.8% in-domain"
     ]
   },
   {
@@ -171,8 +171,8 @@ export const languages = [
       "2. Daw duduha nga tukod nga waray bandera"
     ],
     "models": [
-      "whisper-small-pld-war · 242M · CER 5.5% in-domain",
-      "whisper-large-v3-pld-war-norm · 1543M · CER 7.8% frozen-disjoint normalised"
+      "★ RECOMMENDED · whisper-large-v3-pld-war-norm · 1543M · CER 7.8% frozen-disjoint normalised",
+      "fast baseline · whisper-small-pld-war · 242M · CER 5.5% in-domain"
     ]
   }
 ]

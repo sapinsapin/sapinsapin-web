@@ -23,6 +23,7 @@
 
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
+import { findBaseline, parseModelLabel } from '../src/lib/modelLabels.js'
 
 const spaceId = 'sapinsapin/halohalo-dashboard'
 const origin = `https://${spaceId.replace('/', '-')}.hf.space`
@@ -102,12 +103,17 @@ for (const language of languages) {
   if (!voiceChoices.length) throw new Error(`${language}: no voices returned by /lambda`)
   if (!clipChoices.length) throw new Error(`${language}: no clips returned by /_on_lang`)
   if (!modelChoices.length) throw new Error(`${language}: no models returned by /_on_lang`)
-  // The Space's own dropdown sorts the whisper-small baseline first, and the
-  // demo defaults to the first option — so this is the contract that the
-  // "default model" the page promises still is the baseline.
-  if (!modelChoices[0].startsWith('whisper-small-pld-')) {
-    throw new Error(`${language}: first model ${modelChoices[0]} is not the whisper-small baseline`)
+  // Contract with the demo and with Sappy's voice line, which both need the
+  // fast whisper-small baseline to exist in every language. Its POSITION is not
+  // the contract any more: since 23 Sep 2026 the Space opens each list on a
+  // "★ RECOMMENDED" model and prefixes every label with a tier, which made the
+  // old "first option is the baseline" check fail every night for a week while
+  // the manifest quietly went stale. Assert on what the page actually needs.
+  if (!findBaseline(modelChoices)) {
+    throw new Error(`${language}: no whisper-small baseline among ${modelChoices.length} models`)
   }
+  const unreadable = modelChoices.filter((label) => !/^[A-Za-z][\w.-]+$/.test(parseModelLabel(label).id))
+  if (unreadable.length) throw new Error(`${language}: model labels without a readable id: ${unreadable.join(' | ')}`)
   modelTotal += modelChoices.length
   perLanguage.push({
     name: language,

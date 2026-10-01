@@ -1,0 +1,46 @@
+# Gates every push and pull request on the same checks the scheduled sync runs
+# before it deploys.
+#
+# Vercel deploys main on push, so for a direct push this is an alarm rather
+# than a gate — but it is the alarm that was missing: a hand edit that broke
+# catalog parity or an inline-script hash would otherwise surface only when the
+# next scheduled sync refused to deploy, hours later and for a reason that
+# looks unrelated. On a pull request it is a real gate.
+#
+# No network to the Space and no Hub sync here: CI checks what was committed.
+# Freshness is sync.yml's job.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'knowledge/**'
+      - '**/*.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Check catalog parity
+        run: npm run check:catalog
+      - name: Build
+        run: npm run build
+      - name: Check CSP hashes
+        run: npm run check:csp

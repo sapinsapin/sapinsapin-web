@@ -28,6 +28,7 @@
 //    each time the cursor moves. See `withTranscriptInputs` and `withPrepared`.
 
 import { spaceOrigin, languages as manifestLanguages } from '../data/spaceManifest.js'
+import { findSameModel, parseModelLabel } from './modelLabels.js'
 
 const api = `${spaceOrigin}/gradio_api`
 
@@ -358,8 +359,16 @@ export async function uploadBlob(blob, filename, { signal, timeoutMs = 60_000 } 
 }
 
 // Generated audio is served as application/octet-stream, which Safari refuses to
-// decode from a bare <audio src>. Pulling the bytes and re-typing them as WAV
-// makes it play everywhere, and gives us a stable object URL to revoke.
+// decode from a bare <audio src>. Pulling the bytes and re-typing them makes it
+// play everywhere, and gives us a stable object URL to revoke. The type follows
+// the file's own extension: live results are WAV, but the pre-rendered voice
+// comparison ships Ogg, and labelling Ogg bytes as WAV makes decoders refuse it.
+const audioTypes = { ogg: 'audio/ogg', oga: 'audio/ogg', opus: 'audio/ogg', mp3: 'audio/mpeg', flac: 'audio/flac', m4a: 'audio/mp4', wav: 'audio/wav' }
+const typeOf = (fileData) => {
+  const name = String(fileData?.orig_name ?? fileData?.path ?? fileData?.url ?? '')
+  return audioTypes[name.split('?')[0].split('.').pop()?.toLowerCase()] ?? 'audio/wav'
+}
+
 export async function fetchAudioBlob(fileData, { signal, timeoutMs = 60_000 } = {}) {
   const url = fileData?.url ?? (fileData?.path ? `${api}/file=${fileData.path}` : null)
   if (!url) throw new SpaceError('The Space returned no audio.', { kind: 'failed' })
@@ -374,7 +383,7 @@ export async function fetchAudioBlob(fileData, { signal, timeoutMs = 60_000 } = 
       throw translate(error, signal, timeout)
     }
     if (!response.ok) throw new SpaceError(`Could not download the audio (${response.status}).`, { kind: 'failed' })
-    return new Blob([await response.arrayBuffer()], { type: 'audio/wav' })
+    return new Blob([await response.arrayBuffer()], { type: typeOf(fileData) })
   } finally {
     budget.done()
   }
@@ -398,7 +407,7 @@ const heavy = { timeoutMs: 180_000 }
 // for the small ones. The budget is derived from the size in the model's
 // dropdown label ("… · 1543M · …"); new sizes need no new number here.
 function modelBudget(model) {
-  const size = Number(String(model ?? '').match(/·\s*(\d+)M\s*·/)?.[1])
+  const size = parseModelLabel(model).sizeM
   if (!Number.isFinite(size)) return 210_000
   if (size >= 1200) return 450_000
   if (size >= 500) return 300_000
@@ -506,8 +515,12 @@ export function transcribe({ language, model, audio, reference = '' }, options =
         const { models, value } = await withTranscriptInputs(
           language,
           ({ models: live }) => {
-            const label = live?.length ? (live.includes(model) ? model : live[0]) : model
-            return request('transcribe', [language, label, audio, reference], { ...options, timeoutMs: budget })
+            // Match by model id, not by the whole label: the Space rewrites
+            // labels (tier prefixes, refreshed scores) without changing the
+            // model, and falling back to live[0] would silently swap a 242M
+            // request for the 6 GB recommended model.
+            const label = live?.length ? (findSameModel(live, model) ?? live[0]) : model
+            return request('transcribe', [language, label, audio, reference], { ...options, timeoutMs: modelBudget(label) })
           },
           options,
         )
@@ -533,4 +546,54 @@ export function convert({ audio, voice }, options = {}) {
       }),
     options,
   )
+}
+
+/* ------------------------------------------------------- published voices */
+
+// The Space's "Compare voices" tab: the same held-out sentences spoken by a
+// person and by every TTS system the org has evaluated, pre-rendered offline.
+// It is how a visitor hears the PUBLISHED text-to-speech (Orpheus 3B) at all —
+// at ~2.7 min a sentence on free CPU it cannot run live, so the Space serves
+// files instead. No model loads, so this answers in about a second.
+//
+// The handler is exposed under its internal name, /lambda_1, and returns one
+// flat list: a markdown score table, then for each sentence a markdown line
+// followed by one audio update per system. It is parsed by shape rather than
+// position — an update with a label is a clip, one without is a sentence — so
+// a system added or dropped on the Space does not shift everything after it.
+// A system with no clip for a language arrives as "<name> — not available"
+// with a null value, and is kept so the page can say so.
+const cleanSentence = (value) => String(value ?? '').replace(/^\*\*\d+\.\*\*\s*/, '').replace(/^"|"$/g, '').trim()
+
+function parseScoreTable(markdown) {
+  const rows = String(markdown ?? '').split('\n').filter((line) => line.trim().startsWith('|'))
+  if (rows.length < 3) return { columns: [], rows: [] }
+  const cells = (line) => line.split('|').slice(1, -1).map((cell) => cell.trim())
+  const [head, , ...body] = rows
+  return {
+    columns: cells(head).slice(1).filter(Boolean),
+    rows: body.map(cells).map(([system, ...values]) => ({ system: system.replace(/\*\*/g, ''), values })),
+  }
+}
+
+export function compareVoices(language, options = {}) {
+  return schedule(async () => {
+    const value = await request('lambda_1', [language], { ...options, timeoutMs: 45_000 })
+    if (!Array.isArray(value) || !value.length) throw new SpaceError('The Space returned no comparison.', { kind: 'failed' })
+    const scores = parseScoreTable(typeof value[0] === 'string' ? value[0] : value[0]?.value)
+    const sentences = []
+    for (const item of value.slice(1)) {
+      if (!item || typeof item !== 'object') continue
+      if (!item.label && typeof item.value === 'string') {
+        sentences.push({ text: cleanSentence(item.value), clips: [] })
+      } else if (item.label && sentences.length) {
+        const unavailable = /not available/i.test(item.label)
+        sentences.at(-1).clips.push({
+          system: item.label.replace(/\s*—\s*not available$/i, '').trim(),
+          audio: unavailable ? null : file(item.value),
+        })
+      }
+    }
+    return { scores, sentences: sentences.filter((sentence) => sentence.text) }
+  }, options)
 }

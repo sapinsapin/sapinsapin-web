@@ -79,44 +79,23 @@ function formatDay(value) {
   })
 }
 
+// Hand-checked lineage, kept only where it adds something the model card does
+// not say correctly — everything else now arrives by sync from each card's own
+// `base_model` / `datasets` front matter (see sync-catalog.mjs). Two kinds of
+// entry belong here: cards that are silent (qwen3vl), and cards that name a
+// repo that does not exist (bikoLLM's card says `sapinsapin/halo-bikol`; the
+// published corpus is `halo-bcl`). Rows for repos that are no longer public —
+// the SpeechT5 per-language fleet went private and the syllable CTC arms were
+// deleted on 22 Sep 2026 — were removed rather than left to rot.
 const modelRows = [
   ['qwen3vl-balitanlp-news-writer', '{{VERIFY}}', 'aisingapore/Qwen-SEA-LION-v4-8B-VL', '{{VERIFY}}'],
-  ['llama31-8b-balitanlp-cpt', 'Text generation', 'meta-llama/Llama-3.1-8B', 'LanceBunag/BalitaNLP'],
-  ['llama31-8b-balitanlp-IT', '{{VERIFY}}', 'internetoftim/llama31-8b-balitanlp-cpt', 'CohereLabs/aya_dataset'],
-  ['gpt-oss-20b-balitanlp-cpt', 'Text generation', 'openai/gpt-oss-20b', 'LanceBunag/BalitaNLP'],
   ['bikoLLM', 'Text generation', 'meta-llama/Llama-3.1-8B', 'sapinsapin/halo-bcl'],
-  ['speecht5_tts-fsc', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/filipinospeechcorpus'],
-  ['whisper-small-fsc', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/filipinospeechcorpus'],
+  // ONNX exports: the card names the parent model but not its data, which is
+  // the parent's — the FSC corpus, per the parent cards.
   ['speecht5_tts-fsc-ONNX', 'Text to speech', 'sapinsapin/speecht5_tts-fsc', 'sapinsapin/filipinospeechcorpus'],
   ['whisper-small-fsc-ONNX', 'Speech recognition', 'sapinsapin/whisper-small-fsc', 'sapinsapin/filipinospeechcorpus'],
-  ['speecht5_tts-pld-bcl', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],
-  ['speecht5_tts-pld-ceb', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],
-  ['speecht5_tts-pld-eng', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],
-  ['speecht5_tts-pld-fil', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],
-  ['speecht5_tts-pld-hil', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],
-  ['speecht5_tts-pld-ilo', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],
-  ['speecht5_tts-pld-pag', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],
-  ['speecht5_tts-pld-pam', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],
-  ['speecht5_tts-pld-tsg', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],
-  ['speecht5_tts-pld-war', 'Text to speech', 'microsoft/speecht5_tts', 'sapinsapin/pld'],
-  ['speecht5_vc-pld', 'Audio to audio', 'microsoft/speecht5_vc', 'sapinsapin/pld'],
-  ['whisper-small-pld-bcl', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
-  ['whisper-small-pld-ceb', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
-  ['whisper-small-pld-eng', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
-  ['whisper-small-pld-fil', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
-  ['whisper-small-pld-hil', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
-  ['whisper-small-pld-ilo', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
-  ['whisper-small-pld-pag', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
-  ['whisper-small-pld-pam', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
-  ['whisper-small-pld-tsg', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
-  ['whisper-small-pld-war', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
-  ['whisper-small-fsc-pld-fil', 'Speech recognition', 'openai/whisper-small', 'sapinsapin/pld'],
-  ['whisper-large-v3-pld-ceb', 'Speech recognition', 'openai/whisper-large-v3', 'sapinsapin/pld'],
-  ['whisper-large-v3-pld-pam', 'Speech recognition', 'openai/whisper-large-v3', 'sapinsapin/pld'],
-  ['omniASR_W2V_1B_SSL-ctc-char-pld_ceb', 'Speech recognition', 'ylacombe/omniASR_W2V_1B_SSL', 'sapinsapin/pld'],
-  ['omniASR_W2V_1B_SSL-ctc-syllable-pld_ceb', 'Speech recognition', 'ylacombe/omniASR_W2V_1B_SSL', 'sapinsapin/pld'],
-  ['omniASR_W2V_1B_SSL-ctc-char-pld_pam', 'Speech recognition', 'ylacombe/omniASR_W2V_1B_SSL', 'sapinsapin/pld'],
-  ['omniASR_W2V_1B_SSL-ctc-syllable-pld_pam', 'Speech recognition', 'ylacombe/omniASR_W2V_1B_SSL', 'sapinsapin/pld'],
+  // A fastText classifier trained from scratch — there is no base model to name.
+  ['halo-lid', 'Text classification', 'fastText (no base model)', '{{VERIFY}}'],
 ]
 
 const datasetCopyById = new Map(datasetCopy.map((item) => [item.id, item]))
@@ -160,13 +139,19 @@ export const datasets = [
   }
 })
 
+// Precedence per field: a hand-checked value above, then the model card's own
+// front matter, then an honest "not stated". Never a guess from the repo name.
+const stated = (...values) => values.find((value) => value && value !== '{{VERIFY}}') ?? '{{VERIFY}}'
+
 export const models = hubModels.map((live) => {
   const [fallbackTask, architecture, trainingData] =
     modelCopyByName.get(live.name) ?? ['{{VERIFY}}', '{{VERIFY}}', '{{VERIFY}}']
   return {
     name: live.name,
-    architecture,
-    trainingData,
+    architecture: stated(architecture, live.base),
+    trainingData: stated(trainingData, live.data),
+    license: live.license ?? null,
+    created: live.created ?? null,
     task: live.task ?? fallbackTask,
     downloads: String(live.downloads ?? 0),
     updated: formatDay(live.updated),

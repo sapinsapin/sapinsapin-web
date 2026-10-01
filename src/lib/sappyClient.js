@@ -16,6 +16,7 @@
 
 import { fetchAudioBlob, synthesize, transcribe, uploadBlob } from './spaceClient'
 import { languages } from '../data/spaceManifest'
+import { findBaseline } from './modelLabels'
 
 const DEFAULT_SAPPY_ENDPOINT = 'https://sappy-ai.primary-bd7.workers.dev'
 
@@ -78,9 +79,11 @@ export async function askSappy(question, { signal } = {}) {
 export async function callSappyVoice(blob, { signal, onPhase } = {}) {
   const filipino = languages.find((entry) => entry.name === SAPPY_VOICE_LANGUAGE)
   const models = filipino?.models ?? []
-  // The plain Whisper-small baseline is the first option in the Space's own
-  // list, so a fresh session follows the picker to its default there too.
-  const model = models.find((option) => /^whisper-small\b/.test(option)) ?? models[0] ?? ''
+  // Sappy always hears with the fast whisper-small baseline. The Space's own
+  // list opens on a 6 GB recommended model since 23 Sep 2026, so "first option"
+  // is no longer the cheap one — find the baseline by id, whatever its tier
+  // prefix says. spaceClient re-resolves this against the live list by id.
+  const model = findBaseline(models) ?? models[0] ?? ''
   const voice = filipino?.voices?.[0] ?? ''
   if (!model || !voice) {
     throw new Error('The Filipino voice manifest is missing — run `npm run sync:space`.')

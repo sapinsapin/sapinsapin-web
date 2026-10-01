@@ -2,367 +2,562 @@
 // Live state of https://huggingface.co/sapinsapin, read from the public Hub API.
 // `downloads` is the Hub's 30-day count, matching the org dashboard Space.
 export const syncedAt = "2026-10-01"
-export const hubTotals = {"models":48,"datasets":9,"modelDownloads":2643,"datasetDownloads":2224}
+export const hubTotals = {"models":48,"datasets":9,"modelDownloads":2676,"datasetDownloads":2165}
 export const hubModels = [
   {
     "name": "gpt-oss-20b-balitanlp-cpt-bf16",
     "task": "Text generation",
-    "downloads": 456,
+    "downloads": 463,
     "likes": 0,
-    "updated": "2026-09-26"
+    "updated": "2026-09-26",
+    "created": "2026-09-26",
+    "base": "sapinsapin/gpt-oss-20b-balitanlp-cpt",
+    "data": "LanceBunag/BalitaNLP",
+    "license": "apache-2.0"
   },
   {
     "name": "whisper-small-fsc",
     "task": "Speech recognition",
-    "downloads": 289,
+    "downloads": 284,
     "likes": 0,
-    "updated": "2026-08-08"
+    "updated": "2026-08-08",
+    "created": "2026-08-08",
+    "base": "openai/whisper-small",
+    "data": "sapinsapin/filipinospeechcorpus",
+    "license": "apache-2.0"
   },
   {
     "name": "whisper-small-pld-ceb",
     "task": "Speech recognition",
-    "downloads": 202,
+    "downloads": 207,
     "likes": 0,
-    "updated": "2026-09-15"
+    "updated": "2026-09-15",
+    "created": "2026-08-11",
+    "base": "openai/whisper-small",
+    "data": "sapinsapin/pld",
+    "license": "apache-2.0"
   },
   {
     "name": "whisper-small-fsc-ONNX",
     "task": "Speech recognition",
-    "downloads": 118,
+    "downloads": 124,
     "likes": 0,
-    "updated": "2026-09-12"
+    "updated": "2026-09-12",
+    "created": "2026-09-12",
+    "base": "sapinsapin/whisper-small-fsc",
+    "data": null,
+    "license": "mit"
   },
   {
     "name": "omniASR_W2V_1B_SSL-ctc-char-pld_ceb-norm",
     "task": "Speech recognition",
-    "downloads": 71,
+    "downloads": 72,
     "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-21",
+    "base": "ylacombe/omniASR_W2V_1B_SSL",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-small-pld-fil",
     "task": "Speech recognition",
     "downloads": 70,
     "likes": 0,
-    "updated": "2026-09-15"
+    "updated": "2026-09-15",
+    "created": "2026-08-11",
+    "base": "openai/whisper-small",
+    "data": "sapinsapin/pld",
+    "license": "apache-2.0"
   },
   {
     "name": "whisper-large-v3-pld-ceb",
     "task": "Speech recognition",
     "downloads": 60,
     "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-18",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-small-pld-eng",
     "task": "Speech recognition",
-    "downloads": 57,
+    "downloads": 59,
     "likes": 0,
-    "updated": "2026-09-16"
+    "updated": "2026-09-16",
+    "created": "2026-08-11",
+    "base": "openai/whisper-small",
+    "data": "sapinsapin/pld",
+    "license": "apache-2.0"
   },
   {
     "name": "whisper-large-v3-pld-pam",
     "task": "Speech recognition",
     "downloads": 56,
     "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-18",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-small-pld-hil",
     "task": "Speech recognition",
     "downloads": 55,
     "likes": 0,
-    "updated": "2026-09-16"
+    "updated": "2026-09-16",
+    "created": "2026-08-11",
+    "base": "openai/whisper-small",
+    "data": "sapinsapin/pld",
+    "license": "apache-2.0"
   },
   {
     "name": "omniASR_W2V_1B_SSL-ctc-char-pld_ceb",
     "task": "Speech recognition",
     "downloads": 53,
     "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-18",
+    "base": "ylacombe/omniASR_W2V_1B_SSL",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-small-pld-ilo",
     "task": "Speech recognition",
     "downloads": 52,
     "likes": 0,
-    "updated": "2026-09-16"
+    "updated": "2026-09-16",
+    "created": "2026-08-11",
+    "base": "openai/whisper-small",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
+    "name": "gpt-oss-20b-balitanlp-cpt",
+    "task": "Text generation",
+    "downloads": 49,
+    "likes": 1,
+    "updated": "2026-04-16",
+    "created": "2025-12-19",
+    "base": "openai/gpt-oss-20b",
+    "data": "LanceBunag/BalitaNLP",
+    "license": "apache-2.0"
   },
   {
     "name": "whisper-small-pld-war",
     "task": "Speech recognition",
     "downloads": 49,
     "likes": 0,
-    "updated": "2026-09-16"
-  },
-  {
-    "name": "gpt-oss-20b-balitanlp-cpt",
-    "task": "Text generation",
-    "downloads": 48,
-    "likes": 1,
-    "updated": "2026-04-16"
+    "updated": "2026-09-16",
+    "created": "2026-08-11",
+    "base": "openai/whisper-small",
+    "data": "sapinsapin/pld",
+    "license": "apache-2.0"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-pam",
     "task": "Text to speech",
     "downloads": 46,
     "likes": 0,
-    "updated": "2026-09-26"
+    "updated": "2026-09-26",
+    "created": "2026-09-21",
+    "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
+    "name": "orpheus-3b-0.1-pretrained-char-pld-ceb",
+    "task": "Text to speech",
+    "downloads": 45,
+    "likes": 0,
+    "updated": "2026-09-26",
+    "created": "2026-09-21",
+    "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-small-pld-tsg",
     "task": "Speech recognition",
     "downloads": 43,
     "likes": 0,
-    "updated": "2026-09-16"
+    "updated": "2026-09-16",
+    "created": "2026-08-11",
+    "base": "openai/whisper-small",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
-    "name": "orpheus-3b-0.1-pretrained-char-pld-ceb",
-    "task": "Text to speech",
+    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_pam",
+    "task": "Speech recognition",
     "downloads": 43,
     "likes": 0,
-    "updated": "2026-09-26"
+    "updated": "2026-09-22",
+    "created": "2026-09-18",
+    "base": "ylacombe/omniASR_W2V_1B_SSL",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-tsg",
     "task": "Text to speech",
     "downloads": 43,
     "likes": 0,
-    "updated": "2026-09-26"
-  },
-  {
-    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_pam",
-    "task": "Speech recognition",
-    "downloads": 41,
-    "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-26",
+    "created": "2026-09-21",
+    "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-eng",
     "task": "Text to speech",
     "downloads": 41,
     "likes": 0,
-    "updated": "2026-09-26"
+    "updated": "2026-09-26",
+    "created": "2026-09-21",
+    "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-hil",
     "task": "Text to speech",
     "downloads": 41,
     "likes": 0,
-    "updated": "2026-09-26"
+    "updated": "2026-09-26",
+    "created": "2026-09-21",
+    "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-small-pld-bcl",
     "task": "Speech recognition",
     "downloads": 40,
     "likes": 0,
-    "updated": "2026-08-12"
+    "updated": "2026-08-12",
+    "created": "2026-08-11",
+    "base": "openai/whisper-small",
+    "data": "sapinsapin/pld",
+    "license": "apache-2.0"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-bcl",
     "task": "Text to speech",
     "downloads": 39,
     "likes": 0,
-    "updated": "2026-09-26"
+    "updated": "2026-09-26",
+    "created": "2026-09-21",
+    "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-large-v3-pld-ceb-norm",
     "task": "Speech recognition",
     "downloads": 39,
     "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-21",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-small-pld-pag",
     "task": "Speech recognition",
     "downloads": 38,
     "likes": 0,
-    "updated": "2026-09-16"
+    "updated": "2026-09-16",
+    "created": "2026-08-11",
+    "base": "openai/whisper-small",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-ilo",
     "task": "Text to speech",
     "downloads": 38,
     "likes": 0,
-    "updated": "2026-09-26"
+    "updated": "2026-09-26",
+    "created": "2026-09-21",
+    "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "omniASR_W2V_7B_SSL-ctc-char-pld_ceb",
     "task": "Speech recognition",
     "downloads": 38,
     "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-21",
+    "base": "ylacombe/omniASR_W2V_7B_SSL",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-war",
     "task": "Text to speech",
     "downloads": 37,
     "likes": 0,
-    "updated": "2026-09-26"
+    "updated": "2026-09-26",
+    "created": "2026-09-21",
+    "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-small-pld-pam",
     "task": "Speech recognition",
     "downloads": 36,
     "likes": 0,
-    "updated": "2026-09-16"
+    "updated": "2026-09-16",
+    "created": "2026-08-11",
+    "base": "openai/whisper-small",
+    "data": "sapinsapin/pld",
+    "license": "apache-2.0"
   },
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-fil",
     "task": "Text to speech",
     "downloads": 36,
     "likes": 0,
-    "updated": "2026-09-26"
+    "updated": "2026-09-26",
+    "created": "2026-09-21",
+    "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-large-v3-pld-fil-norm",
     "task": "Speech recognition",
-    "downloads": 32,
+    "downloads": 34,
     "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-22",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "speecht5_tts-fsc",
     "task": "Text to speech",
     "downloads": 31,
     "likes": 0,
-    "updated": "2026-08-07"
+    "updated": "2026-08-07",
+    "created": "2026-08-07",
+    "base": "microsoft/speecht5_tts",
+    "data": "sapinsapin/filipinospeechcorpus",
+    "license": "mit"
   },
   {
     "name": "omniASR_W2V_1B_SSL-ctc-char-pld_pam-norm",
     "task": "Speech recognition",
     "downloads": 31,
     "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-21",
+    "base": "ylacombe/omniASR_W2V_1B_SSL",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-large-v3-pld-bcl-norm",
     "task": "Speech recognition",
     "downloads": 31,
     "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-22",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
+    "name": "whisper-large-v3-pld-tsg-norm",
+    "task": "Speech recognition",
+    "downloads": 31,
+    "likes": 0,
+    "updated": "2026-09-22",
+    "created": "2026-09-22",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
+    "name": "whisper-large-v3-pld-pag-norm",
+    "task": "Speech recognition",
+    "downloads": 30,
+    "likes": 0,
+    "updated": "2026-09-22",
+    "created": "2026-09-22",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-large-v3-pld-war-norm",
     "task": "Speech recognition",
     "downloads": 28,
     "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-22",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-large-v3-pld-pam-norm",
     "task": "Speech recognition",
     "downloads": 27,
     "likes": 0,
-    "updated": "2026-09-22"
-  },
-  {
-    "name": "whisper-large-v3-pld-pag-norm",
-    "task": "Speech recognition",
-    "downloads": 27,
-    "likes": 0,
-    "updated": "2026-09-22"
-  },
-  {
-    "name": "whisper-large-v3-pld-tsg-norm",
-    "task": "Speech recognition",
-    "downloads": 27,
-    "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-21",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-large-v3-pld-hil-norm",
     "task": "Speech recognition",
     "downloads": 25,
     "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-22",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
+    "name": "speecht5_vc-pld",
+    "task": "Audio to audio",
+    "downloads": 24,
+    "likes": 0,
+    "updated": "2026-08-08",
+    "created": "2026-08-08",
+    "base": "microsoft/speecht5_vc",
+    "data": "sapinsapin/pld",
+    "license": "mit"
   },
   {
     "name": "speecht5_tts-fsc-ONNX",
     "task": "Text to speech",
     "downloads": 24,
     "likes": 1,
-    "updated": "2026-09-12"
-  },
-  {
-    "name": "speecht5_vc-pld",
-    "task": "Audio to audio",
-    "downloads": 21,
-    "likes": 0,
-    "updated": "2026-08-08"
+    "updated": "2026-09-12",
+    "created": "2026-09-12",
+    "base": "sapinsapin/speecht5_tts-fsc",
+    "data": null,
+    "license": "mit"
   },
   {
     "name": "whisper-large-v3-pld-ilo-norm",
     "task": "Speech recognition",
     "downloads": 21,
     "likes": 0,
-    "updated": "2026-09-22"
+    "updated": "2026-09-22",
+    "created": "2026-09-22",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "whisper-small-fsc-pld-fil",
     "task": "Speech recognition",
     "downloads": 17,
     "likes": 0,
-    "updated": "2026-09-16"
+    "updated": "2026-09-16",
+    "created": "2026-09-16",
+    "base": "openai/whisper-small",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
   },
   {
     "name": "llama31-8b-balitanlp-cpt",
     "task": "Text generation",
     "downloads": 16,
     "likes": 0,
-    "updated": "2025-12-24"
+    "updated": "2025-12-24",
+    "created": "2025-12-14",
+    "base": "meta-llama/Llama-3.1-8B",
+    "data": "LanceBunag/BalitaNLP",
+    "license": "llama3.1"
   },
   {
     "name": "bikoLLM",
     "task": "Text generation",
     "downloads": 10,
     "likes": 0,
-    "updated": "2025-12-28"
+    "updated": "2025-12-28",
+    "created": "2025-12-27",
+    "base": "meta-llama/Llama-3.1-8B",
+    "data": "sapinsapin/halo-bikol",
+    "license": "llama3.1"
   },
   {
     "name": "qwen3vl-balitanlp-news-writer",
     "task": null,
     "downloads": 0,
     "likes": 0,
-    "updated": "2025-12-14"
+    "updated": "2025-12-14",
+    "created": "2025-12-14",
+    "base": "aisingapore/Qwen-SEA-LION-v4-8B-VL",
+    "data": null,
+    "license": null
   },
   {
     "name": "llama31-8b-balitanlp-IT",
     "task": null,
     "downloads": 0,
     "likes": 0,
-    "updated": "2025-12-16"
+    "updated": "2025-12-16",
+    "created": "2025-12-16",
+    "base": "internetoftim/llama31-8b-balitanlp-cpt",
+    "data": "CohereLabs/aya_dataset",
+    "license": null
   },
   {
     "name": "halo-lid",
     "task": "Text classification",
     "downloads": 0,
     "likes": 0,
-    "updated": "2026-09-23"
+    "updated": "2026-09-23",
+    "created": "2026-09-22",
+    "base": null,
+    "data": null,
+    "license": "cc-by-nc-4.0"
   }
 ]
 export const hubDatasets = [
   {
     "id": "pld",
-    "downloads": 979,
+    "downloads": 937,
     "likes": 0,
     "updated": "2026-09-26",
+    "created": "2026-08-08",
     "gated": false,
     "license": null
   },
   {
     "id": "filipinospeechcorpus",
-    "downloads": 765,
+    "downloads": 750,
     "likes": 3,
     "updated": "2026-08-11",
+    "created": "2026-03-21",
     "gated": false,
     "license": "mit"
   },
   {
     "id": "halo-hil",
-    "downloads": 345,
+    "downloads": 342,
     "likes": 0,
     "updated": "2026-09-23",
+    "created": "2025-12-28",
     "gated": false,
     "license": "mit"
   },
@@ -371,46 +566,52 @@ export const hubDatasets = [
     "downloads": 34,
     "likes": 0,
     "updated": "2026-03-27",
-    "gated": false,
-    "license": null
-  },
-  {
-    "id": "BantayWika",
-    "downloads": 24,
-    "likes": 0,
-    "updated": "2026-03-14",
+    "created": "2025-12-26",
     "gated": false,
     "license": null
   },
   {
     "id": "halo-tgl",
-    "downloads": 23,
+    "downloads": 24,
     "likes": 0,
     "updated": "2026-03-27",
+    "created": "2025-12-25",
     "gated": false,
     "license": "mit"
+  },
+  {
+    "id": "BantayWika",
+    "downloads": 23,
+    "likes": 0,
+    "updated": "2026-03-14",
+    "created": "2026-03-13",
+    "gated": false,
+    "license": null
   },
   {
     "id": "kumu-livestream-raw",
     "downloads": 22,
     "likes": 0,
     "updated": "2026-09-12",
+    "created": "2026-08-11",
     "gated": true,
     "license": null
   },
   {
     "id": "kumu-livestream-segmented",
-    "downloads": 19,
+    "downloads": 21,
     "likes": 0,
     "updated": "2026-08-11",
+    "created": "2026-08-06",
     "gated": true,
     "license": null
   },
   {
     "id": "halohalo",
-    "downloads": 13,
+    "downloads": 12,
     "likes": 0,
     "updated": "2026-03-28",
+    "created": "2026-03-28",
     "gated": false,
     "license": null
   }

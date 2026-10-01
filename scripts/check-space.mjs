@@ -10,6 +10,7 @@
 // catch.
 
 import { languages, spaceId, spaceOrigin, targetVoices } from '../src/data/spaceManifest.js'
+import { findBaseline, parseModelLabel } from '../src/lib/modelLabels.js'
 
 const checks = []
 const check = (name, run) => checks.push({ name, run })
@@ -67,7 +68,8 @@ check('every endpoint the demo calls still exists', async () => {
   if (!response.ok) throw new Error(`HTTP ${response.status}`)
   info = await response.json()
   const named = Object.keys(info.named_endpoints ?? {})
-  const needed = ['/lambda', '/_on_lang', '/load_sample', '/transcribe', '/synthesize', '/convert']
+  // /lambda_1 is the pre-rendered voice comparison the Synthesize tab leads with.
+  const needed = ['/lambda', '/lambda_1', '/_on_lang', '/load_sample', '/transcribe', '/synthesize', '/convert']
   const missing = needed.filter((name) => !named.includes(name))
   if (missing.length) throw new Error(`missing: ${missing.join(', ')}`)
   return `${needed.length} present`
@@ -78,6 +80,7 @@ check('every endpoint the demo calls still exists', async () => {
 check('endpoint parameters are unchanged', async () => {
   const expected = {
     '/lambda': ['l'],
+    '/lambda_1': ['l'],
     '/_on_lang': ['lang_name'],
     '/load_sample': ['lang_name', 'label'],
     '/transcribe': ['lang_name', 'model_label', 'audio', 'reference'],
@@ -141,8 +144,17 @@ check('per-language model lists still match the manifest', async () => {
     const prep = await call('_on_lang', [entry.name])
     const live = values(prep?.[1]?.choices)
     if (live.join('|') !== entry.models.join('|')) {
-      wrong.push(`${entry.name}: manifest ${entry.models.length} ≠ live ${live.length} (run npm run sync:space)`)
+      // Say what actually moved — "manifest 2 ≠ live 2" sent people hunting for
+      // a count change when the Space had only re-worded its labels.
+      const ids = (labels) => labels.map((label) => parseModelLabel(label).id)
+      const added = ids(live).filter((id) => !ids(entry.models).includes(id))
+      const gone = ids(entry.models).filter((id) => !ids(live).includes(id))
+      const what = added.length || gone.length
+        ? [added.length && `added ${added.join(', ')}`, gone.length && `removed ${gone.join(', ')}`].filter(Boolean).join('; ')
+        : 'labels re-worded'
+      wrong.push(`${entry.name}: ${what} (run npm run sync:space)`)
     }
+    if (!findBaseline(live)) wrong.push(`${entry.name}: no whisper-small baseline — Sappy's voice line needs one`)
   }
   if (wrong.length) throw new Error(wrong.join(' · '))
   return `${languages.length} model lists in sync`

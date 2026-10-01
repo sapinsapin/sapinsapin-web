@@ -45,11 +45,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
@@ -99,19 +99,30 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         id: summary
         run: |
+          # A multi-line step output needs a closing delimiter line. The first
+          # version of this step never wrote one, so every run that found a
+          # real change died here ("Matching delimiter not found 'EOF'") and
+          # no PR was ever opened — the 28 Sep 2026 failure. The delimiter is
+          # random so diff content can never terminate it early, and each
+          # `head -c` is followed by a newline because a cut mid-line would
+          # otherwise glue the next marker onto the diff's last line.
+          delim="SUMMARY_$(openssl rand -hex 8)"
           {
-            echo "summary<<EOF"
+            echo "summary<<$delim"
             echo "### What changed"
             echo
             echo '```diff'
             git diff --cached -U1 -- knowledge/snapshots/current-public-state.json knowledge/base/ knowledge/rag-sources.yaml knowledge/qa/ | head -c 6000
+            echo
             echo '```'
             echo
             echo "### Generated RAG diff (excerpt)"
             echo
             echo '```diff'
             git diff --cached -U1 -- knowledge/generated/ | grep -Ev '^\+generated_at|^\-generated_at' | head -c 6000
+            echo
             echo '```'
+            echo "$delim"
           } >> "$GITHUB_OUTPUT"
 
       - name: Create branch and commit
@@ -130,7 +141,15 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Passed through the environment rather than pasted into the script:
+          # an expression expanded inline becomes shell source, so a diff line
+          # that happened to read "BODY" would end the heredoc below early.
+          SUMMARY: ${{ steps.summary.outputs.summary }}
         run: |
+          # The label did not exist in the repo, which made `gh pr create`
+          # fail on its own even where Actions may open PRs. Idempotent.
+          gh label create ssai-rag-candidate --color 7057ff \
+            --description 'Automated Sappy knowledge refresh — review before any production deploy' 2>/dev/null || true
           cat > /tmp/pr-body.md << 'BODY'
           Automated knowledge refresh — candidate only, NOT deployed.
 
@@ -144,7 +163,7 @@ jobs:
           **Validation:** `scripts/rag/validate-rag.mjs` passed (see the
           workflow run's logs for any human-review warnings it flagged).
 
-          ${{ steps.summary.outputs.summary }}
+          SUMMARY_PLACEHOLDER
 
           ### Review checklist for Marc
           - [ ] Any license/access-status change matches what the linked Hugging Face card actually shows
@@ -153,6 +172,12 @@ jobs:
           - [ ] Validator warnings (if any, see workflow logs) have been read
           - [ ] This PR is merged ONLY as a knowledge-candidate update — production deployment is a separate manual step
           BODY
+          # Splice the summary in from the environment, as data.
+          python3 - <<'PY'
+          import os, pathlib
+          p = pathlib.Path('/tmp/pr-body.md')
+          p.write_text(p.read_text().replace('SUMMARY_PLACEHOLDER', os.environ.get('SUMMARY', '')))
+          PY
           gh pr create \
             --title "SSAI knowledge refresh: $(date -u +%Y-%m-%d)" \
             --body-file /tmp/pr-body.md \

@@ -9,17 +9,29 @@
 # hubSnapshot.js design rests on.
 #
 # The push at the end IS the deploy, so everything that can fail is gated before it.
+#
+# Lesson that shaped the "Report" step: from 23 Sep to 1 Oct 2026 the Space
+# manifest sync failed on every single run — the Space had relabelled its model
+# dropdown — and the only signal was a yellow job annotation nobody opened. The
+# run stayed green, so the demo's model lists went stale for eight days. Any
+# non-fatal failure now opens (or updates) one GitHub issue, so a silent
+# degradation is a notification, not an archaeology project.
 
 name: Sync Hub catalog
 
 on:
   schedule:
-    # 05:17 Manila. Off-the-hour on purpose: GitHub delays :00 schedules under load.
-    - cron: '17 21 * * *'
+    # Every six hours, off the hour on purpose (GitHub delays :00 schedules
+    # under load). The first slot is 05:17 Manila. A run where the Hub has not
+    # moved commits nothing and deploys nothing, so the extra runs cost a few
+    # minutes of CI and buy a page that is at most six hours behind the org
+    # rather than a day.
+    - cron: '17 3,9,15,21 * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   # The Space deadlocks if two sessions talk to it at once, and two jobs racing
@@ -30,10 +42,10 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
@@ -45,16 +57,19 @@ jobs:
 
       # Not fatal: the demo manifest is scaffolding that spaceClient.js refreshes
       # at runtime, and a sleeping Space must not throw away a good catalog
-      # refresh. But the failure is a real signal — CLAUDE.md: "This script
-      # failing is the signal that the Space's shape changed" — so it is surfaced
-      # as a job warning instead of being swallowed.
+      # refresh. But it IS reported — see the last step.
       - name: Sync the Space manifest
         id: space
         continue-on-error: true
-        run: npm run sync:space
-      - name: Flag a Space manifest failure
-        if: steps.space.outcome == 'failure'
-        run: echo "::warning title=Space sync failed::sync-space.mjs failed — the Space's shape may have changed. The catalog sync still applied."
+        run: npm run sync:space 2>&1 | tee space-sync.log; exit ${PIPESTATUS[0]}
+
+      # The contract test for the demo: endpoints, parameter order, CORS,
+      # session-scoped choices. Read-only and sequential. Not fatal for the same
+      # reason as above, and reported the same way.
+      - name: Check the Space contract
+        id: contract
+        continue-on-error: true
+        run: npm run check:space 2>&1 | tee space-check.log; exit ${PIPESTATUS[0]}
 
       # Gates. Both run BEFORE the push, because the push deploys.
       - name: Check catalog parity
@@ -67,15 +82,21 @@ jobs:
 
       # sync-catalog.mjs stamps syncedAt with today's date on every run, so the
       # file always differs even when the Hub has not moved. Committing on that
-      # alone would deploy the site every single day to change one date string.
-      # Drop the snapshot if syncedAt is the ONLY thing that changed.
-      - name: Discard a date-only change
+      # alone would deploy the site every single run to change one date string.
+      # Drop a generated file if its date is the ONLY thing that changed.
+      - name: Discard date-only changes
         run: |
-          substantive=$(git diff -U0 -- src/data/hubSnapshot.js \
-            | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' | grep -v 'syncedAt' || true)
-          if [ -z "$substantive" ] && ! git diff --quiet -- src/data/hubSnapshot.js; then
-            echo 'Only syncedAt moved — the Hub is unchanged. Discarding.'
+          only_dates() {
+            ! git diff --quiet -- "$1" && [ -z "$(git diff -U0 -- "$1" \
+              | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' | grep -v 'syncedAt' || true)" ]
+          }
+          if only_dates src/data/hubSnapshot.js; then
+            echo 'Hub unchanged — discarding the date-only snapshot change.'
             git checkout -- src/data/hubSnapshot.js public/sitemap.xml
+          fi
+          if only_dates src/data/spaceManifest.js; then
+            echo 'Space unchanged — discarding the date-only manifest change.'
+            git checkout -- src/data/spaceManifest.js
           fi
 
       - name: Commit the refreshed snapshot
@@ -84,8 +105,52 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src/data/hubSnapshot.js src/data/spaceManifest.js public/sitemap.xml
           if git diff --cached --quiet; then
-            echo 'Hub unchanged — nothing to commit, nothing to deploy.'
+            echo 'Hub and Space unchanged — nothing to commit, nothing to deploy.'
             exit 0
           fi
           git commit -m 'Sync Hub catalog'
-          git push
+          # main can move while this job runs (a human push, a merged PR). The
+          # generated files are only ever written by this job, so a rebase onto
+          # the new main cannot conflict on them.
+          git pull --rebase --quiet origin main
+          git push origin HEAD:main
+
+      - name: Report a degraded sync
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SPACE: ${{ steps.space.outcome }}
+          CONTRACT: ${{ steps.contract.outcome }}
+          JOB: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title='Site sync is degraded'
+          existing=$(gh issue list --state open --search "\"$title\" in:title" --json number -q '.[0].number')
+          if [ "$SPACE" != failure ] && [ "$CONTRACT" != failure ] && [ "$JOB" = success ]; then
+            if [ -n "$existing" ]; then
+              gh issue close "$existing" --comment "Recovered in $RUN_URL — every sync step passed."
+            fi
+            exit 0
+          fi
+          {
+            echo "The scheduled site sync finished with a problem: $RUN_URL"
+            echo
+            echo "| Step | Outcome |"
+            echo "|---|---|"
+            echo "| Hub catalog + build + deploy gates | $JOB |"
+            echo "| Space manifest sync (demo lists) | $SPACE |"
+            echo "| Space contract check | $CONTRACT |"
+            for log in space-sync.log space-check.log; do
+              [ -s "$log" ] || continue
+              echo; echo "<details><summary>$log</summary>"; echo; echo '```'
+              tail -n 30 "$log" | cut -c1-400
+              echo '```'; echo "</details>"
+            done
+            echo
+            echo "The live demo refreshes its lists from the Space at runtime, so a stale manifest degrades the first paint rather than breaking requests — but it does go stale until this is fixed. See CLAUDE.md, \"What updates on its own, and what does not\"."
+          } > body.md
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file body.md
+          else
+            gh issue create --title "$title" --body-file body.md --label bug
+          fi
