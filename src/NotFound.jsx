@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Anchor, ArrowLeft, ArrowUpRight, Github, HuggingFace, Mark } from './components/Icons'
+import { Anchor, ArrowLeft, ArrowUpRight, Discord, Github, HuggingFace, Mark } from './components/Icons'
 import SignalTrace from './components/SignalTrace'
 import ThemeToggle from './components/ThemeToggle'
 import DeferredOrb from './components/DeferredOrb'
@@ -17,6 +17,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react'
 
 const hub = 'https://huggingface.co/sapinsapin'
 const github = 'https://github.com/sapinsapin'
+const discord = 'https://discord.gg/DwgEMN5jx5'
 const space = 'https://huggingface.co/spaces/sapinsapin/halohalo-dashboard'
 
 /* Everywhere a visitor could reasonably have been heading. `keywords` exist to
@@ -196,6 +197,7 @@ function Nav({ theme, onToggleTheme }) {
       </a>
       <div className="flex items-center gap-1.5 sm:gap-2">
         <a href={github} target="_blank" rel="noreferrer" className="nav-icon-link hidden sm:grid" aria-label="SapinSapin AI on GitHub"><Github className="h-[1.1rem] w-[1.1rem]" /></a>
+        <a href={discord} target="_blank" rel="noreferrer" className="nav-icon-link hidden sm:grid" aria-label="SapinSapin AI on Discord"><Discord className="h-[1.1rem] w-[1.1rem]" /></a>
         <a href={hub} target="_blank" rel="noreferrer" className="nav-icon-link hidden sm:grid" aria-label="SapinSapin AI on Hugging Face"><HuggingFace className="h-[1.1rem] w-[1.1rem]" /></a>
         <span className="nav-divider hidden sm:block" aria-hidden="true" />
         <ThemeToggle theme={theme} onToggle={onToggleTheme} />

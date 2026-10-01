@@ -15,7 +15,7 @@ const hub = 'https://huggingface.co/sapinsapin'
 const github = 'https://github.com/sapinsapin'
 const facebook = 'https://www.facebook.com/sapinsapinai'
 const linkedin = 'https://www.linkedin.com/showcase/sapinsapin'
-const discord = 'https://discord.gg/8snUfQw5Uq'
+const discord = 'https://discord.gg/DwgEMN5jx5'
 const space = 'https://huggingface.co/spaces/sapinsapin/halohalo-dashboard'
 
 /* Scrolls to the true document top rather than to the #top hash target —
@@ -401,6 +401,7 @@ function Nav({ theme, onToggleTheme }) {
       <div ref={linksRef} className="nav-links hidden items-center gap-1 text-[.78rem] font-medium text-ink/70 lg:flex">{links}</div>
       <div className="flex items-center gap-1.5 sm:gap-2">
         <ExternalLink href={github} className="nav-icon-link hidden sm:grid" label="SapinSapin AI on GitHub"><Github className="h-[1.1rem] w-[1.1rem]" /></ExternalLink>
+        <ExternalLink href={discord} className="nav-icon-link hidden sm:grid" label="SapinSapin AI on Discord"><Discord className="h-[1.1rem] w-[1.1rem]" /></ExternalLink>
         <ExternalLink href={hub} className="nav-icon-link hidden sm:grid" label="SapinSapin AI on Hugging Face"><HuggingFace className="h-[1.1rem] w-[1.1rem]" /></ExternalLink>
         <span className="nav-divider hidden sm:block" aria-hidden="true" />
         {/* On the narrowest phones this one is hidden and its twin inside the
