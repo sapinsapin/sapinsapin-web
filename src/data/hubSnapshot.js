@@ -2,12 +2,12 @@
 // Live state of https://huggingface.co/sapinsapin, read from the public Hub API.
 // `downloads` is the Hub's 30-day count, matching the org dashboard Space.
 export const syncedAt = "2026-10-03"
-export const hubTotals = {"models":48,"datasets":9,"modelDownloads":2692,"datasetDownloads":2177}
+export const hubTotals = {"models":48,"datasets":9,"modelDownloads":2731,"datasetDownloads":2202}
 export const hubModels = [
   {
     "name": "gpt-oss-20b-balitanlp-cpt-bf16",
     "task": "Text generation",
-    "downloads": 469,
+    "downloads": 472,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-09-26",
@@ -40,7 +40,7 @@ export const hubModels = [
   {
     "name": "whisper-small-fsc-ONNX",
     "task": "Speech recognition",
-    "downloads": 130,
+    "downloads": 136,
     "likes": 0,
     "updated": "2026-09-12",
     "created": "2026-09-12",
@@ -51,7 +51,7 @@ export const hubModels = [
   {
     "name": "omniASR_W2V_1B_SSL-ctc-char-pld_ceb-norm",
     "task": "Speech recognition",
-    "downloads": 73,
+    "downloads": 74,
     "likes": 0,
     "updated": "2026-09-22",
     "created": "2026-09-21",
@@ -73,7 +73,7 @@ export const hubModels = [
   {
     "name": "whisper-large-v3-pld-ceb",
     "task": "Speech recognition",
-    "downloads": 61,
+    "downloads": 62,
     "likes": 0,
     "updated": "2026-09-22",
     "created": "2026-09-18",
@@ -93,6 +93,17 @@ export const hubModels = [
     "license": "apache-2.0"
   },
   {
+    "name": "whisper-large-v3-pld-pam",
+    "task": "Speech recognition",
+    "downloads": 58,
+    "likes": 0,
+    "updated": "2026-09-22",
+    "created": "2026-09-18",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
     "name": "whisper-small-pld-hil",
     "task": "Speech recognition",
     "downloads": 57,
@@ -104,13 +115,13 @@ export const hubModels = [
     "license": "apache-2.0"
   },
   {
-    "name": "whisper-large-v3-pld-pam",
+    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_ceb",
     "task": "Speech recognition",
-    "downloads": 57,
+    "downloads": 55,
     "likes": 0,
     "updated": "2026-09-22",
     "created": "2026-09-18",
-    "base": "openai/whisper-large-v3",
+    "base": "ylacombe/omniASR_W2V_1B_SSL",
     "data": "sapinsapin/pld",
     "license": "cc-by-nc-4.0"
   },
@@ -122,17 +133,6 @@ export const hubModels = [
     "updated": "2026-09-16",
     "created": "2026-08-11",
     "base": "openai/whisper-small",
-    "data": "sapinsapin/pld",
-    "license": "cc-by-nc-4.0"
-  },
-  {
-    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_ceb",
-    "task": "Speech recognition",
-    "downloads": 54,
-    "likes": 0,
-    "updated": "2026-09-22",
-    "created": "2026-09-18",
-    "base": "ylacombe/omniASR_W2V_1B_SSL",
     "data": "sapinsapin/pld",
     "license": "cc-by-nc-4.0"
   },
@@ -161,7 +161,7 @@ export const hubModels = [
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-pam",
     "task": "Text to speech",
-    "downloads": 47,
+    "downloads": 48,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-09-21",
@@ -172,7 +172,29 @@ export const hubModels = [
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-ceb",
     "task": "Text to speech",
-    "downloads": 46,
+    "downloads": 47,
+    "likes": 0,
+    "updated": "2026-09-26",
+    "created": "2026-09-21",
+    "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
+    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_pam",
+    "task": "Speech recognition",
+    "downloads": 45,
+    "likes": 0,
+    "updated": "2026-09-22",
+    "created": "2026-09-18",
+    "base": "ylacombe/omniASR_W2V_1B_SSL",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
+    "name": "orpheus-3b-0.1-pretrained-char-pld-tsg",
+    "task": "Text to speech",
+    "downloads": 45,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-09-21",
@@ -192,31 +214,9 @@ export const hubModels = [
     "license": "cc-by-nc-4.0"
   },
   {
-    "name": "omniASR_W2V_1B_SSL-ctc-char-pld_pam",
-    "task": "Speech recognition",
-    "downloads": 44,
-    "likes": 0,
-    "updated": "2026-09-22",
-    "created": "2026-09-18",
-    "base": "ylacombe/omniASR_W2V_1B_SSL",
-    "data": "sapinsapin/pld",
-    "license": "cc-by-nc-4.0"
-  },
-  {
-    "name": "orpheus-3b-0.1-pretrained-char-pld-tsg",
-    "task": "Text to speech",
-    "downloads": 44,
-    "likes": 0,
-    "updated": "2026-09-26",
-    "created": "2026-09-21",
-    "base": "unsloth/orpheus-3b-0.1-pretrained",
-    "data": "sapinsapin/pld",
-    "license": "cc-by-nc-4.0"
-  },
-  {
     "name": "orpheus-3b-0.1-pretrained-char-pld-eng",
     "task": "Text to speech",
-    "downloads": 42,
+    "downloads": 43,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-09-21",
@@ -227,7 +227,7 @@ export const hubModels = [
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-hil",
     "task": "Text to speech",
-    "downloads": 42,
+    "downloads": 43,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-09-21",
@@ -238,7 +238,7 @@ export const hubModels = [
   {
     "name": "whisper-large-v3-pld-ceb-norm",
     "task": "Speech recognition",
-    "downloads": 42,
+    "downloads": 43,
     "likes": 0,
     "updated": "2026-09-22",
     "created": "2026-09-21",
@@ -249,11 +249,33 @@ export const hubModels = [
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-bcl",
     "task": "Text to speech",
+    "downloads": 41,
+    "likes": 0,
+    "updated": "2026-09-26",
+    "created": "2026-09-21",
+    "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
+    "name": "orpheus-3b-0.1-pretrained-char-pld-ilo",
+    "task": "Text to speech",
     "downloads": 40,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-09-21",
     "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
+    "name": "omniASR_W2V_7B_SSL-ctc-char-pld_ceb",
+    "task": "Speech recognition",
+    "downloads": 40,
+    "likes": 0,
+    "updated": "2026-09-22",
+    "created": "2026-09-21",
+    "base": "ylacombe/omniASR_W2V_7B_SSL",
     "data": "sapinsapin/pld",
     "license": "cc-by-nc-4.0"
   },
@@ -280,31 +302,9 @@ export const hubModels = [
     "license": "cc-by-nc-4.0"
   },
   {
-    "name": "orpheus-3b-0.1-pretrained-char-pld-ilo",
-    "task": "Text to speech",
-    "downloads": 39,
-    "likes": 0,
-    "updated": "2026-09-26",
-    "created": "2026-09-21",
-    "base": "unsloth/orpheus-3b-0.1-pretrained",
-    "data": "sapinsapin/pld",
-    "license": "cc-by-nc-4.0"
-  },
-  {
-    "name": "omniASR_W2V_7B_SSL-ctc-char-pld_ceb",
-    "task": "Speech recognition",
-    "downloads": 39,
-    "likes": 0,
-    "updated": "2026-09-22",
-    "created": "2026-09-21",
-    "base": "ylacombe/omniASR_W2V_7B_SSL",
-    "data": "sapinsapin/pld",
-    "license": "cc-by-nc-4.0"
-  },
-  {
     "name": "orpheus-3b-0.1-pretrained-char-pld-war",
     "task": "Text to speech",
-    "downloads": 38,
+    "downloads": 39,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-09-21",
@@ -315,11 +315,22 @@ export const hubModels = [
   {
     "name": "orpheus-3b-0.1-pretrained-char-pld-fil",
     "task": "Text to speech",
-    "downloads": 37,
+    "downloads": 38,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-09-21",
     "base": "unsloth/orpheus-3b-0.1-pretrained",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
+    "name": "whisper-large-v3-pld-fil-norm",
+    "task": "Speech recognition",
+    "downloads": 38,
+    "likes": 0,
+    "updated": "2026-09-22",
+    "created": "2026-09-22",
+    "base": "openai/whisper-large-v3",
     "data": "sapinsapin/pld",
     "license": "cc-by-nc-4.0"
   },
@@ -335,20 +346,9 @@ export const hubModels = [
     "license": "apache-2.0"
   },
   {
-    "name": "whisper-large-v3-pld-fil-norm",
-    "task": "Speech recognition",
-    "downloads": 36,
-    "likes": 0,
-    "updated": "2026-09-22",
-    "created": "2026-09-22",
-    "base": "openai/whisper-large-v3",
-    "data": "sapinsapin/pld",
-    "license": "cc-by-nc-4.0"
-  },
-  {
     "name": "omniASR_W2V_1B_SSL-ctc-char-pld_pam-norm",
     "task": "Speech recognition",
-    "downloads": 32,
+    "downloads": 33,
     "likes": 0,
     "updated": "2026-09-22",
     "created": "2026-09-21",
@@ -359,7 +359,7 @@ export const hubModels = [
   {
     "name": "whisper-large-v3-pld-bcl-norm",
     "task": "Speech recognition",
-    "downloads": 32,
+    "downloads": 33,
     "likes": 0,
     "updated": "2026-09-22",
     "created": "2026-09-22",
@@ -369,6 +369,17 @@ export const hubModels = [
   },
   {
     "name": "whisper-large-v3-pld-tsg-norm",
+    "task": "Speech recognition",
+    "downloads": 33,
+    "likes": 0,
+    "updated": "2026-09-22",
+    "created": "2026-09-22",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
+    "name": "whisper-large-v3-pld-pag-norm",
     "task": "Speech recognition",
     "downloads": 31,
     "likes": 0,
@@ -390,20 +401,9 @@ export const hubModels = [
     "license": "mit"
   },
   {
-    "name": "whisper-large-v3-pld-pag-norm",
-    "task": "Speech recognition",
-    "downloads": 30,
-    "likes": 0,
-    "updated": "2026-09-22",
-    "created": "2026-09-22",
-    "base": "openai/whisper-large-v3",
-    "data": "sapinsapin/pld",
-    "license": "cc-by-nc-4.0"
-  },
-  {
     "name": "whisper-large-v3-pld-war-norm",
     "task": "Speech recognition",
-    "downloads": 28,
+    "downloads": 29,
     "likes": 0,
     "updated": "2026-09-22",
     "created": "2026-09-22",
@@ -414,10 +414,32 @@ export const hubModels = [
   {
     "name": "whisper-large-v3-pld-pam-norm",
     "task": "Speech recognition",
-    "downloads": 27,
+    "downloads": 28,
     "likes": 0,
     "updated": "2026-09-22",
     "created": "2026-09-21",
+    "base": "openai/whisper-large-v3",
+    "data": "sapinsapin/pld",
+    "license": "cc-by-nc-4.0"
+  },
+  {
+    "name": "speecht5_tts-fsc-ONNX",
+    "task": "Text to speech",
+    "downloads": 26,
+    "likes": 1,
+    "updated": "2026-09-12",
+    "created": "2026-09-12",
+    "base": "sapinsapin/speecht5_tts-fsc",
+    "data": null,
+    "license": "mit"
+  },
+  {
+    "name": "whisper-large-v3-pld-hil-norm",
+    "task": "Speech recognition",
+    "downloads": 26,
+    "likes": 0,
+    "updated": "2026-09-22",
+    "created": "2026-09-22",
     "base": "openai/whisper-large-v3",
     "data": "sapinsapin/pld",
     "license": "cc-by-nc-4.0"
@@ -434,9 +456,9 @@ export const hubModels = [
     "license": "mit"
   },
   {
-    "name": "whisper-large-v3-pld-hil-norm",
+    "name": "whisper-large-v3-pld-ilo-norm",
     "task": "Speech recognition",
-    "downloads": 25,
+    "downloads": 22,
     "likes": 0,
     "updated": "2026-09-22",
     "created": "2026-09-22",
@@ -445,24 +467,13 @@ export const hubModels = [
     "license": "cc-by-nc-4.0"
   },
   {
-    "name": "speecht5_tts-fsc-ONNX",
-    "task": "Text to speech",
-    "downloads": 24,
-    "likes": 1,
-    "updated": "2026-09-12",
-    "created": "2026-09-12",
-    "base": "sapinsapin/speecht5_tts-fsc",
-    "data": null,
-    "license": "mit"
-  },
-  {
-    "name": "whisper-large-v3-pld-ilo-norm",
+    "name": "whisper-small-fsc-pld-fil",
     "task": "Speech recognition",
-    "downloads": 21,
+    "downloads": 18,
     "likes": 0,
-    "updated": "2026-09-22",
-    "created": "2026-09-22",
-    "base": "openai/whisper-large-v3",
+    "updated": "2026-09-16",
+    "created": "2026-09-16",
+    "base": "openai/whisper-small",
     "data": "sapinsapin/pld",
     "license": "cc-by-nc-4.0"
   },
@@ -476,17 +487,6 @@ export const hubModels = [
     "base": "meta-llama/Llama-3.1-8B",
     "data": "LanceBunag/BalitaNLP",
     "license": "llama3.1"
-  },
-  {
-    "name": "whisper-small-fsc-pld-fil",
-    "task": "Speech recognition",
-    "downloads": 17,
-    "likes": 0,
-    "updated": "2026-09-16",
-    "created": "2026-09-16",
-    "base": "openai/whisper-small",
-    "data": "sapinsapin/pld",
-    "license": "cc-by-nc-4.0"
   },
   {
     "name": "bikoLLM",
@@ -536,7 +536,7 @@ export const hubModels = [
 export const hubDatasets = [
   {
     "id": "pld",
-    "downloads": 913,
+    "downloads": 914,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-08-08",
@@ -545,7 +545,7 @@ export const hubDatasets = [
   },
   {
     "id": "filipinospeechcorpus",
-    "downloads": 782,
+    "downloads": 783,
     "likes": 3,
     "updated": "2026-08-11",
     "created": "2026-03-21",
@@ -554,7 +554,7 @@ export const hubDatasets = [
   },
   {
     "id": "halo-hil",
-    "downloads": 343,
+    "downloads": 344,
     "likes": 0,
     "updated": "2026-09-23",
     "created": "2025-12-28",
@@ -563,7 +563,7 @@ export const hubDatasets = [
   },
   {
     "id": "halo-bcl",
-    "downloads": 35,
+    "downloads": 39,
     "likes": 0,
     "updated": "2026-03-27",
     "created": "2025-12-26",
@@ -572,7 +572,7 @@ export const hubDatasets = [
   },
   {
     "id": "halo-tgl",
-    "downloads": 25,
+    "downloads": 33,
     "likes": 0,
     "updated": "2026-03-27",
     "created": "2025-12-25",
@@ -580,17 +580,8 @@ export const hubDatasets = [
     "license": "mit"
   },
   {
-    "id": "BantayWika",
-    "downloads": 23,
-    "likes": 0,
-    "updated": "2026-03-14",
-    "created": "2026-03-13",
-    "gated": false,
-    "license": null
-  },
-  {
     "id": "kumu-livestream-raw",
-    "downloads": 23,
+    "downloads": 27,
     "likes": 0,
     "updated": "2026-09-12",
     "created": "2026-08-11",
@@ -598,8 +589,17 @@ export const hubDatasets = [
     "license": null
   },
   {
+    "id": "BantayWika",
+    "downloads": 25,
+    "likes": 0,
+    "updated": "2026-03-14",
+    "created": "2026-03-13",
+    "gated": false,
+    "license": null
+  },
+  {
     "id": "kumu-livestream-segmented",
-    "downloads": 21,
+    "downloads": 23,
     "likes": 0,
     "updated": "2026-08-11",
     "created": "2026-08-06",
@@ -608,7 +608,7 @@ export const hubDatasets = [
   },
   {
     "id": "halohalo",
-    "downloads": 12,
+    "downloads": 14,
     "likes": 0,
     "updated": "2026-03-28",
     "created": "2026-03-28",
