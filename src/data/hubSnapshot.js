@@ -2,12 +2,12 @@
 // Live state of https://huggingface.co/sapinsapin, read from the public Hub API.
 // `downloads` is the Hub's 30-day count, matching the org dashboard Space.
 export const syncedAt = "2026-10-04"
-export const hubTotals = {"models":48,"datasets":9,"modelDownloads":2749,"datasetDownloads":2202}
+export const hubTotals = {"models":48,"datasets":9,"modelDownloads":2753,"datasetDownloads":2187}
 export const hubModels = [
   {
     "name": "gpt-oss-20b-balitanlp-cpt-bf16",
     "task": "Text generation",
-    "downloads": 472,
+    "downloads": 476,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-09-26",
@@ -536,7 +536,7 @@ export const hubModels = [
 export const hubDatasets = [
   {
     "id": "pld",
-    "downloads": 914,
+    "downloads": 917,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-08-08",
@@ -545,7 +545,7 @@ export const hubDatasets = [
   },
   {
     "id": "filipinospeechcorpus",
-    "downloads": 783,
+    "downloads": 774,
     "likes": 3,
     "updated": "2026-08-11",
     "created": "2026-03-21",
@@ -554,7 +554,7 @@ export const hubDatasets = [
   },
   {
     "id": "halo-hil",
-    "downloads": 344,
+    "downloads": 338,
     "likes": 0,
     "updated": "2026-09-23",
     "created": "2025-12-28",
@@ -563,7 +563,7 @@ export const hubDatasets = [
   },
   {
     "id": "halo-bcl",
-    "downloads": 39,
+    "downloads": 38,
     "likes": 0,
     "updated": "2026-03-27",
     "created": "2025-12-26",
@@ -572,7 +572,7 @@ export const hubDatasets = [
   },
   {
     "id": "halo-tgl",
-    "downloads": 33,
+    "downloads": 34,
     "likes": 0,
     "updated": "2026-03-27",
     "created": "2025-12-25",
@@ -581,7 +581,7 @@ export const hubDatasets = [
   },
   {
     "id": "kumu-livestream-raw",
-    "downloads": 27,
+    "downloads": 28,
     "likes": 0,
     "updated": "2026-09-12",
     "created": "2026-08-11",
@@ -589,21 +589,21 @@ export const hubDatasets = [
     "license": null
   },
   {
-    "id": "BantayWika",
-    "downloads": 25,
-    "likes": 0,
-    "updated": "2026-03-14",
-    "created": "2026-03-13",
-    "gated": false,
-    "license": null
-  },
-  {
     "id": "kumu-livestream-segmented",
-    "downloads": 23,
+    "downloads": 24,
     "likes": 0,
     "updated": "2026-08-11",
     "created": "2026-08-06",
     "gated": true,
+    "license": null
+  },
+  {
+    "id": "BantayWika",
+    "downloads": 20,
+    "likes": 0,
+    "updated": "2026-03-14",
+    "created": "2026-03-13",
+    "gated": false,
     "license": null
   },
   {
