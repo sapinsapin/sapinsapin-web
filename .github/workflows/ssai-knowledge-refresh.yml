@@ -112,14 +112,17 @@ jobs:
             echo "### What changed"
             echo
             echo '```diff'
-            git diff --cached -U1 -- knowledge/snapshots/current-public-state.json knowledge/base/ knowledge/rag-sources.yaml knowledge/qa/ | head -c 6000
+            git diff --cached -U1 -- knowledge/snapshots/current-public-state.json knowledge/base/ knowledge/rag-sources.yaml knowledge/qa/ \
+              | python3 -c 'import sys; sys.stdout.write(sys.stdin.read()[:6000])'
             echo
             echo '```'
             echo
             echo "### Generated RAG diff (excerpt)"
             echo
             echo '```diff'
-            git diff --cached -U1 -- knowledge/generated/ | grep -Ev '^\+generated_at|^\-generated_at' | head -c 6000
+            git diff --cached -U1 -- knowledge/generated/ \
+              | grep -Ev '^\+generated_at|^\-generated_at' \
+              | python3 -c 'import sys; sys.stdout.write(sys.stdin.read()[:6000])'
             echo
             echo '```'
             echo "$delim"
