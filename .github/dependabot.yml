@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      # Tailwind 4 changes the PostCSS plugin and CSS integration used by this
+      # site. Keep automatic updates within v3 until a deliberate migration is
+      # made and verified.
+      - dependency-name: tailwindcss
+        update-types:
+          - version-update:semver-major

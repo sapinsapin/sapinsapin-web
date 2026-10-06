@@ -135,8 +135,25 @@ jobs:
           branch="ssai-knowledge-refresh/$(date -u +%Y-%m-%d)"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git checkout -b "$branch"
+          # Commit the freshly generated candidate first. If this workflow is
+          # re-run on the same UTC day, the daily branch may already exist;
+          # append this candidate commit to that branch instead of trying to
+          # recreate it from main and receiving a non-fast-forward rejection.
           git commit -m "Refresh SSAI knowledge candidate ($(date -u +%Y-%m-%d))"
+          candidate_commit=$(git rev-parse HEAD)
+          if git fetch origin "refs/heads/$branch" 2>/dev/null; then
+            git checkout -b "$branch" FETCH_HEAD
+            if ! git cherry-pick "$candidate_commit"; then
+              if git diff --quiet && git diff --cached --quiet; then
+                git cherry-pick --skip
+              else
+                echo "Could not apply the refreshed candidate to existing branch $branch; resolve the knowledge-file conflict before retrying."
+                exit 1
+              fi
+            fi
+          else
+            git checkout -b "$branch" "$candidate_commit"
+          fi
           git push -u origin "$branch"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
@@ -181,10 +198,14 @@ jobs:
           p = pathlib.Path('/tmp/pr-body.md')
           p.write_text(p.read_text().replace('SUMMARY_PLACEHOLDER', os.environ.get('SUMMARY', '')))
           PY
+          if gh pr view "${{ steps.commit.outputs.branch }}" --repo "$GITHUB_REPOSITORY" --json url >/dev/null 2>&1; then
+            echo "Pull request already exists for ${GITHUB_REPOSITORY}#${{ steps.commit.outputs.branch }}; the branch has been refreshed."
+            exit 0
+          fi
           gh pr create \
             --title "SSAI knowledge refresh: $(date -u +%Y-%m-%d)" \
             --body-file /tmp/pr-body.md \
             --base main \
             --head "${{ steps.commit.outputs.branch }}" \
             --label "ssai-rag-candidate" 2>&1 || \
-          echo "::warning title=PR creation failed::gh pr create failed — this usually means 'Allow GitHub Actions to create and approve pull requests' is disabled in repo Settings > Actions > General > Workflow permissions. See docs/SAPPY-RAG-UPDATE-PROCEDURE.md for the one-time fix. The refreshed branch was still pushed and can be turned into a PR manually."
+          echo "::warning title=PR creation failed::See the gh pr create error above for the cause. The refreshed branch was pushed and can be opened as a PR manually; repository or organization Actions policy may still block token-based PR creation."
