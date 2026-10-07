@@ -1,0 +1,63 @@
+name: Auto-merge Dependabot updates
+
+# Run after CI finishes and whenever an external status (for example, Vercel)
+# changes. This workflow never checks out or executes code from the PR branch.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+  status:
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+
+jobs:
+  enable-auto-merge:
+    if: github.repository == 'sapinsapin/sapinsapin-web'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable auto-merge for passing Dependabot PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_PATH: ${{ github.event_path }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_run" ]; then
+            if [ "$(jq -r '.workflow_run.conclusion' "$EVENT_PATH")" != "success" ]; then
+              echo "CI did not pass; no pull request will be queued for auto-merge."
+              exit 0
+            fi
+            sha=$(jq -r '.workflow_run.head_sha' "$EVENT_PATH")
+          else
+            sha=$(jq -r '.sha' "$EVENT_PATH")
+          fi
+
+          prs=$(gh api "repos/$GH_REPO/commits/$sha/pulls" \
+            --jq '[.[] | select(.state == "open" and .base.ref == "main" and .user.login == "dependabot[bot]") | .number] | .[]')
+          if [ -z "$prs" ]; then
+            echo "No open Dependabot pull request is associated with $sha."
+            exit 0
+          fi
+
+          while IFS= read -r pr; do
+            [ -n "$pr" ] || continue
+            checks=$(gh pr checks "$pr" --repo "$GH_REPO" --json bucket)
+            if ! printf '%s' "$checks" | jq -e 'length > 0 and all(.[]; .bucket == "pass" or .bucket == "skipping")' >/dev/null; then
+              echo "PR #$pr still has failing or pending checks; waiting for the next check update."
+              continue
+            fi
+
+            auto_merge=$(gh pr view "$pr" --repo "$GH_REPO" --json autoMergeRequest --jq '.autoMergeRequest != null')
+            if [ "$auto_merge" = "true" ]; then
+              echo "Auto-merge is already enabled for PR #$pr."
+              continue
+            fi
+
+            gh pr merge "$pr" --repo "$GH_REPO" --auto --squash
+          done <<EOF
+          $prs
+          EOF
