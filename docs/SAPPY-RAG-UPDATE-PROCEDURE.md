@@ -26,10 +26,11 @@ Manual dispatch is available for redeploying the current `main` version.
 4. Do not add required reviewers to the Production environment if you want
    deployment to proceed without a manual approval after merge.
 
-The first deployment run will back up the existing item ID recorded in
-`scripts/rag/deploy-rag.mjs` before writing. If backup or credentials are
-missing, it stops without changing production. A successful deploy is not
-claimed until indexing and every retrieval QA question pass.
+The deployment locates the existing built-in item by its stable filename and
+backs it up before writing; it does not rely on a Cloudflare item ID. If the
+item is missing or ambiguous, or credentials are missing, it stops without
+changing production. A successful deploy is not claimed until indexing and
+every retrieval QA question pass.
 
 ## Limits
 

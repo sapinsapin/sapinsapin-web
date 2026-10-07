@@ -7,7 +7,9 @@ import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-const itemId = '87c37f86cb5c42a387e5fdaa5ec5ab09'
+// Item IDs can change when an AI Search item is recreated. The key is the
+// durable identity; discover its current ID before touching production.
+const productionKey = 'SapinSapin-knowledge-base-rag-ready.md'
 const instance = 'sappy-knowledge'
 const namespace = 'default'
 const backupDir = process.env.RAG_BACKUP_DIR || resolve(process.env.RUNNER_TEMP || '/tmp', 'rag-production-backup')
@@ -45,15 +47,19 @@ async function downloadItem(id) {
 async function saveBackup() {
   requiredEnv()
   await mkdir(backupDir, { recursive: true })
-  const item = await apiJson(`/items/${encodeURIComponent(itemId)}`)
-  if (item.id !== itemId || typeof item.key !== 'string' || !item.key || item.source_id && item.source_id !== 'builtin') {
-    throw new Error('The configured production item does not match the expected built-in knowledge item; refusing to deploy.')
+  const items = await apiJson(`/items?key=${encodeURIComponent(productionKey)}`)
+  // Cloudflare reports source_id=null for some older built-in items.
+  const matches = Array.isArray(items) ? items.filter((item) => item.key === productionKey && (item.source_id == null || item.source_id === 'builtin')) : []
+  if (matches.length !== 1) {
+    const summary = matches.length ? `${matches.length} exact-key matches` : 'no exact-key match'
+    throw new Error(`Expected one built-in production item named ${productionKey}; found ${summary}. Refusing to deploy.`)
   }
-  const content = await downloadItem(itemId)
+  const item = matches[0]
+  const content = await downloadItem(item.id)
   if (!content.length) throw new Error('The production item backup is empty; refusing to deploy.')
   await writeFile(resolve(backupDir, 'production-item.backup'), content, { mode: 0o600 })
-  await writeFile(resolve(backupDir, 'metadata.json'), JSON.stringify({ id: itemId, key: item.key, checksum: item.checksum, backed_up_at: new Date().toISOString() }, null, 2), { mode: 0o600 })
-  console.log(`Backed up production item ${itemId} (${content.length} bytes).`)
+  await writeFile(resolve(backupDir, 'metadata.json'), JSON.stringify({ id: item.id, key: item.key, checksum: item.checksum, backed_up_at: new Date().toISOString() }, null, 2), { mode: 0o600 })
+  console.log(`Backed up production item ${item.id} (${content.length} bytes).`)
 }
 
 async function upload(content, key) {
@@ -63,10 +69,10 @@ async function upload(content, key) {
   return apiJson('/items', { method: 'POST', body: form })
 }
 
-async function waitForIndexing() {
+async function waitForIndexing(id) {
   const deadline = Date.now() + 12 * 60 * 1000
   while (Date.now() < deadline) {
-    const item = await apiJson(`/items/${encodeURIComponent(itemId)}`)
+    const item = await apiJson(`/items/${encodeURIComponent(id)}`)
     if (item.status === 'completed' && item.chunks_count > 0) {
       console.log(`Indexing completed with ${item.chunks_count} chunks.`)
       return
@@ -122,8 +128,10 @@ async function deploy() {
   try {
     writeAttempted = true
     const indexed = await upload(candidate, metadata.key)
-    if (indexed.id !== itemId) throw new Error(`Cloudflare returned a different item ID (${indexed.id || 'missing'}); refusing to continue.`)
-    await waitForIndexing()
+    if (indexed.key !== metadata.key || indexed.source_id && indexed.source_id !== 'builtin' || !indexed.id) {
+      throw new Error('Cloudflare returned an item that does not match the backed-up production key; refusing to continue.')
+    }
+    await waitForIndexing(indexed.id)
     await runRetrievalQa()
     console.log('Production RAG deployment and retrieval QA passed.')
   } catch (error) {
@@ -131,8 +139,8 @@ async function deploy() {
       console.error('Deployment verification failed; restoring the production backup.')
       try {
         const restored = await upload(backup, metadata.key)
-        if (restored.id !== itemId) throw new Error('Rollback returned a different item ID.')
-        await waitForIndexing()
+        if (restored.key !== metadata.key || restored.source_id && restored.source_id !== 'builtin' || !restored.id) throw new Error('Rollback returned an unexpected item.')
+        await waitForIndexing(restored.id)
         console.error('Rollback completed and the prior item finished indexing.')
       } catch (rollbackError) {
         throw new Error(`${error.message} Rollback also failed: ${rollbackError.message}`)
