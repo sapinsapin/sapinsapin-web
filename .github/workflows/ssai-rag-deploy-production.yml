@@ -50,7 +50,7 @@ concurrency:
 
 jobs:
   guard:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 2
     outputs:
       proceed: ${{ steps.check.outputs.proceed }}
@@ -73,7 +73,7 @@ jobs:
   deploy:
     needs: guard
     if: needs.guard.outputs.proceed == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     # Requires Marc to configure a required reviewer on this environment for
     # the approval gate to actually pause the run — see one-time setup notes.
