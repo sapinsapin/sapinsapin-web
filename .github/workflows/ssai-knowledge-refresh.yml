@@ -1,12 +1,10 @@
 name: SSAI Knowledge Refresh (RAG candidate)
 
 # Self-maintenance for Sappy's public knowledge base. This workflow only ever
-# touches files under knowledge/ in a branch + pull request — it NEVER
-# deploys anything to Cloudflare AI Search and NEVER auto-merges. Production
-# replacement is a separate, always-manual step documented in
-# docs/SAPPY-RAG-UPDATE-PROCEDURE.md and (if adopted) the separate
-# rag-deploy-production.yml workflow, which requires its own explicit
-# workflow_dispatch trigger and human approval.
+# touches files under knowledge/ in a branch + pull request. Passing candidates
+# can auto-merge after validation, CI and Vercel checks; that does NOT deploy
+# anything to Cloudflare AI Search. Production replacement remains a separate,
+# explicitly approved step documented in docs/SAPPY-RAG-UPDATE-PROCEDURE.md.
 #
 # What this workflow does, in order:
 #   1. Refresh the structured public-state snapshot from live sources
@@ -16,8 +14,8 @@ name: SSAI Knowledge Refresh (RAG candidate)
 #   3. Run deterministic validation (scripts/rag/validate-rag.mjs).
 #   4. Diff the regenerated candidate against the last committed version.
 #   5. If nothing meaningfully changed, stop — no branch, no PR, no noise.
-#   6. If something changed, open a PR summarizing exactly what changed and
-#      what the validator found, for Marc to review by hand.
+#   6. If something changed, open a candidate PR. The bot merge workflow waits
+#      for the candidate validation, CI and Vercel checks before merging it.
 
 on:
   schedule:
@@ -35,6 +33,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 
 concurrency:
   group: ssai-knowledge-refresh
@@ -174,12 +173,13 @@ jobs:
           explicitly-approved production deployment procedure in
           `docs/SAPPY-RAG-UPDATE-PROCEDURE.md` before anything reaches Sappy.
 
-          **Validation:** `scripts/rag/validate-rag.mjs` passed (see the
-          workflow run's logs for any human-review warnings it flagged).
+          **Validation:** `scripts/rag/validate-rag.mjs` passed. It checks the
+          generated structure and source references; it does not decide whether
+          every source-backed claim is accurate.
 
           SUMMARY_PLACEHOLDER
 
-          ### Review checklist for Marc
+          ### Review before any production deployment
           - [ ] Any license/access-status change matches what the linked Hugging Face card actually shows
           - [ ] Any team-roster change matches the live site
           - [ ] No claim reads as stronger than the underlying source supports
@@ -194,12 +194,14 @@ jobs:
           PY
           if gh pr view "${{ steps.commit.outputs.branch }}" --repo "$GITHUB_REPOSITORY" --json url >/dev/null 2>&1; then
             echo "Pull request already exists for ${GITHUB_REPOSITORY}#${{ steps.commit.outputs.branch }}; the branch has been refreshed."
-            exit 0
+          else
+            gh pr create \
+              --title "SSAI knowledge refresh: $(date -u +%Y-%m-%d)" \
+              --body-file /tmp/pr-body.md \
+              --base main \
+              --head "${{ steps.commit.outputs.branch }}" \
+              --label "ssai-rag-candidate"
           fi
-          gh pr create \
-            --title "SSAI knowledge refresh: $(date -u +%Y-%m-%d)" \
-            --body-file /tmp/pr-body.md \
-            --base main \
-            --head "${{ steps.commit.outputs.branch }}" \
-            --label "ssai-rag-candidate" 2>&1 || \
-          echo "::warning title=PR creation failed::See the gh pr create error above for the cause. The refreshed branch was pushed and can be opened as a PR manually; repository or organization Actions policy may still block token-based PR creation."
+          # GITHUB_TOKEN does not trigger the ordinary pull_request workflow.
+          # Dispatch CI explicitly for this generated candidate branch.
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "${{ steps.commit.outputs.branch }}"
