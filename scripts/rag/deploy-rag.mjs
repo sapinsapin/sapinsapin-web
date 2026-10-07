@@ -52,7 +52,13 @@ async function saveBackup() {
   const matches = Array.isArray(items) ? items.filter((item) => item.key === productionKey && (item.source_id == null || item.source_id === 'builtin')) : []
   if (matches.length !== 1) {
     const summary = matches.length ? `${matches.length} exact-key matches` : 'no exact-key match'
-    throw new Error(`Expected one built-in production item named ${productionKey}; found ${summary}. Refusing to deploy.`)
+    const listed = await apiJson('/items?per_page=50')
+    const candidates = Array.isArray(listed)
+      ? listed
+          .filter((item) => item.source_id == null || item.source_id === 'builtin')
+          .map((item) => `${item.key} [${item.status || 'unknown'}]`)
+      : []
+    throw new Error(`Expected one built-in production item named ${productionKey}; found ${summary}. Available built-in items: ${candidates.join('; ') || '(none returned)'}. Refusing to deploy.`)
   }
   const item = matches[0]
   const content = await downloadItem(item.id)
