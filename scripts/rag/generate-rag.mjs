@@ -154,7 +154,7 @@ async function main() {
     '---',
     'document_type: sappy-rag-knowledge-base',
     'version: "3.0-generated"',
-    'status: CANDIDATE \u2014 NOT YET DEPLOYED. Generated automatically from knowledge/base/*.md and knowledge/snapshots/current-public-state.json. Must not be treated as production until Marc explicitly approves and deploys it via the procedure in docs/SAPPY-RAG-UPDATE-PROCEDURE.md.',
+    'status: CANDIDATE \u2014 NOT YET DEPLOYED. Generated automatically from knowledge/base/*.md and knowledge/snapshots/current-public-state.json. Merging its reviewed PR to protected main triggers automatic production deployment; see docs/SAPPY-RAG-UPDATE-PROCEDURE.md.',
     `predecessor: ${PREDECESSOR}`,
     `knowledge_snapshot_date: "${snapshotDate}"`,
     `generated_at: "${generatedAt}"`,

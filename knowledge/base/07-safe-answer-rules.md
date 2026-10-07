@@ -19,4 +19,4 @@ These rules govern how this knowledge should be used in generated answers, not j
 
 This document is chunked by Cloudflare AI Search at 1024 tokens with a 10-token overlap, retrieved by vector similarity (no keyword/hybrid), top 10 results, score threshold 0.4 (see `docs/SSAI-ARCHITECTURE.md` for the live configuration — re-check there before assuming these numbers, since AI Search config can change independently of this document). Each section is written to stand alone as a coherent chunk: the qualifying language for a claim (license caveats, "not established," attribution) sits in the same section as the claim itself, not in a separate caveats appendix — preserve this when editing any base knowledge file.
 
-**Deployment note:** the generated file this content feeds into is a candidate only until Marc explicitly approves and deploys it. See `docs/SAPPY-RAG-UPDATE-PROCEDURE.md` for the deployment and rollback procedure.
+**Deployment note:** the generated file remains a candidate until its PR merges to protected `main`; that merge triggers automatic production indexing and retrieval checks, with rollback on failure. See `docs/SAPPY-RAG-UPDATE-PROCEDURE.md`.

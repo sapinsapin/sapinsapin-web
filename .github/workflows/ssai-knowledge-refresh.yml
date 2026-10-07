@@ -2,9 +2,9 @@ name: SSAI Knowledge Refresh (RAG candidate)
 
 # Self-maintenance for Sappy's public knowledge base. This workflow only ever
 # touches files under knowledge/ in a branch + pull request. Passing candidates
-# can auto-merge after validation, CI and Vercel checks; that does NOT deploy
-# anything to Cloudflare AI Search. Production replacement remains a separate,
-# explicitly approved step documented in docs/SAPPY-RAG-UPDATE-PROCEDURE.md.
+# can auto-merge after validation, CI and Vercel checks. Merging to protected
+# main triggers the production deploy workflow, which backs up the current item
+# and rolls it back if indexing or retrieval QA fails.
 #
 # What this workflow does, in order:
 #   1. Refresh the structured public-state snapshot from live sources
@@ -162,16 +162,15 @@ jobs:
           # The label did not exist in the repo, which made `gh pr create`
           # fail on its own even where Actions may open PRs. Idempotent.
           gh label create ssai-rag-candidate --color 7057ff \
-            --description 'Automated Sappy knowledge refresh — review before any production deploy' 2>/dev/null || true
+            --description 'Automated Sappy knowledge refresh candidate; merge triggers production deployment' 2>/dev/null || true
           cat > /tmp/pr-body.md << 'BODY'
-          Automated knowledge refresh — candidate only, NOT deployed.
+          Automated knowledge refresh — candidate only until merged to main.
 
-          This PR was opened by the `SSAI Knowledge Refresh` workflow. It never
-          touches Cloudflare AI Search and never modifies the production RAG
-          item. Merging this PR only updates the checked-in candidate files
-          under `knowledge/` — a human must still run the separate,
-          explicitly-approved production deployment procedure in
-          `docs/SAPPY-RAG-UPDATE-PROCEDURE.md` before anything reaches Sappy.
+          This PR only proposes files under `knowledge/`. After candidate
+          validation, CI and Vercel pass and it merges to protected `main`, the
+          production workflow automatically backs up and updates the Cloudflare
+          AI Search item, waits for indexing, runs retrieval QA and restores
+          the backup if verification fails.
 
           **Validation:** `scripts/rag/validate-rag.mjs` passed. It checks the
           generated structure and source references; it does not decide whether
@@ -179,12 +178,12 @@ jobs:
 
           SUMMARY_PLACEHOLDER
 
-          ### Review before any production deployment
+          ### Review before merge (merge triggers production deployment)
           - [ ] Any license/access-status change matches what the linked Hugging Face card actually shows
           - [ ] Any team-roster change matches the live site
           - [ ] No claim reads as stronger than the underlying source supports
           - [ ] Validator warnings (if any, see workflow logs) have been read
-          - [ ] This PR is merged ONLY as a knowledge-candidate update — production deployment is a separate manual step
+          - [ ] Confirm these knowledge changes are appropriate for Sappy's production answers
           BODY
           # Splice the summary in from the environment, as data.
           python3 - <<'PY'
