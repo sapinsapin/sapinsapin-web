@@ -58,12 +58,14 @@ jobs:
             fi
 
             merge_state=$(gh pr view "$pr" --repo "$GH_REPO" --json mergeStateStatus --jq '.mergeStateStatus')
-            if [ "$merge_state" != "CLEAN" ]; then
-              echo "PR #$pr is not mergeable yet ($merge_state); waiting for a branch update or manual conflict resolution."
+            if [ "$merge_state" = "DIRTY" ]; then
+              echo "PR #$pr has merge conflicts; leaving it open for resolution."
               continue
             fi
 
-            gh pr merge "$pr" --repo "$GH_REPO" --squash
+            if ! gh pr merge "$pr" --repo "$GH_REPO" --squash; then
+              echo "GitHub did not merge PR #$pr yet ($merge_state); it will be reconsidered after the next check update."
+            fi
           done <<EOF
           $prs
           EOF
