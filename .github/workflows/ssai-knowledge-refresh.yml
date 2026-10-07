@@ -135,26 +135,20 @@ jobs:
           branch="ssai-knowledge-refresh/$(date -u +%Y-%m-%d)"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          # Commit the freshly generated candidate first. If this workflow is
-          # re-run on the same UTC day, the daily branch may already exist;
-          # append this candidate commit to that branch instead of trying to
-          # recreate it from main and receiving a non-fast-forward rejection.
+          # Commit the freshly generated candidate first. A same-day rerun
+          # regenerates the same candidate files from main, so cherry-picking
+          # onto the earlier candidate branch can conflict. Replace that
+          # bot-owned daily branch with the latest clean candidate instead.
           git commit -m "Refresh SSAI knowledge candidate ($(date -u +%Y-%m-%d))"
           candidate_commit=$(git rev-parse HEAD)
           if git fetch origin "refs/heads/$branch" 2>/dev/null; then
-            git checkout -b "$branch" FETCH_HEAD
-            if ! git cherry-pick "$candidate_commit"; then
-              if git diff --quiet && git diff --cached --quiet; then
-                git cherry-pick --skip
-              else
-                echo "Could not apply the refreshed candidate to existing branch $branch; resolve the knowledge-file conflict before retrying."
-                exit 1
-              fi
-            fi
+            existing_commit=$(git rev-parse FETCH_HEAD)
+            git checkout -B "$branch" "$candidate_commit"
+            git push --force-with-lease="refs/heads/$branch:$existing_commit" -u origin "$branch"
           else
             git checkout -b "$branch" "$candidate_commit"
+            git push -u origin "$branch"
           fi
-          git push -u origin "$branch"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
       - name: Open pull request
