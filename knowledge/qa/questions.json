@@ -16,7 +16,7 @@
     },
     {
       "id": "who-is-marc",
-      "question": "Who is Marc Ocampo?",
+      "question": "What role does Marc Ocampo have on SapinSapin AI's current team roster?",
       "must_mention_any": ["Marc Ocampo", "Core team"],
       "must_not_mention": ["Marc Ocampo — Founder", "Marc founded SapinSapin"]
     },
