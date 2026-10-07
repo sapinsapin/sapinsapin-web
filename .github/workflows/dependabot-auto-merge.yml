@@ -3,6 +3,7 @@ name: Auto-merge Dependabot updates
 # Run after CI finishes and whenever an external status (for example, Vercel)
 # changes. This workflow never checks out or executes code from the PR branch.
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: [CI]
     types: [completed]
@@ -15,29 +16,34 @@ permissions:
   statuses: read
 
 jobs:
-  enable-auto-merge:
+  merge-dependabot-updates:
     if: github.repository == 'sapinsapin/sapinsapin-web'
     runs-on: ubuntu-latest
     steps:
-      - name: Enable auto-merge for passing Dependabot PRs
+      - name: Merge passing Dependabot PRs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           EVENT_NAME: ${{ github.event_name }}
           EVENT_PATH: ${{ github.event_path }}
         run: |
-          if [ "$EVENT_NAME" = "workflow_run" ]; then
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            prs=$(gh pr list --repo "$GH_REPO" --state open --author 'dependabot[bot]' --json number \
+              --jq '.[].number')
+          elif [ "$EVENT_NAME" = "workflow_run" ]; then
             if [ "$(jq -r '.workflow_run.conclusion' "$EVENT_PATH")" != "success" ]; then
-              echo "CI did not pass; no pull request will be queued for auto-merge."
+              echo "CI did not pass; no pull request will be considered for merge."
               exit 0
             fi
             sha=$(jq -r '.workflow_run.head_sha' "$EVENT_PATH")
+            prs=$(gh api "repos/$GH_REPO/commits/$sha/pulls" \
+              --jq '[.[] | select(.state == "open" and .base.ref == "main" and .user.login == "dependabot[bot]") | .number] | .[]')
           else
             sha=$(jq -r '.sha' "$EVENT_PATH")
+            prs=$(gh api "repos/$GH_REPO/commits/$sha/pulls" \
+              --jq '[.[] | select(.state == "open" and .base.ref == "main" and .user.login == "dependabot[bot]") | .number] | .[]')
           fi
 
-          prs=$(gh api "repos/$GH_REPO/commits/$sha/pulls" \
-            --jq '[.[] | select(.state == "open" and .base.ref == "main" and .user.login == "dependabot[bot]") | .number] | .[]')
           if [ -z "$prs" ]; then
             echo "No open Dependabot pull request is associated with $sha."
             exit 0
@@ -51,13 +57,13 @@ jobs:
               continue
             fi
 
-            auto_merge=$(gh pr view "$pr" --repo "$GH_REPO" --json autoMergeRequest --jq '.autoMergeRequest != null')
-            if [ "$auto_merge" = "true" ]; then
-              echo "Auto-merge is already enabled for PR #$pr."
+            merge_state=$(gh pr view "$pr" --repo "$GH_REPO" --json mergeStateStatus --jq '.mergeStateStatus')
+            if [ "$merge_state" != "CLEAN" ]; then
+              echo "PR #$pr is not mergeable yet ($merge_state); waiting for a branch update or manual conflict resolution."
               continue
             fi
 
-            gh pr merge "$pr" --repo "$GH_REPO" --auto --squash
+            gh pr merge "$pr" --repo "$GH_REPO" --squash
           done <<EOF
           $prs
           EOF
