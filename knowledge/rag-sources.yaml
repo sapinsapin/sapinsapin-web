@@ -14,7 +14,7 @@
 # without a human re-reading the change. Even sources marked true only ever
 # affect the GENERATED CANDIDATE — no source in this file, regardless of tier,
 # is permitted to write to production Cloudflare AI Search. That is a separate,
-# always-manual step (see docs/SAPPY-RAG-UPDATE-PROCEDURE.md).
+# automatic after the candidate PR merges to protected main (see docs/SAPPY-RAG-UPDATE-PROCEDURE.md).
 
 version: 1
 last_reviewed: "2026-09-22"

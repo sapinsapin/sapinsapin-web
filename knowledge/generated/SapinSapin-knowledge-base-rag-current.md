@@ -1,10 +1,10 @@
 ---
 document_type: sappy-rag-knowledge-base
 version: "3.0-generated"
-status: CANDIDATE — NOT YET DEPLOYED. Generated automatically from knowledge/base/*.md and knowledge/snapshots/current-public-state.json. Must not be treated as production until Marc explicitly approves and deploys it via the procedure in docs/SAPPY-RAG-UPDATE-PROCEDURE.md.
+status: CANDIDATE — NOT YET DEPLOYED. Generated automatically from knowledge/base/*.md and knowledge/snapshots/current-public-state.json. Merging its reviewed PR to protected main triggers automatic production deployment; see docs/SAPPY-RAG-UPDATE-PROCEDURE.md.
 predecessor: SapinSapin-knowledge-base-rag-v2.md (content-frozen candidate, 2026-09-22) — itself succeeding SapinSapin-knowledge-base-rag-ready.md (v1, production item id 87c37f86cb5c42a387e5fdaa5ec5ab09, deployed 2026-09-18)
 knowledge_snapshot_date: "2026-10-07"
-generated_at: "2026-10-07T00:13:50.171Z"
+generated_at: "2026-10-07T00:46:13.285Z"
 canonical_source_policy: ssai/docs/KNOWLEDGE-SOURCES.md (authority hierarchy: live infra/repo > live first-party site/HF/repo > canonical SSAI docs > this RAG lineage > general research snapshot > inference)
 source_manifest: knowledge/rag-sources.yaml
 scope: Public-facing knowledge for Sappy (Discord + web chat assistant). Contains no secrets, account IDs, Discord IDs, OAuth details, or internal deployment instructions — see ssai/docs/SAPPY-OPERATIONS.md for that internal material.
@@ -179,7 +179,7 @@ These rules govern how this knowledge should be used in generated answers, not j
 
 This document is chunked by Cloudflare AI Search at 1024 tokens with a 10-token overlap, retrieved by vector similarity (no keyword/hybrid), top 10 results, score threshold 0.4 (see `docs/SSAI-ARCHITECTURE.md` for the live configuration — re-check there before assuming these numbers, since AI Search config can change independently of this document). Each section is written to stand alone as a coherent chunk: the qualifying language for a claim (license caveats, "not established," attribution) sits in the same section as the claim itself, not in a separate caveats appendix — preserve this when editing any base knowledge file.
 
-**Deployment note:** the generated file this content feeds into is a candidate only until Marc explicitly approves and deploys it. See `docs/SAPPY-RAG-UPDATE-PROCEDURE.md` for the deployment and rollback procedure.
+**Deployment note:** the generated file remains a candidate until its PR merges to protected `main`; that merge triggers automatic production indexing and retrieval checks, with rollback on failure. See `docs/SAPPY-RAG-UPDATE-PROCEDURE.md`.
 
 ## 08 — Static Source Register (durable portion)
 
