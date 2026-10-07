@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 // Item IDs can change when an AI Search item is recreated. The key is the
 // durable identity; discover its current ID before touching production.
-const productionKey = 'SapinSapin-knowledge-base-rag-ready.md'
+const productionKey = 'SapinSapin-knowledge-base-rag-current.md'
 const instance = 'sappy-knowledge'
 const namespace = 'default'
 const backupDir = process.env.RAG_BACKUP_DIR || resolve(process.env.RUNNER_TEMP || '/tmp', 'rag-production-backup')
