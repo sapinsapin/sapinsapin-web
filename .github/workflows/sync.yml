@@ -8,7 +8,7 @@
 # what any given deployment actually showed, which is the property the whole
 # hubSnapshot.js design rests on.
 #
-# The push at the end IS the deploy, so everything that can fail is gated before it.
+# A passing catalog-sync PR auto-merges to main, which triggers the Vercel deploy.
 #
 # Lesson that shaped the "Report" step: from 23 Sep to 1 Oct 2026 the Space
 # manifest sync failed on every single run — the Space had relabelled its model
@@ -32,6 +32,8 @@ on:
 permissions:
   contents: write
   issues: write
+  pull-requests: write
+  actions: write
 
 concurrency:
   # The Space deadlocks if two sessions talk to it at once, and two jobs racing
@@ -61,7 +63,7 @@ jobs:
       - name: Sync the Space manifest
         id: space
         continue-on-error: true
-        run: npm run sync:space 2>&1 | tee space-sync.log; exit ${PIPESTATUS[0]}
+        run: npm run sync:space 2>&1 | tee space-sync.log; exit "${PIPESTATUS[0]}"
 
       # The contract test for the demo: endpoints, parameter order, CORS,
       # session-scoped choices. Read-only and sequential. Not fatal for the same
@@ -69,7 +71,7 @@ jobs:
       - name: Check the Space contract
         id: contract
         continue-on-error: true
-        run: npm run check:space 2>&1 | tee space-check.log; exit ${PIPESTATUS[0]}
+        run: npm run check:space 2>&1 | tee space-check.log; exit "${PIPESTATUS[0]}"
 
       # Gates. Both run BEFORE the push, because the push deploys.
       - name: Check catalog parity
@@ -99,21 +101,55 @@ jobs:
             git checkout -- src/data/spaceManifest.js
           fi
 
-      - name: Commit the refreshed snapshot
+      - name: Commit and push refreshed snapshot branch
+        id: commit
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src/data/hubSnapshot.js src/data/spaceManifest.js public/sitemap.xml
           if git diff --cached --quiet; then
             echo 'Hub and Space unchanged — nothing to commit, nothing to deploy.'
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git commit -m 'Sync Hub catalog'
-          # main can move while this job runs (a human push, a merged PR). The
-          # generated files are only ever written by this job, so a rebase onto
-          # the new main cannot conflict on them.
+          # The generated files are only ever written by this job, so a rebase
+          # onto a newer main should be clean. Publish a bot-owned branch and
+          # let CI + Vercel validate its PR before the merge workflow proceeds.
           git pull --rebase --quiet origin main
-          git push origin HEAD:main
+          branch='automation/hub-catalog'
+          if git fetch origin "refs/heads/$branch" 2>/dev/null; then
+            existing_commit=$(git rev-parse FETCH_HEAD)
+            git push --force-with-lease="refs/heads/$branch:$existing_commit" origin "HEAD:$branch"
+          else
+            git push -u origin "HEAD:$branch"
+          fi
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+
+      - name: Open or update catalog sync PR
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.commit.outputs.branch }}
+        run: |
+          gh label create hub-catalog-sync --color 1d76db \
+            --description 'Automated Hub catalog and demo manifest refresh' 2>/dev/null || true
+          pr=$(gh pr list --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [ -z "$pr" ]; then
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base main \
+              --head "$BRANCH" \
+              --title "Sync Hub catalog: $(date -u +%Y-%m-%d)" \
+              --label hub-catalog-sync \
+              --body 'Automated catalog and demo-manifest refresh. The workflow ran catalog parity, build, CSP, and Space checks before proposing this update. CI and the Vercel preview must pass before it merges.'
+          else
+            echo "Updated existing catalog sync PR #$pr."
+          fi
+          # GITHUB_TOKEN pushes do not start normal push/pull_request workflows.
+          # Dispatch CI explicitly for this bot-created PR branch.
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
 
       - name: Report a degraded sync
         if: always()
