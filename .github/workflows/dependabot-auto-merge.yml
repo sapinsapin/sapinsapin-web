@@ -57,6 +57,12 @@ jobs:
               continue
             fi
 
+            body=$(gh pr view "$pr" --repo "$GH_REPO" --json body --jq '.body')
+            if printf '%s' "$body" | grep -Fq 'version-update:semver-major'; then
+              echo "PR #$pr contains a major dependency update; leaving it for human review."
+              continue
+            fi
+
             merge_state=$(gh pr view "$pr" --repo "$GH_REPO" --json mergeStateStatus --jq '.mergeStateStatus')
             if [ "$merge_state" = "DIRTY" ]; then
               echo "PR #$pr has merge conflicts; leaving it open for resolution."
