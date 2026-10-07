@@ -25,27 +25,27 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           EVENT_NAME: ${{ github.event_name }}
-          EVENT_PATH: ${{ github.event_path }}
         run: |
+          event_path="${GITHUB_EVENT_PATH:?GitHub did not provide the event payload path}"
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             prs=$(gh pr list --repo "$GH_REPO" --state open --author 'dependabot[bot]' --json number \
               --jq '.[].number')
           elif [ "$EVENT_NAME" = "workflow_run" ]; then
-            if [ "$(jq -r '.workflow_run.conclusion' "$EVENT_PATH")" != "success" ]; then
+            if [ "$(jq -r '.workflow_run.conclusion' "$event_path")" != "success" ]; then
               echo "CI did not pass; no pull request will be considered for merge."
               exit 0
             fi
-            sha=$(jq -r '.workflow_run.head_sha' "$EVENT_PATH")
+            sha=$(jq -r '.workflow_run.head_sha' "$event_path")
             prs=$(gh api "repos/$GH_REPO/commits/$sha/pulls" \
               --jq '[.[] | select(.state == "open" and .base.ref == "main" and .user.login == "dependabot[bot]") | .number] | .[]')
           else
-            sha=$(jq -r '.sha' "$EVENT_PATH")
+            sha=$(jq -r '.sha' "$event_path")
             prs=$(gh api "repos/$GH_REPO/commits/$sha/pulls" \
               --jq '[.[] | select(.state == "open" and .base.ref == "main" and .user.login == "dependabot[bot]") | .number] | .[]')
           fi
 
           if [ -z "$prs" ]; then
-            echo "No open Dependabot pull request is associated with $sha."
+            echo "No open Dependabot pull request needs processing."
             exit 0
           fi
 
