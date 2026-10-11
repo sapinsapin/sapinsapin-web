@@ -4,7 +4,7 @@ version: "3.0-generated"
 status: CANDIDATE — NOT YET DEPLOYED. Generated automatically from knowledge/base/*.md and knowledge/snapshots/current-public-state.json. Merging its reviewed PR to protected main triggers automatic production deployment; see docs/SAPPY-RAG-UPDATE-PROCEDURE.md.
 predecessor: SapinSapin-knowledge-base-rag-v2.md (content-frozen candidate, 2026-09-22) — itself succeeding SapinSapin-knowledge-base-rag-ready.md (v1, production item id 87c37f86cb5c42a387e5fdaa5ec5ab09, deployed 2026-09-18)
 knowledge_snapshot_date: "2026-10-11"
-generated_at: "2026-10-11T09:20:50.021Z"
+generated_at: "2026-10-11T09:27:54.268Z"
 canonical_source_policy: ssai/docs/KNOWLEDGE-SOURCES.md (authority hierarchy: live infra/repo > live first-party site/HF/repo > canonical SSAI docs > this RAG lineage > general research snapshot > inference)
 source_manifest: knowledge/rag-sources.yaml
 scope: Public-facing knowledge for Sappy (Discord + web chat assistant). Contains no secrets, account IDs, Discord IDs, OAuth details, or internal deployment instructions — see ssai/docs/SAPPY-OPERATIONS.md for that internal material.
@@ -70,9 +70,11 @@ Do not name anyone else as a current formal team member. Other individuals somet
 
 Sappy itself, and questions about who built Sappy specifically, are answered by Sappy's own built-in identity rules, not by this knowledge base — do not restate creator-attribution details here if they appear elsewhere in the answer; keep this document to project facts, not Sappy's own persona rules.
 
-### SapinSapin AI contributor perspectives (attributed, not project policy)
+### What do contributors say about the project?
 
-SapinSapin AI contributors have described the project's motivation in a supplied interview transcript. JC Diamante has argued for Filipino-led research and cultural self-representation; Joseph Ian Kim Vidon has observed shortcomings in generic regional translation; Michelle Alarcon has suggested local-language interfaces for inclusion; and Jayve Iay E. Lato has suggested strengthening the domestic AI ecosystem. These are individual contributor statements about SapinSapin AI, not project policy. Their attributed perspectives follow. Always attribute these by name ("[Name] has said that...") — never present them as official SapinSapin AI positions or as consensus:
+#### SapinSapin AI contributor perspectives (attributed, not project policy)
+
+Contributors say that SapinSapin AI can support local-language research, cultural self-representation, more natural regional translation, inclusion, and the domestic technical ecosystem. These statements describe motivations and possible benefits, not confirmed product deployments or unanimous team positions. SapinSapin AI contributors have described the project's motivation in a supplied interview transcript. JC Diamante has argued for Filipino-led research and cultural self-representation; Joseph Ian Kim Vidon has observed shortcomings in generic regional translation; Michelle Alarcon has suggested local-language interfaces for inclusion; and Jayve Iay E. Lato has suggested strengthening the domestic AI ecosystem. These are individual contributor statements about SapinSapin AI, not project policy. Their attributed perspectives follow. Always attribute these by name ("[Name] has said that...") — never present them as official SapinSapin AI positions or as consensus:
 
 - **JC Diamante**: has argued that heavy reliance on foreign frontier models can cede cultural interpretation to outside actors, and that local models support Filipino-led research and self-representation.
 - **Joseph Ian Kim Vidon**: has observed that generic machine translation can sound mechanical or unnatural in regional field engagements (e.g. greetings, local talking points).
