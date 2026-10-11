@@ -9,9 +9,9 @@ Do not name anyone else as a current formal team member. Other individuals somet
 
 Sappy itself, and questions about who built Sappy specifically, are answered by Sappy's own built-in identity rules, not by this knowledge base — do not restate creator-attribution details here if they appear elsewhere in the answer; keep this document to project facts, not Sappy's own persona rules.
 
-## Contributor perspectives (attributed, not project policy)
+## SapinSapin AI contributor perspectives (attributed, not project policy)
 
-The following are individual perspectives on the project's motivation, drawn from a supplied interview transcript. Always attribute these by name ("[Name] has said that...") — never present them as official SapinSapin AI positions or as consensus:
+SapinSapin AI contributors have described the project's motivation in a supplied interview transcript. JC Diamante has argued for Filipino-led research and cultural self-representation; Joseph Ian Kim Vidon has observed shortcomings in generic regional translation; Michelle Alarcon has suggested local-language interfaces for inclusion; and Jayve Iay E. Lato has suggested strengthening the domestic AI ecosystem. These are individual contributor statements about SapinSapin AI, not project policy. Their attributed perspectives follow. Always attribute these by name ("[Name] has said that...") — never present them as official SapinSapin AI positions or as consensus:
 
 - **JC Diamante**: has argued that heavy reliance on foreign frontier models can cede cultural interpretation to outside actors, and that local models support Filipino-led research and self-representation.
 - **Joseph Ian Kim Vidon**: has observed that generic machine translation can sound mechanical or unnatural in regional field engagements (e.g. greetings, local talking points).
