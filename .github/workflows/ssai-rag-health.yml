@@ -1,0 +1,60 @@
+name: SSAI RAG Health
+
+# Read-only checks; sharing the deploy lock prevents probing during replacement.
+on:
+  schedule:
+    - cron: '53 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: ssai-rag-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  health:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: Production
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Verify source refresh ran successfully within 72 hours
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ssai-knowledge-refresh.yml/runs?branch=main&per_page=30" > /tmp/rag-refresh-runs.json
+          node --input-type=module - <<'JS'
+          import { readFileSync } from 'node:fs';
+          const {workflow_runs:runs} = JSON.parse(readFileSync('/tmp/rag-refresh-runs.json'));
+          const healthy = runs.some(r => ['schedule','workflow_dispatch'].includes(r.event) && r.conclusion === 'success' && Date.now()-Date.parse(r.created_at)<72*3600*1000);
+          if (!healthy) throw new Error('No successful main source-refresh run in 72 hours.');
+          JS
+      - name: Detect stalled knowledge candidates
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/pulls?state=open&base=main&per_page=100" > /tmp/rag-open-prs.json
+          node --input-type=module - <<'JS'
+          import {readFileSync} from 'node:fs';
+          const stale = JSON.parse(readFileSync('/tmp/rag-open-prs.json')).filter(p => p.head.ref.startsWith('ssai-knowledge-refresh/') && Date.now()-Date.parse(p.created_at)>48*3600*1000);
+          if (stale.length) throw new Error('Knowledge candidates pending over 48 hours: '+stale.map(p=>p.html_url).join(', '));
+          JS
+      - name: Verify production bytes, indexing and retrieval
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/rag/deploy-rag.mjs health
+      - name: Record health result
+        if: always()
+        env:
+          RESULT: ${{ job.status }}
+        run: echo "RAG health result — $RESULT. See source-refresh and production retrieval steps for details." >> "$GITHUB_STEP_SUMMARY"

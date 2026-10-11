@@ -14,6 +14,7 @@
 //   network — used by tests/CI dry-runs to stay deterministic without
 //   depending on live third-party APIs being reachable at test time.
 
+import { fetchJsonPages as fetchJson } from './source-utils.mjs'
 import { mkdir, readFile, writeFile, copyFile, access } from 'node:fs/promises'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -31,12 +32,6 @@ const GH_ORG = 'sapinsapin'
 const args = process.argv.slice(2)
 const fixtureIdx = args.indexOf('--offline-fixture')
 const fixturePath = fixtureIdx >= 0 ? args[fixtureIdx + 1] : null
-
-async function fetchJson(url) {
-  const response = await fetch(url, { headers: { accept: 'application/json', 'user-agent': 'ssai-rag-refresh' } })
-  if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`)
-  return response.json()
-}
 
 // ---- Hugging Face: org catalog (tier 1, authoritative for counts/licenses) ----
 
@@ -56,10 +51,10 @@ async function fetchHfOrgCatalog(org) {
       id: m.id,
       name: m.id.split('/').pop(),
       pipeline_tag: m.pipeline_tag ?? null,
-      gated: Boolean(m.gated),
+      gated: m.gated === 'auto' ? 'auto-gate' : m.gated === 'manual' ? 'manual-gate' : Boolean(m.gated),
       private: Boolean(m.private),
       lastModified: m.lastModified ?? null,
-      license: (m.cardData || {}).license ?? null, // usually null at API level for this org — do not infer
+      license: licenseOf(m.tags) || (m.cardData || {}).license || null, // explicit public metadata only
     })),
     datasets: datasets.map((d) => ({
       id: d.id,
@@ -82,12 +77,11 @@ async function fetchHfSpaces(org) {
 async function fetchGithubRepos(org) {
   try {
     const repos = await fetchJson(`https://api.github.com/orgs/${org}/repos?per_page=100`)
-    return repos.map((r) => ({ name: r.name, private: r.private, archived: r.archived, description: r.description ?? null }))
+    return repos.filter(r => !r.private).map((r) => ({ name: r.name, private: r.private, archived: r.archived, description: r.description ?? null }))
   } catch (err) {
-    // GitHub's unauthenticated rate limit is low; a failure here should not
-    // abort the whole refresh — the org/repo list is a minor supporting fact.
+    // A missing supporting source must preserve the prior complete snapshot.
     console.warn(`  ! GitHub org repo list unavailable: ${err.message}`)
-    return { error: String(err.message) }
+    throw new Error(`GitHub public repository lookup failed: ${err.message}`)
   }
 }
 
@@ -124,12 +118,14 @@ function parsePeopleFromAppJsx(source) {
     if (ch === '}') { depth--; if (depth === 0) { people.push(current); continue } }
     if (depth >= 1) current += ch
   }
-  return people.map((entry) => {
-    const name = entry.match(/name:\s*'([^']+)'/)?.[1] ?? null
-    const role = entry.match(/role:\s*'([^']+)'/)?.[1] ?? null
+  const parsed = people.map((entry) => {
+    const name = entry.match(/name:\s*'((?:\\.|[^'\\])*)'/)?.[1] ?? null
+    const role = entry.match(/role:\s*'((?:\\.|[^'\\])*)'/)?.[1] ?? null
     const links = [...entry.matchAll(/kind:\s*'([^']+)',\s*href:\s*'([^']+)'/g)].map(([, kind, href]) => ({ kind, href }))
     return { name, role, links }
-  }).filter((p) => p.name && p.role)
+  })
+  if (parsed.some(p => !p.name || !p.role || p.links.length === 0)) throw new Error('Partial team roster extraction; refusing incomplete people data.')
+  return parsed
 }
 
 function parseReferencesFromAppJsx(source) {
@@ -144,13 +140,15 @@ function parseReferencesFromAppJsx(source) {
     if (ch === '}') { depth--; if (depth === 0) { entries.push(current); continue } }
     if (depth >= 1) current += ch
   }
-  return entries.map((entry) => ({
-    id: entry.match(/id:\s*'([^']+)'/)?.[1] ?? null,
-    title: decodeJsStringEscapes(entry.match(/title:\s*'([^']+)'/)?.[1] ?? ''),
-    authors: decodeJsStringEscapes(entry.match(/authors:\s*'([^']+)'/)?.[1] ?? ''),
-    where: entry.match(/where:\s*'([^']+)'/)?.[1] ?? null,
-    href: entry.match(/href:\s*'([^']+)'/)?.[1] ?? null,
-  })).filter((r) => r.id)
+  const parsed = entries.map((entry) => ({
+    id: entry.match(/id:\s*'((?:\\.|[^'\\])*)'/)?.[1] ?? null,
+    title: decodeJsStringEscapes(entry.match(/title:\s*'((?:\\.|[^'\\])*)'/)?.[1] ?? ''),
+    authors: decodeJsStringEscapes(entry.match(/authors:\s*'((?:\\.|[^'\\])*)'/)?.[1] ?? ''),
+    where: entry.match(/where:\s*'((?:\\.|[^'\\])*)'/)?.[1] ?? null,
+    href: entry.match(/href:\s*'((?:\\.|[^'\\])*)'/)?.[1] ?? null,
+  }))
+  if (parsed.some(r => !r.id || !r.title || !r.href)) throw new Error('Partial source reference extraction; refusing incomplete references.')
+  return parsed
 }
 
 async function main() {
@@ -163,7 +161,7 @@ async function main() {
   } else {
     const [orgCatalog, personalCatalog, spaces, ghRepos, appJsxSource] = await Promise.all([
       fetchHfOrgCatalog(HF_ORG),
-      fetchHfOrgCatalog(HF_PERSONAL).then((r) => r.models).catch((err) => { console.warn(`  ! ${HF_PERSONAL} lookup failed: ${err.message}`); return { error: String(err.message) } }),
+      fetchHfOrgCatalog(HF_PERSONAL).then((r) => r.models),
       fetchHfSpaces(HF_ORG),
       fetchGithubRepos(GH_ORG),
       readFile(appJsxPath, 'utf8'),
@@ -180,12 +178,15 @@ async function main() {
 
   // Hard-fail conditions: these are facts a bad refresh must never silently drop.
   const problems = []
+  if (!Array.isArray(bundle.site_references) || !bundle.site_references.length) problems.push('Could not extract site references; refusing incomplete snapshot.')
+  if (!Array.isArray(bundle.github_repos) || !Array.isArray(bundle.hf_personal_internetoftim)) problems.push('Supporting public sources unavailable; preserving previous snapshot.')
   if (!bundle.site_people || bundle.site_people.length === 0) {
     problems.push('Could not extract any team members from src/App.jsx — the file shape may have changed. Refusing to overwrite the snapshot with an empty roster.')
   }
   if (!bundle.hf_org || !Array.isArray(bundle.hf_org.models) || !Array.isArray(bundle.hf_org.datasets)) {
     problems.push('Hugging Face org catalog fetch did not return the expected shape.')
   }
+  if (bundle.hf_org?.models?.length === 0 || bundle.hf_org?.datasets?.length === 0) problems.push('Empty organization catalog; refusing to erase previously known public assets.')
   if (problems.length) {
     console.error('refresh-sources FAILED:')
     for (const p of problems) console.error(`  · ${p}`)

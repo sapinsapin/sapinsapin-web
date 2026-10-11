@@ -5,6 +5,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createHash } from 'node:crypto'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 // Item IDs can change when an AI Search item is recreated. The key is the
@@ -26,6 +27,7 @@ function requiredEnv() {
 async function request(path, options = {}) {
   const response = await fetch(`${apiRoot}${path}`, {
     ...options,
+    signal: AbortSignal.timeout(path === '/items' ? 90_000 : 20_000),
     headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`, ...options.headers },
   })
   if (!response.ok) throw new Error(`Cloudflare API returned HTTP ${response.status} for ${options.method || 'GET'} ${path}.`)
@@ -64,7 +66,7 @@ async function saveBackup() {
   const content = await downloadItem(item.id)
   if (!content.length) throw new Error('The production item backup is empty; refusing to deploy.')
   await writeFile(resolve(backupDir, 'production-item.backup'), content, { mode: 0o600 })
-  await writeFile(resolve(backupDir, 'metadata.json'), JSON.stringify({ id: item.id, key: item.key, checksum: item.checksum, backed_up_at: new Date().toISOString() }, null, 2), { mode: 0o600 })
+  await writeFile(resolve(backupDir, 'metadata.json'), JSON.stringify({ id: item.id, key: item.key, checksum: item.checksum, sha256: digest(content), backed_up_at: new Date().toISOString() }, null, 2), { mode: 0o600 })
   console.log(`Backed up production item ${item.id} (${content.length} bytes).`)
 }
 
@@ -76,7 +78,7 @@ async function upload(content, key) {
 }
 
 async function waitForIndexing(id) {
-  const deadline = Date.now() + 12 * 60 * 1000
+  const deadline = Date.now() + 8 * 60 * 1000
   while (Date.now() < deadline) {
     const item = await apiJson(`/items/${encodeURIComponent(id)}`)
     if (item.status === 'completed' && item.chunks_count > 0) {
@@ -86,7 +88,7 @@ async function waitForIndexing(id) {
     if (item.status === 'error' || item.status === 'skipped') throw new Error(`Cloudflare indexing ended with status ${item.status}.`)
     await new Promise((resolve) => setTimeout(resolve, 10_000))
   }
-  throw new Error('Cloudflare indexing did not complete within 12 minutes.')
+  throw new Error('Cloudflare indexing did not complete within 8 minutes; time reserved for rollback.')
 }
 
 function chunksFrom(result) {
@@ -103,7 +105,7 @@ async function runRetrievalQa() {
     const result = await apiJson('/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: [{ role: 'user', content: question.question }] }),
+      body: JSON.stringify({ messages: [{ role: 'user', content: question.question }], ai_search_options: { retrieval: { max_num_results: 5, match_threshold: 0.4 } } }),
     })
     const chunks = chunksFrom(result)
     if (!chunks.length) {
@@ -111,9 +113,9 @@ async function runRetrievalQa() {
       failures += 1
       continue
     }
-    const text = chunks.map((chunk) => typeof chunk.text === 'string' ? chunk.text : '').join('\n').toLowerCase()
+    const text = chunks.map((chunk) => chunk.text ?? chunk.content ?? '').join('\n').toLowerCase()
     const required = question.must_mention_any || []
-    const missing = required.length && !required.some((term) => text.includes(term.toLowerCase()))
+    const missing = (required.length && !required.some((term) => text.includes(term.toLowerCase()))) || (question.must_mention_all || []).some(term => !text.includes(term.toLowerCase()))
     const forbidden = (question.must_not_mention || []).filter((term) => text.includes(term.toLowerCase()))
     if (missing || forbidden.length) {
       console.error(`Retrieval QA ${question.id}: ${missing ? 'expected terms absent' : ''}${missing && forbidden.length ? '; ' : ''}${forbidden.length ? `forbidden terms found: ${forbidden.join(', ')}` : ''}.`)
@@ -125,11 +127,36 @@ async function runRetrievalQa() {
   if (failures) throw new Error(`${failures} retrieval QA check(s) failed.`)
 }
 
+const digest = content => createHash('sha256').update(content).digest('hex')
+
+async function verifyBytes(id, expected) {
+  if (digest(await downloadItem(id)) !== digest(expected)) throw new Error('Indexed item download does not match expected content bytes.')
+}
+
+async function health() {
+  requiredEnv()
+  const listed = await apiJson(`/items?key=${encodeURIComponent(productionKey)}`)
+  const items = listed.filter(item => item.key === productionKey && (item.source_id == null || item.source_id === 'builtin'))
+  if (items.length !== 1) throw new Error('Expected exactly one production item.')
+  const item = await apiJson(`/items/${encodeURIComponent(items[0].id)}`)
+  if (item.status !== 'completed' || item.chunks_count <= 0) throw new Error('Production item is not completely indexed.')
+  await verifyBytes(item.id, await readFile(sourcePath))
+  await runRetrievalQa()
+  console.log('Production health passed: exact committed bytes, completed indexing, and retrieval QA.')
+}
+
 async function deploy() {
   requiredEnv()
   const metadata = JSON.parse(await readFile(resolve(backupDir, 'metadata.json'), 'utf8'))
   const backup = await readFile(resolve(backupDir, 'production-item.backup'))
   const candidate = await readFile(sourcePath)
+  if (metadata.key !== productionKey || !metadata.sha256 || metadata.sha256 !== digest(backup)) throw new Error('Production backup identity/integrity check failed; refusing to write.')
+  await verifyBytes(metadata.id, backup)
+  if (digest(candidate) === digest(backup)) {
+    await runRetrievalQa()
+    console.log('Production already contains the candidate; retrieval QA passed without a write.')
+    return
+  }
   let writeAttempted = false
   try {
     writeAttempted = true
@@ -138,6 +165,7 @@ async function deploy() {
       throw new Error('Cloudflare returned an item that does not match the backed-up production key; refusing to continue.')
     }
     await waitForIndexing(indexed.id)
+    await verifyBytes(indexed.id, candidate)
     await runRetrievalQa()
     console.log('Production RAG deployment and retrieval QA passed.')
   } catch (error) {
@@ -147,6 +175,7 @@ async function deploy() {
         const restored = await upload(backup, metadata.key)
         if (restored.key !== metadata.key || restored.source_id && restored.source_id !== 'builtin' || !restored.id) throw new Error('Rollback returned an unexpected item.')
         await waitForIndexing(restored.id)
+        await verifyBytes(restored.id, backup)
         console.error('Rollback completed and the prior item finished indexing.')
       } catch (rollbackError) {
         throw new Error(`${error.message} Rollback also failed: ${rollbackError.message}`)
@@ -159,4 +188,5 @@ async function deploy() {
 const command = process.argv[2]
 if (command === 'backup') await saveBackup()
 else if (command === 'deploy') await deploy()
-else throw new Error('Usage: node scripts/rag/deploy-rag.mjs <backup|deploy>')
+else if (command === 'health') await health()
+else throw new Error('Usage: node scripts/rag/deploy-rag.mjs <backup|deploy|health>')

@@ -73,6 +73,15 @@ function buildModelFamiliesSummary(snapshot, blurbs) {
   return lines.join('\n')
 }
 
+function buildModelTable(snapshot) {
+  const safeCell = value => String(value).replaceAll('|', '\\|').replaceAll('\n', ' ');
+  return ['| Model | Task (Hub tag) | License metadata / access |', '|---|---|---|',
+    ...snapshot.models.slice().sort((a,b) => a.name.localeCompare(b.name)).map(m =>
+      `| [${safeCell(m.name)}](https://huggingface.co/${m.id}) | ${safeCell(m.pipeline_tag || 'Not tagged')} | ${safeCell(m.license || 'Not stated in public API; check card')}${gateNote(m)} |`),
+    '', 'Model license labels above are public metadata, not a grant of commercial permission. Read the exact model card and license terms before use.',
+  ].join('\n');
+}
+
 function buildTeamRosterTable(team) {
   const rows = team.map((p) => {
     const links = p.links.map((l) => `[${l.kind}](${l.href})`).join(', ')
@@ -135,7 +144,7 @@ async function main() {
     '{{TEAM_ROSTER_TABLE}}': buildTeamRosterTable(snapshot.team),
     '{{CATALOG_SUMMARY_LINE}}': `Catalog totals as of ${snapshotDate}: ${snapshot.totals.datasets} public datasets, ${snapshot.totals.models} public models on huggingface.co/sapinsapin. **This count changes as the org publishes new work \u2014 always prefer the live Hugging Face org page over this number if the user needs a current total.** [confirmed via HF public API]`,
     '{{DATASET_TABLE}}': buildDatasetTable(snapshot, blurbs),
-    '{{MODEL_FAMILIES_SUMMARY}}': `${snapshot.totals.models} public model repositories exist on huggingface.co/sapinsapin as of ${snapshotDate}, grouped by task:\n\n${buildModelFamiliesSummary(snapshot, blurbs)}`,
+    '{{MODEL_FAMILIES_SUMMARY}}': `${snapshot.totals.models} public model repositories exist on huggingface.co/sapinsapin as of ${snapshotDate}, grouped by task:\n\n${buildModelFamiliesSummary(snapshot, blurbs)}\n\n${buildModelTable(snapshot)}`,
     '{{INTERNETOFTIM_NOTE}}': buildInternetoftimNote(snapshot),
   }
 
