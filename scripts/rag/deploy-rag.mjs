@@ -105,7 +105,7 @@ async function runRetrievalQa() {
     const result = await apiJson('/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: [{ role: 'user', content: question.question }], ai_search_options: { retrieval: { max_num_results: 5, match_threshold: 0.4 } } }),
+      body: JSON.stringify({ messages: [{ role: 'user', content: question.question }], ai_search_options: { cache: { enabled: false }, retrieval: { max_num_results: 5, match_threshold: 0.4 } } }),
     })
     const chunks = chunksFrom(result)
     if (!chunks.length) {

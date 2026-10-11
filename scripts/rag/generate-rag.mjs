@@ -144,7 +144,7 @@ async function main() {
     '{{TEAM_ROSTER_TABLE}}': buildTeamRosterTable(snapshot.team),
     '{{CATALOG_SUMMARY_LINE}}': `Catalog totals as of ${snapshotDate}: ${snapshot.totals.datasets} public datasets, ${snapshot.totals.models} public models on huggingface.co/sapinsapin. **This count changes as the org publishes new work \u2014 always prefer the live Hugging Face org page over this number if the user needs a current total.** [confirmed via HF public API]`,
     '{{DATASET_TABLE}}': buildDatasetTable(snapshot, blurbs),
-    '{{MODEL_FAMILIES_SUMMARY}}': `${snapshot.totals.models} public model repositories exist on huggingface.co/sapinsapin as of ${snapshotDate}, grouped by task:\n\n${buildModelFamiliesSummary(snapshot, blurbs)}\n\n${buildModelTable(snapshot)}`,
+    '{{MODEL_FAMILIES_SUMMARY}}': `${snapshot.totals.models} public model repositories exist on huggingface.co/sapinsapin as of ${snapshotDate}, grouped by task:\n\n${buildModelFamiliesSummary(snapshot, blurbs)}`,
     '{{INTERNETOFTIM_NOTE}}': buildInternetoftimNote(snapshot),
   }
 
@@ -176,7 +176,9 @@ async function main() {
     '',
   ].join('\n')
 
-  const body = sections.join('\n\n')
+  // Keep the expanding per-model catalog after project/team prose so catalog
+  // growth does not split leadership and contributor context across chunks.
+  const body = sections.join('\n\n') + '\n\n## 09 — Individual Model License Catalog\n\n' + buildModelTable(snapshot)
   const output = frontMatter + body + '\n'
 
   await mkdir(dirname(outputPath), { recursive: true })
