@@ -111,3 +111,16 @@ test('asset license mismatch is rejected by deterministic validation',async()=>{
   await writeFile(file,content.replace(/(\| \[gpt-oss-20b-balitanlp-cpt\][^\n]*)apache-2\.0/,'$1invented-license'));
   const rejected=run();assert.notEqual(rejected.status,0);assert.match(rejected.stderr,/license does not match/);
 });
+
+
+test('live health checks the actual Worker response schema and rejects missing retrieval', async () => {
+  const workflow=await readFile(new URL('../../../.github/workflows/ssai-rag-health.yml',import.meta.url),'utf8');
+  const healthBlock=workflow.split('- name: Verify live Sappy retrieves and answers')[1].split('- name: Record health result')[0];
+  const code=healthBlock.split("<<'JS'\n")[1].split('          JS')[0];
+  const run=(body,status=200,origin='https://sapinsapin.ai')=>spawnSync(process.execPath,['--input-type=module','-e',`globalThis.fetch=async()=>Response.json(${JSON.stringify(body)},{status:${status},headers:{'access-control-allow-origin':${JSON.stringify(origin)}}});\n${code}`],{encoding:'utf8'});
+  assert.equal(run({answer:'Tim Santos is the founder.',mode:'project_rag',retrieval:{chunks_found:5}}).status,0);
+  assert.notEqual(run({answer:'Tim Santos',meta:{chunks_found:5}}).status,0);
+  assert.notEqual(run({answer:'Tim Santos',retrieval:{chunks_found:0}}).status,0);
+  assert.notEqual(run({answer:'Tim Santos',retrieval:{chunks_found:5}},403).status,0);
+  assert.notEqual(run({answer:'Tim Santos',retrieval:{chunks_found:5}},200,'https://unapproved.invalid').status,0);
+});
