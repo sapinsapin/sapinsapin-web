@@ -10,6 +10,7 @@ on:
   status:
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
   checks: read
@@ -51,7 +52,7 @@ jobs:
 
           while IFS= read -r pr; do
             [ -n "$pr" ] || continue
-            checks=$(gh pr checks "$pr" --repo "$GH_REPO" --json bucket)
+            checks=$(gh pr checks "$pr" --repo "$GH_REPO" --json bucket || true)
             if ! printf '%s' "$checks" | jq -e 'length > 0 and all(.[]; .bucket == "pass" or .bucket == "skipping")' >/dev/null; then
               echo "PR #$pr still has failing or pending checks; waiting for the next check update."
               continue
@@ -63,13 +64,20 @@ jobs:
               continue
             fi
 
+            candidate_branch=$(gh pr view "$pr" --repo "$GH_REPO" --json headRefName --jq '.headRefName')
+            candidate_sha=$(gh pr view "$pr" --repo "$GH_REPO" --json headRefOid --jq '.headRefOid')
             merge_state=$(gh pr view "$pr" --repo "$GH_REPO" --json mergeStateStatus --jq '.mergeStateStatus')
             if [ "$merge_state" = "DIRTY" ]; then
               echo "PR #$pr has merge conflicts; leaving it open for resolution."
               continue
             fi
 
-            if ! gh pr merge "$pr" --repo "$GH_REPO" --squash; then
+            if gh pr merge "$pr" --repo "$GH_REPO" --squash --match-head-commit "$candidate_sha"; then
+              # GITHUB_TOKEN merges do not trigger push workflows. Explicit dispatch does.
+              if [[ "$candidate_branch" == ssai-knowledge-refresh/* ]]; then
+                gh workflow run ssai-rag-deploy-production.yml --repo "$GH_REPO" --ref main
+              fi
+            else
               echo "GitHub did not merge PR #$pr yet ($merge_state); it will be reconsidered after the next check update."
             fi
           done <<EOF

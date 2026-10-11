@@ -19,15 +19,8 @@ name: SSAI Knowledge Refresh (RAG candidate)
 
 on:
   schedule:
-    # Weekly: SapinSapin's own catalog-sync workflow (sync.yml) already runs
-    # daily and shows the org's own history moves in the order of days-to-a-
-    # couple-of-weeks between meaningful changes (new model/dataset batches),
-    # not hours. A daily cadence would mostly produce empty no-op runs; weekly
-    # keeps the workflow's signal-to-noise reasonable. Re-evaluate this cadence
-    # if the org starts publishing much more frequently.
-    # 06:00 Manila time (22:00 UTC previous day), a low-traffic hour, offset
-    # from sync.yml's own 05:17 Manila schedule to avoid any Hub API overlap.
-    - cron: '0 22 * * 0'
+    # Daily at 06:23 Manila, offset from catalog sync.
+    - cron: '23 22 * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -56,6 +49,8 @@ jobs:
       - run: npm ci
 
       - name: Refresh live-source snapshot
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/rag/refresh-sources.mjs
 
       - name: Regenerate RAG candidate
@@ -78,17 +73,14 @@ jobs:
             echo "No tracked files changed at all — nothing to propose."
             exit 0
           fi
-          substantive=$(git diff --cached -U0 -- knowledge/generated/ knowledge/snapshots/current-public-state.json \
-            | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' \
-            | grep -Ev 'generated_at' \
-            | grep -Ev '"generated_at"' \
-            || true)
-          # Base/manifest/QA files changing is always substantive (hand-edited).
-          base_changed=$(git diff --cached --name-only -- knowledge/base/ knowledge/rag-sources.yaml knowledge/qa/ || true)
-          if [ -z "$substantive" ] && [ -z "$base_changed" ]; then
+          # Source fact comparison ignores timestamps and API ordering.
+          # Generated as-of dates alone must not create a daily PR/deployment.
+          substantive=$(node scripts/rag/check-refresh-change.mjs)
+          base_changed=$(git diff --cached --name-only -- knowledge/base/ knowledge/rag-sources.yaml knowledge/qa/)
+          if [ "$substantive" = false ] && [ -z "$base_changed" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Only volatile timestamps moved — the underlying facts are unchanged. Discarding."
-            git checkout -- knowledge/
+            echo "Source facts are unchanged. No candidate PR needed."
+            git restore --source=HEAD --staged --worktree -- knowledge/generated/ knowledge/snapshots/current-public-state.json
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
             echo "Meaningful knowledge change detected."

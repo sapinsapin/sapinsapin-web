@@ -115,6 +115,12 @@ async function main() {
     fail(problems, `Could not read/parse ${snapshotPath} to cross-check volatile counts.`)
   }
   if (snapshot) {
+    if (!Array.isArray(snapshot.models) || !Array.isArray(snapshot.datasets) || snapshot.totals.models !== snapshot.models.length || snapshot.totals.datasets !== snapshot.datasets.length) fail(problems, 'Snapshot catalog totals do not match its records.')
+    if (!Array.isArray(snapshot.team) || !snapshot.team.length || snapshot.team.some(p => !p.name || !p.role)) fail(problems, 'Snapshot team roster is incomplete.')
+    for (const model of snapshot.models) {
+      if (!content.includes(`https://huggingface.co/${model.id}`)) fail(problems, `Model ${model.id} is absent from generated catalog details.`)
+    }
+
     const modelCountInText = content.match(/(\d+)\s+public model repositories exist/)
     const datasetCountInText = content.match(/(\d+)\s+public datasets/)
     if (modelCountInText && Number(modelCountInText[1]) !== snapshot.totals.models) {
@@ -126,20 +132,16 @@ async function main() {
     // Explicit license claims must trace to a snapshot value — flag any
     // license word appearing in the dataset table that isn't backed by the
     // snapshot's own license/license_name fields for that exact dataset.
-    const knownLicenseTokens = new Set()
-    for (const d of snapshot.datasets) {
-      if (d.license) knownLicenseTokens.add(String(d.license).toLowerCase())
-      if (d.license_name) knownLicenseTokens.add(String(d.license_name).toLowerCase())
+    for (const dataset of snapshot.datasets) {
+      const row = content.split('\n').find(line => line.startsWith(`| \`${dataset.name}\` |`))
+      if (!row) { fail(problems, `Dataset ${dataset.name} is absent from generated details.`); continue }
+      const cell = row.split('|')[4].trim().toLowerCase()
+      const expected = String(dataset.license_name || dataset.license || 'not stated on the public card').toLowerCase()
+      if (!cell.includes(expected)) fail(problems, `Dataset ${dataset.name} license does not match its own source metadata.`)
     }
-    const tableSection = content.split('## Datasets and models')[1]?.split('##')[0] ?? ''
-    const licenseWordsInTable = [...tableSection.matchAll(/\|\s*`([a-z0-9_-]+)`\s*\|[^|]*\|[^|]*\|([^|]*)\|/gi)]
-    for (const [, datasetName, licenseCell] of licenseWordsInTable) {
-      const cellLower = licenseCell.toLowerCase()
-      if (cellLower.includes('not stated')) continue
-      const matchesKnown = [...knownLicenseTokens].some((tok) => cellLower.includes(tok))
-      if (!matchesKnown && cellLower.trim()) {
-        warn(problems, `Dataset "${datasetName}" license cell ("${licenseCell.trim()}") does not obviously match any license value in the source snapshot — flagging for human review rather than assuming correctness.`)
-      }
+    for (const model of snapshot.models) {
+      const row = content.split('\n').find(line => line.startsWith(`| [${model.name}](`))
+      if (!row || !row.toLowerCase().includes(String(model.license || 'not stated in public api; check card').toLowerCase())) fail(problems, `Model ${model.name} license does not match its own source metadata.`)
     }
     // Snapshot staleness.
     const snapshotAgeDays = Math.floor((Date.now() - new Date(snapshot.generated_at).getTime()) / 86400000)
@@ -166,12 +168,15 @@ async function main() {
   try {
     qa = JSON.parse(await readFile(qaPath, 'utf8'))
   } catch {
-    warn(problems, `Could not read ${qaPath} — skipping QA keyword sanity check.`)
+    fail(problems, 'Retrieval QA definitions are missing or invalid.')
   }
   if (qa) {
     for (const q of qa.questions) {
       const hasAny = (q.must_mention_any || []).length === 0 || (q.must_mention_any || []).some((kw) => content.toLowerCase().includes(kw.toLowerCase()))
       if (!hasAny) fail(problems, `QA question "${q.id}" (${q.question}) — none of its expected keywords appear anywhere in the generated document. Retrieval would likely surface nothing useful.`)
+      for (const expected of q.must_mention_all || []) {
+        if (!content.toLowerCase().includes(expected.toLowerCase())) fail(problems, `QA ${q.id}: required term ${expected} is missing.`)
+      }
       for (const bad of q.must_not_mention || []) {
         if (content.toLowerCase().includes(bad.toLowerCase())) fail(problems, `QA question "${q.id}" — forbidden phrase "${bad}" found in the generated document.`)
       }
