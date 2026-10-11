@@ -60,7 +60,7 @@ jobs:
           const response=await fetch(base+'/?q='+encodeURIComponent('Who is on the SapinSapin AI team?'),{headers:{Origin:'https://sapinsapin.ai'},signal:AbortSignal.timeout(55000)});
           if(response.status!==200 || response.headers.get('access-control-allow-origin')!=='https://sapinsapin.ai') throw new Error('Sappy public answer/CORS check failed.');
           const body=await response.json();
-          if(typeof body.answer!=='string' || !/Tim Santos/i.test(body.answer) || !(body.meta?.chunks_found>0)) throw new Error('Sappy did not produce a retrieved team answer.');
+          if(typeof body.answer!=='string' || !/Tim Santos/i.test(body.answer) || !(body.retrieval?.chunks_found>0)) throw new Error('Sappy did not produce a retrieved team answer.');
           console.log('Live Sappy retrieved project knowledge and answered successfully.');
           JS
       - name: Record health result
