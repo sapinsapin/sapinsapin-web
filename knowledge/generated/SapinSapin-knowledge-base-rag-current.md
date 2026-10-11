@@ -4,7 +4,7 @@ version: "3.0-generated"
 status: CANDIDATE — NOT YET DEPLOYED. Generated automatically from knowledge/base/*.md and knowledge/snapshots/current-public-state.json. Merging its reviewed PR to protected main triggers automatic production deployment; see docs/SAPPY-RAG-UPDATE-PROCEDURE.md.
 predecessor: SapinSapin-knowledge-base-rag-v2.md (content-frozen candidate, 2026-09-22) — itself succeeding SapinSapin-knowledge-base-rag-ready.md (v1, production item id 87c37f86cb5c42a387e5fdaa5ec5ab09, deployed 2026-09-18)
 knowledge_snapshot_date: "2026-10-11"
-generated_at: "2026-10-11T05:52:50.989Z"
+generated_at: "2026-10-11T09:13:34.865Z"
 canonical_source_policy: ssai/docs/KNOWLEDGE-SOURCES.md (authority hierarchy: live infra/repo > live first-party site/HF/repo > canonical SSAI docs > this RAG lineage > general research snapshot > inference)
 source_manifest: knowledge/rag-sources.yaml
 scope: Public-facing knowledge for Sappy (Discord + web chat assistant). Contains no secrets, account IDs, Discord IDs, OAuth details, or internal deployment instructions — see ssai/docs/SAPPY-OPERATIONS.md for that internal material.
@@ -110,59 +110,6 @@ Catalog totals as of 2026-10-11: 9 public datasets, 48 public models on huggingf
 - **Audio To Audio** (1 repository): Voice-conversion models that re-speak existing audio in a different voice while preserving words and timing.
 - **Text Classification** (1 repository): Additional model repositories in this category — check individual cards for specifics.
 
-| Model | Task (Hub tag) | License metadata / access |
-|---|---|---|
-| [bikoLLM](https://huggingface.co/sapinsapin/bikoLLM) | text-generation | llama3.1 |
-| [gpt-oss-20b-balitanlp-cpt](https://huggingface.co/sapinsapin/gpt-oss-20b-balitanlp-cpt) | text-generation | apache-2.0 |
-| [gpt-oss-20b-balitanlp-cpt-bf16](https://huggingface.co/sapinsapin/gpt-oss-20b-balitanlp-cpt-bf16) | text-generation | apache-2.0 |
-| [halo-lid](https://huggingface.co/sapinsapin/halo-lid) | text-classification | cc-by-nc-4.0 |
-| [llama31-8b-balitanlp-cpt](https://huggingface.co/sapinsapin/llama31-8b-balitanlp-cpt) | text-generation | llama3.1 |
-| [llama31-8b-balitanlp-IT](https://huggingface.co/sapinsapin/llama31-8b-balitanlp-IT) | Not tagged | Not stated in public API; check card |
-| [omniASR_W2V_1B_SSL-ctc-char-pld_ceb](https://huggingface.co/sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_ceb) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [omniASR_W2V_1B_SSL-ctc-char-pld_ceb-norm](https://huggingface.co/sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_ceb-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [omniASR_W2V_1B_SSL-ctc-char-pld_pam](https://huggingface.co/sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_pam) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [omniASR_W2V_1B_SSL-ctc-char-pld_pam-norm](https://huggingface.co/sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_pam-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [omniASR_W2V_7B_SSL-ctc-char-pld_ceb](https://huggingface.co/sapinsapin/omniASR_W2V_7B_SSL-ctc-char-pld_ceb) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [orpheus-3b-0.1-pretrained-char-pld-bcl](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-bcl) | text-to-speech | cc-by-nc-4.0 |
-| [orpheus-3b-0.1-pretrained-char-pld-ceb](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-ceb) | text-to-speech | cc-by-nc-4.0 |
-| [orpheus-3b-0.1-pretrained-char-pld-eng](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-eng) | text-to-speech | cc-by-nc-4.0 |
-| [orpheus-3b-0.1-pretrained-char-pld-fil](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-fil) | text-to-speech | cc-by-nc-4.0 |
-| [orpheus-3b-0.1-pretrained-char-pld-hil](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-hil) | text-to-speech | cc-by-nc-4.0 |
-| [orpheus-3b-0.1-pretrained-char-pld-ilo](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-ilo) | text-to-speech | cc-by-nc-4.0 |
-| [orpheus-3b-0.1-pretrained-char-pld-pam](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-pam) | text-to-speech | cc-by-nc-4.0 |
-| [orpheus-3b-0.1-pretrained-char-pld-tsg](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-tsg) | text-to-speech | cc-by-nc-4.0 |
-| [orpheus-3b-0.1-pretrained-char-pld-war](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-war) | text-to-speech | cc-by-nc-4.0 |
-| [qwen3vl-balitanlp-news-writer](https://huggingface.co/sapinsapin/qwen3vl-balitanlp-news-writer) | Not tagged | Not stated in public API; check card |
-| [speecht5_tts-fsc](https://huggingface.co/sapinsapin/speecht5_tts-fsc) | text-to-speech | mit |
-| [speecht5_tts-fsc-ONNX](https://huggingface.co/sapinsapin/speecht5_tts-fsc-ONNX) | text-to-speech | mit |
-| [speecht5_vc-pld](https://huggingface.co/sapinsapin/speecht5_vc-pld) | audio-to-audio | mit |
-| [whisper-large-v3-pld-bcl-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-bcl-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-large-v3-pld-ceb](https://huggingface.co/sapinsapin/whisper-large-v3-pld-ceb) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-large-v3-pld-ceb-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-ceb-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-large-v3-pld-fil-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-fil-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-large-v3-pld-hil-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-hil-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-large-v3-pld-ilo-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-ilo-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-large-v3-pld-pag-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-pag-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-large-v3-pld-pam](https://huggingface.co/sapinsapin/whisper-large-v3-pld-pam) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-large-v3-pld-pam-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-pam-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-large-v3-pld-tsg-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-tsg-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-large-v3-pld-war-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-war-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-small-fsc](https://huggingface.co/sapinsapin/whisper-small-fsc) | automatic-speech-recognition | apache-2.0 |
-| [whisper-small-fsc-ONNX](https://huggingface.co/sapinsapin/whisper-small-fsc-ONNX) | automatic-speech-recognition | mit |
-| [whisper-small-fsc-pld-fil](https://huggingface.co/sapinsapin/whisper-small-fsc-pld-fil) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-small-pld-bcl](https://huggingface.co/sapinsapin/whisper-small-pld-bcl) | automatic-speech-recognition | apache-2.0 |
-| [whisper-small-pld-ceb](https://huggingface.co/sapinsapin/whisper-small-pld-ceb) | automatic-speech-recognition | apache-2.0 |
-| [whisper-small-pld-eng](https://huggingface.co/sapinsapin/whisper-small-pld-eng) | automatic-speech-recognition | apache-2.0 |
-| [whisper-small-pld-fil](https://huggingface.co/sapinsapin/whisper-small-pld-fil) | automatic-speech-recognition | apache-2.0 |
-| [whisper-small-pld-hil](https://huggingface.co/sapinsapin/whisper-small-pld-hil) | automatic-speech-recognition | apache-2.0 |
-| [whisper-small-pld-ilo](https://huggingface.co/sapinsapin/whisper-small-pld-ilo) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-small-pld-pag](https://huggingface.co/sapinsapin/whisper-small-pld-pag) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-small-pld-pam](https://huggingface.co/sapinsapin/whisper-small-pld-pam) | automatic-speech-recognition | apache-2.0 |
-| [whisper-small-pld-tsg](https://huggingface.co/sapinsapin/whisper-small-pld-tsg) | automatic-speech-recognition | cc-by-nc-4.0 |
-| [whisper-small-pld-war](https://huggingface.co/sapinsapin/whisper-small-pld-war) | automatic-speech-recognition | apache-2.0 |
-
-Model license labels above are public metadata, not a grant of commercial permission. Read the exact model card and license terms before use.
-
 **Do not state exact parameter counts, benchmark scores, or "active"/production status for any specific model unless quoting its live model card.** A public repository existing on the Hub is not evidence of benchmarked quality or production deployment — describe what is public ("a public repository exists for X"), not what is proven.
 
 The base models SapinSapin's fine-tunes build on (e.g. Llama 3.1, gpt-oss, Whisper, SpeechT5, Meta's OmniASR) are third-party foundation models — SapinSapin AI did not train these from scratch; it continues their training or fine-tunes them on Philippine-language data. Never imply SapinSapin AI trained a frontier foundation model from scratch.
@@ -247,3 +194,58 @@ This document is chunked by Cloudflare AI Search at 1024 tokens with a 10-token 
 - General linguistic context (gender-neutral pronouns, Austronesian morphology, code-switching, PH language count) — general field knowledge, not a SapinSapin-specific citation
 
 Full source authority tiers, refresh strategy, and which sources may auto-update which facts are defined in `knowledge/rag-sources.yaml` and `ssai/docs/KNOWLEDGE-SOURCES.md`.
+
+## 09 — Individual Model License Catalog
+
+| Model | Task (Hub tag) | License metadata / access |
+|---|---|---|
+| [bikoLLM](https://huggingface.co/sapinsapin/bikoLLM) | text-generation | llama3.1 |
+| [gpt-oss-20b-balitanlp-cpt](https://huggingface.co/sapinsapin/gpt-oss-20b-balitanlp-cpt) | text-generation | apache-2.0 |
+| [gpt-oss-20b-balitanlp-cpt-bf16](https://huggingface.co/sapinsapin/gpt-oss-20b-balitanlp-cpt-bf16) | text-generation | apache-2.0 |
+| [halo-lid](https://huggingface.co/sapinsapin/halo-lid) | text-classification | cc-by-nc-4.0 |
+| [llama31-8b-balitanlp-cpt](https://huggingface.co/sapinsapin/llama31-8b-balitanlp-cpt) | text-generation | llama3.1 |
+| [llama31-8b-balitanlp-IT](https://huggingface.co/sapinsapin/llama31-8b-balitanlp-IT) | Not tagged | Not stated in public API; check card |
+| [omniASR_W2V_1B_SSL-ctc-char-pld_ceb](https://huggingface.co/sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_ceb) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [omniASR_W2V_1B_SSL-ctc-char-pld_ceb-norm](https://huggingface.co/sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_ceb-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [omniASR_W2V_1B_SSL-ctc-char-pld_pam](https://huggingface.co/sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_pam) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [omniASR_W2V_1B_SSL-ctc-char-pld_pam-norm](https://huggingface.co/sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_pam-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [omniASR_W2V_7B_SSL-ctc-char-pld_ceb](https://huggingface.co/sapinsapin/omniASR_W2V_7B_SSL-ctc-char-pld_ceb) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [orpheus-3b-0.1-pretrained-char-pld-bcl](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-bcl) | text-to-speech | cc-by-nc-4.0 |
+| [orpheus-3b-0.1-pretrained-char-pld-ceb](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-ceb) | text-to-speech | cc-by-nc-4.0 |
+| [orpheus-3b-0.1-pretrained-char-pld-eng](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-eng) | text-to-speech | cc-by-nc-4.0 |
+| [orpheus-3b-0.1-pretrained-char-pld-fil](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-fil) | text-to-speech | cc-by-nc-4.0 |
+| [orpheus-3b-0.1-pretrained-char-pld-hil](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-hil) | text-to-speech | cc-by-nc-4.0 |
+| [orpheus-3b-0.1-pretrained-char-pld-ilo](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-ilo) | text-to-speech | cc-by-nc-4.0 |
+| [orpheus-3b-0.1-pretrained-char-pld-pam](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-pam) | text-to-speech | cc-by-nc-4.0 |
+| [orpheus-3b-0.1-pretrained-char-pld-tsg](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-tsg) | text-to-speech | cc-by-nc-4.0 |
+| [orpheus-3b-0.1-pretrained-char-pld-war](https://huggingface.co/sapinsapin/orpheus-3b-0.1-pretrained-char-pld-war) | text-to-speech | cc-by-nc-4.0 |
+| [qwen3vl-balitanlp-news-writer](https://huggingface.co/sapinsapin/qwen3vl-balitanlp-news-writer) | Not tagged | Not stated in public API; check card |
+| [speecht5_tts-fsc](https://huggingface.co/sapinsapin/speecht5_tts-fsc) | text-to-speech | mit |
+| [speecht5_tts-fsc-ONNX](https://huggingface.co/sapinsapin/speecht5_tts-fsc-ONNX) | text-to-speech | mit |
+| [speecht5_vc-pld](https://huggingface.co/sapinsapin/speecht5_vc-pld) | audio-to-audio | mit |
+| [whisper-large-v3-pld-bcl-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-bcl-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-large-v3-pld-ceb](https://huggingface.co/sapinsapin/whisper-large-v3-pld-ceb) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-large-v3-pld-ceb-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-ceb-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-large-v3-pld-fil-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-fil-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-large-v3-pld-hil-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-hil-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-large-v3-pld-ilo-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-ilo-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-large-v3-pld-pag-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-pag-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-large-v3-pld-pam](https://huggingface.co/sapinsapin/whisper-large-v3-pld-pam) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-large-v3-pld-pam-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-pam-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-large-v3-pld-tsg-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-tsg-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-large-v3-pld-war-norm](https://huggingface.co/sapinsapin/whisper-large-v3-pld-war-norm) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-small-fsc](https://huggingface.co/sapinsapin/whisper-small-fsc) | automatic-speech-recognition | apache-2.0 |
+| [whisper-small-fsc-ONNX](https://huggingface.co/sapinsapin/whisper-small-fsc-ONNX) | automatic-speech-recognition | mit |
+| [whisper-small-fsc-pld-fil](https://huggingface.co/sapinsapin/whisper-small-fsc-pld-fil) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-small-pld-bcl](https://huggingface.co/sapinsapin/whisper-small-pld-bcl) | automatic-speech-recognition | apache-2.0 |
+| [whisper-small-pld-ceb](https://huggingface.co/sapinsapin/whisper-small-pld-ceb) | automatic-speech-recognition | apache-2.0 |
+| [whisper-small-pld-eng](https://huggingface.co/sapinsapin/whisper-small-pld-eng) | automatic-speech-recognition | apache-2.0 |
+| [whisper-small-pld-fil](https://huggingface.co/sapinsapin/whisper-small-pld-fil) | automatic-speech-recognition | apache-2.0 |
+| [whisper-small-pld-hil](https://huggingface.co/sapinsapin/whisper-small-pld-hil) | automatic-speech-recognition | apache-2.0 |
+| [whisper-small-pld-ilo](https://huggingface.co/sapinsapin/whisper-small-pld-ilo) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-small-pld-pag](https://huggingface.co/sapinsapin/whisper-small-pld-pag) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-small-pld-pam](https://huggingface.co/sapinsapin/whisper-small-pld-pam) | automatic-speech-recognition | apache-2.0 |
+| [whisper-small-pld-tsg](https://huggingface.co/sapinsapin/whisper-small-pld-tsg) | automatic-speech-recognition | cc-by-nc-4.0 |
+| [whisper-small-pld-war](https://huggingface.co/sapinsapin/whisper-small-pld-war) | automatic-speech-recognition | apache-2.0 |
+
+Model license labels above are public metadata, not a grant of commercial permission. Read the exact model card and license terms before use.

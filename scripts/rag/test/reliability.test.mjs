@@ -49,7 +49,7 @@ async function scenario(mode, {command='deploy', candidate='new candidate', corr
       if(path.endsWith('/download')) return new Response(current);
       if(method==='POST' && path.endsWith('/items')) {current=await o.body.get('file').text();return result(item);}
       if(path.endsWith('/search')) {
-        const opts=JSON.parse(o.body); if(opts.ai_search_options.retrieval.max_num_results!==5) throw Error('QA settings mismatch');
+        const opts=JSON.parse(o.body); if(opts.ai_search_options.cache.enabled!==false) throw Error('QA must bypass cache'); if(opts.ai_search_options.retrieval.max_num_results!==5) throw Error('QA settings mismatch');
         return result({chunks:${JSON.stringify(mode==='qa-fail'?[]:[{text:'expected'}])}});
       }
       if(path.endsWith('/items')) return result([item]);

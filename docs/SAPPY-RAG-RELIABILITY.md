@@ -40,3 +40,7 @@ Local verification: **8** RAG regression tests; **53** existing Worker tests; ge
 - Changing AI Search configuration, secrets or manual content still needs task authorization. Preserve backups and rollback. Current automatic publishing policy was established in the existing repository workflow; do not silently restore the superseded manual-only bootstrap design.
 
 Initial PR #23 production rollout indexed the expanded catalog but failed the unchanged leadership retrieval question; the workflow restored and byte-verified the exact previous item. The follow-up makes the generated team roster an explicit searchable sentence, retains the same leadership query and five-result/0.4 threshold, and adds bounded public-chunk failure diagnostics. This is an observed rollback, not only a mocked test.
+
+### Expanded catalog retrieval isolation
+
+Per-model license details are appended after durable project and team sections, keeping catalog growth from shifting the team/contributor context into catalog chunks. Deployment and read-only retrieval QA explicitly bypass similarity caching so checks exercise the current index. The original leadership and contributor questions remain mandatory.
