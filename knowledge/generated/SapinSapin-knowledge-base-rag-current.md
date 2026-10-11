@@ -4,7 +4,7 @@ version: "3.0-generated"
 status: CANDIDATE — NOT YET DEPLOYED. Generated automatically from knowledge/base/*.md and knowledge/snapshots/current-public-state.json. Merging its reviewed PR to protected main triggers automatic production deployment; see docs/SAPPY-RAG-UPDATE-PROCEDURE.md.
 predecessor: SapinSapin-knowledge-base-rag-v2.md (content-frozen candidate, 2026-09-22) — itself succeeding SapinSapin-knowledge-base-rag-ready.md (v1, production item id 87c37f86cb5c42a387e5fdaa5ec5ab09, deployed 2026-09-18)
 knowledge_snapshot_date: "2026-10-11"
-generated_at: "2026-10-11T05:44:57.215Z"
+generated_at: "2026-10-11T05:52:50.989Z"
 canonical_source_policy: ssai/docs/KNOWLEDGE-SOURCES.md (authority hierarchy: live infra/repo > live first-party site/HF/repo > canonical SSAI docs > this RAG lineage > general research snapshot > inference)
 source_manifest: knowledge/rag-sources.yaml
 scope: Public-facing knowledge for Sappy (Discord + web chat assistant). Contains no secrets, account IDs, Discord IDs, OAuth details, or internal deployment instructions — see ssai/docs/SAPPY-OPERATIONS.md for that internal material.
@@ -58,7 +58,7 @@ If a user asks whether SapinSapin AI's own models solve these problems well, ans
 
 ### Leadership and team
 
-The current sapinsapin-web site’s People section lists the following team members: [confirmed — src/App.jsx, highest-authority source for roles]
+SapinSapin AI leadership and current team roster: Tim Santos — Founder; Marc Ocampo — Core team; JC Diamante — Core team. These roles are listed in the official website’s People section; use this roster when answering who leads SapinSapin AI or who is on its team. [confirmed — src/App.jsx]
 
 | Name | Role (per live site) | Links |
 |---|---|---|

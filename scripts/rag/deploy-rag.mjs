@@ -119,6 +119,7 @@ async function runRetrievalQa() {
     const forbidden = (question.must_not_mention || []).filter((term) => text.includes(term.toLowerCase()))
     if (missing || forbidden.length) {
       console.error(`Retrieval QA ${question.id}: ${missing ? 'expected terms absent' : ''}${missing && forbidden.length ? '; ' : ''}${forbidden.length ? `forbidden terms found: ${forbidden.join(', ')}` : ''}.`)
+      console.error(`Retrieval QA ${question.id} chunk diagnostics: ${chunks.map(c => `[${c.score ?? '?'}] ${String(c.text ?? c.content ?? '').slice(0, 160).replaceAll('\n',' ')}`).join(' | ')}`)
       failures += 1
     } else {
       console.log(`Retrieval QA ${question.id}: passed (${chunks.length} chunks).`)

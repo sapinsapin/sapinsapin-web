@@ -88,7 +88,7 @@ function buildTeamRosterTable(team) {
     return `| ${p.name} | ${p.role} | ${links} |`
   })
   return [
-    'The current sapinsapin-web site\u2019s People section lists the following team members: [confirmed \u2014 src/App.jsx, highest-authority source for roles]',
+    `SapinSapin AI leadership and current team roster: ${team.map(p => `${p.name} — ${p.role}`).join('; ')}. These roles are listed in the official website’s People section; use this roster when answering who leads SapinSapin AI or who is on its team. [confirmed — src/App.jsx]`,
     '',
     '| Name | Role (per live site) | Links |',
     '|---|---|---|',
