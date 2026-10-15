@@ -14,6 +14,25 @@ name: CI
 
 on:
   pull_request:
+    # The bot workflows (Sync Hub catalog, SSAI Knowledge Refresh) commit only
+    # generated files and then dispatch this workflow explicitly on their
+    # branch. Their PRs are opened by github-actions[bot], and this repository
+    # holds that actor's own pull_request runs at "action_required" until a
+    # maintainer approves them. A held run still registers a github-actions
+    # check suite with no jobs, and that empty suite becomes the newest one on
+    # the head commit, shadowing the `build` check the dispatched run produced:
+    # the required check then looks missing and the PR sits BLOCKED. That is
+    # what kept the catalog-sync PR unmerged from 2026-10-11 to 2026-10-15.
+    # Ignoring the generated paths stops GitHub creating that empty suite at
+    # all. The bot workflows' pre-push gates plus their explicit dispatch remain
+    # the gate for those PRs. A hand-written PR that touches *only* a generated
+    # file should dispatch this workflow by hand (`gh workflow run ci.yml
+    # --ref <branch>`), since generated files are never hand-edited (AGENTS.md).
+    paths-ignore:
+      - 'knowledge/**'
+      - 'src/data/hubSnapshot.js'
+      - 'src/data/spaceManifest.js'
+      - 'public/sitemap.xml'
   workflow_dispatch:
   push:
     branches: [main]

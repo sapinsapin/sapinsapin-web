@@ -57,11 +57,48 @@ jobs:
         run: |
           node --input-type=module - <<'JS'
           const base='https://sappy-ai.primary-bd7.workers.dev';
-          const response=await fetch(base+'/?q='+encodeURIComponent('Who is on the SapinSapin AI team?'),{headers:{Origin:'https://sapinsapin.ai'},signal:AbortSignal.timeout(55000)});
-          if(response.status!==200 || response.headers.get('access-control-allow-origin')!=='https://sapinsapin.ai') throw new Error('Sappy public answer/CORS check failed.');
-          const body=await response.json();
-          if(typeof body.answer!=='string' || !/Tim Santos/i.test(body.answer) || !(body.retrieval?.chunks_found>0)) throw new Error('Sappy did not produce a retrieved team answer.');
-          console.log('Live Sappy retrieved project knowledge and answered successfully.');
+          const origin='https://sapinsapin.ai';
+          const url=base+'/?q='+encodeURIComponent('Who is on the SapinSapin AI team?');
+          // The Worker answers a transient workers-AI hiccup with 429/5xx plus
+          // its own JSON error and correct CORS. The pipeline treats upstream
+          // provider outages as possible, so one bad model call should not turn
+          // the whole day red with no reason printed: retry those statuses (and
+          // network/timeout failures) a bounded number of times, printing the
+          // status, allow-origin and body of each failed attempt. A wrong
+          // schema, a wrong CORS header or any other status fails immediately,
+          // because a retry cannot fix those.
+          const retryStatuses=new Set([429,500,502,503,504]);
+          const attempts=3;
+          // Overridable so the regression test can exercise the retry without
+          // sleeping for real.
+          const retryDelayMs=Number(process.env.SAPPY_HEALTH_RETRY_DELAY_MS??5000);
+          let lastError;
+          for(let attempt=1;attempt<=attempts;attempt++){
+            let retriable=true;
+            try{
+              const response=await fetch(url,{headers:{Origin:origin},signal:AbortSignal.timeout(55000)});
+              const allowOrigin=response.headers.get('access-control-allow-origin');
+              const text=await response.text();
+              if(response.status!==200 || allowOrigin!==origin){
+                retriable=retryStatuses.has(response.status);
+                throw new Error('Sappy public answer/CORS check failed (status '+response.status+', allow-origin '+allowOrigin+'). Body: '+text.slice(0,300));
+              }
+              const body=JSON.parse(text);
+              if(typeof body.answer!=='string' || !/Tim Santos/i.test(body.answer) || !(body.retrieval?.chunks_found>0)){
+                retriable=false;
+                throw new Error('Sappy did not produce a retrieved team answer. Body: '+text.slice(0,300));
+              }
+              console.log('Live Sappy retrieved project knowledge and answered successfully (attempt '+attempt+'/'+attempts+').');
+              lastError=undefined;
+              break;
+            }catch(error){
+              lastError=error;
+              console.error('Sappy attempt '+attempt+'/'+attempts+' failed: '+error.message);
+              if(!retriable || attempt===attempts) break;
+              await new Promise(resolve=>setTimeout(resolve,retryDelayMs*attempt));
+            }
+          }
+          if(lastError) throw lastError;
           JS
       - name: Record health result
         if: always()

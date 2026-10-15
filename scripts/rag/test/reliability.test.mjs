@@ -124,3 +124,36 @@ test('live health checks the actual Worker response schema and rejects missing r
   assert.notEqual(run({answer:'Tim Santos',retrieval:{chunks_found:5}},403).status,0);
   assert.notEqual(run({answer:'Tim Santos',retrieval:{chunks_found:5}},200,'https://unapproved.invalid').status,0);
 });
+
+
+test('live health retries a transient Worker outage but gives up on a persistent one', async () => {
+  const workflow=await readFile(new URL('../../../.github/workflows/ssai-rag-health.yml',import.meta.url),'utf8');
+  const healthBlock=workflow.split('- name: Verify live Sappy retrieves and answers')[1].split('- name: Record health result')[0];
+  const code=healthBlock.split("<<'JS'\n")[1].split('          JS')[0];
+  const good={answer:'Tim Santos is the founder.',mode:'project_rag',retrieval:{chunks_found:5}};
+  const busy={error:'Sappy is temporarily unavailable. Please try again later.'};
+  const noRetrieval={answer:'Tim Santos',meta:{chunks_found:5}};
+  const step=(status,body)=>({status,body});
+  // A stateful fetch: each attempt consumes the next scripted step, repeating
+  // the last one. The retry delay is dropped to zero so the regression test
+  // never really sleeps.
+  const run=(steps)=>spawnSync(process.execPath,['--input-type=module','-e',`
+    let __n=0;const __steps=${JSON.stringify(steps)};
+    globalThis.fetch=async()=>{const s=__steps[Math.min(__n++,__steps.length-1)];
+      return new Response(JSON.stringify(s.body),{status:s.status,headers:{'access-control-allow-origin':'https://sapinsapin.ai'}});};
+    ${code}`],{encoding:'utf8',env:{...process.env,SAPPY_HEALTH_RETRY_DELAY_MS:'0'}});
+
+  const recovered=run([step(503,busy),step(503,busy),step(200,good)]);
+  assert.equal(recovered.status,0,recovered.stderr);
+  assert.match(recovered.stdout,/attempt 3\/3/);
+  assert.match(recovered.stderr,/Sappy attempt 1\/3/);
+  assert.notEqual(run([step(503,busy),step(503,busy),step(503,busy)]).status,0);
+  // Bounded: a fourth, successful attempt is never reached.
+  assert.notEqual(run([step(503,busy),step(503,busy),step(503,busy),step(200,good)]).status,0);
+
+  // A schema mismatch cannot be fixed by retrying, so it fails on attempt one.
+  const schema=run([step(200,noRetrieval),step(200,good)]);
+  assert.notEqual(schema.status,0);
+  assert.match(schema.stderr,/Sappy attempt 1\/3/);
+  assert.doesNotMatch(schema.stderr,/Sappy attempt 2\/3/);
+});
