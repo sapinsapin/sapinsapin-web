@@ -14,7 +14,8 @@ permissions:
   contents: write
   pull-requests: write
   checks: read
-  statuses: read
+  statuses: write
+  issues: write
 
 jobs:
   merge-dependabot-updates:
@@ -52,6 +53,24 @@ jobs:
 
           while IFS= read -r pr; do
             [ -n "$pr" ] || continue
+            candidate_sha=$(gh pr view "$pr" --repo "$GH_REPO" --json headRefOid --jq '.headRefOid')
+            author=$(gh pr view "$pr" --repo "$GH_REPO" --json author --jq '.author.login')
+            if [ "$author" = "app/github-actions" ] || [ "$author" = "github-actions[bot]" ]; then
+              # Bot PRs are pushed with GITHUB_TOKEN, so GitHub never starts their
+              # pull_request CI; the sync workflows dispatch CI by hand instead, and
+              # GitHub does not count a dispatched run as the required `build` check
+              # (PR stayed BLOCKED 2026-10-15 to 2026-11-05). Mirror a passing
+              # dispatched CI run on this exact commit as a `build` commit status.
+              ci_ok=$(gh api "repos/$GH_REPO/actions/workflows/ci.yml/runs?head_sha=$candidate_sha&status=success" --jq '.total_count')
+              has_status=$(gh api "repos/$GH_REPO/commits/$candidate_sha/statuses" --jq '[.[] | select(.context == "build" and .state == "success")] | length')
+              if [ "${ci_ok:-0}" -gt 0 ] && [ "${has_status:-0}" -eq 0 ]; then
+                gh api -X POST "repos/$GH_REPO/statuses/$candidate_sha" \
+                  -f state=success -f context=build \
+                  -f description="CI passed (dispatched run)" \
+                  -f target_url="https://github.com/$GH_REPO/actions/workflows/ci.yml"
+              fi
+            fi
+
             checks=$(gh pr checks "$pr" --repo "$GH_REPO" --json bucket || true)
             if ! printf '%s' "$checks" | jq -e 'length > 0 and all(.[]; .bucket == "pass" or .bucket == "skipping")' >/dev/null; then
               echo "PR #$pr still has failing or pending checks; waiting for the next check update."
@@ -83,3 +102,21 @@ jobs:
           done <<EOF
           $prs
           EOF
+
+      - name: Flag bot pull requests stuck for more than 2 days
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          cutoff=$(date -u -d '2 days ago' +%Y-%m-%dT%H:%M:%SZ)
+          stuck=$(gh api "repos/$GH_REPO/pulls?state=open&base=main" --paginate \
+            --jq "[.[] | select((.user.login == \"dependabot[bot]\" or .user.login == \"github-actions[bot]\") and .created_at < \"$cutoff\") | .number] | .[]")
+          for pr in $stuck; do
+            title="Bot PR #$pr has been open for more than 2 days"
+            existing=$(gh issue list --repo "$GH_REPO" --state open --search "\"$title\" in:title" --json number --jq 'length')
+            if [ "$existing" -eq 0 ]; then
+              gh issue create --repo "$GH_REPO" --title "$title" \
+                --body "The auto-merge workflow has not been able to merge #$pr. Open its latest Auto-merge run for the reason, then merge or close it by hand."
+            fi
+          done
