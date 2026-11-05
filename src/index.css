@@ -2358,6 +2358,14 @@
 [data-theme='dark'] .model-filters button,
 [data-theme='dark'] .reference-meta,
 [data-theme='dark'] .reference-note { color: rgb(var(--c-ink) / .76); }
+/* This block is unlayered, so it beats the layered `.is-active` rules above
+   regardless of specificity and turned the selected pill's text pale on the
+   light-lavender fill. Restate the dark selected text here, after the lift. */
+[data-theme='dark'] .dataset-filters button.is-active,
+[data-theme='dark'] .model-filters button.is-active,
+[data-theme='dark'] .demo-langs button.is-active { color: #0d0c0b; }
+[data-theme='dark'] .dataset-filters button.is-active span,
+[data-theme='dark'] .model-filters button.is-active span { background: rgb(13 12 11 / .18); color: #0d0c0b; }
 [data-theme='dark'] .nav-menu-panel a { color: rgb(var(--c-ink) / .82); }
 [data-theme='dark'] .footer-body { color: rgb(var(--footer-fg) / .76); }
 [data-theme='dark'] .footer-links a { color: rgb(var(--footer-fg) / .80); }
