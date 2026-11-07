@@ -1,3 +1,4 @@
+import { handleIntroduction } from './introduction.js';
 import { handleMetaWebhook } from './meta-webhook.js';
 import { checkPageAndAnnounce } from './page-announcements.js';
 const DISCORD_API = "https://discord.com/api/v10";
@@ -2621,6 +2622,9 @@ export default {
           });
         }
 
+
+        const onboarding = await handleIntroduction(interaction, env, ctx);
+        if (onboarding) return onboarding;
 
         // /ask
 

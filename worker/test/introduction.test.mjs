@@ -1,0 +1,64 @@
+import assert from 'node:assert/strict';
+import { handleIntroduction, makeCapability, FIELDS } from '../src/introduction.js';
+import worker from '../src/index.js';
+const env={DISCORD_APPLICATION_ID:'1550091743003811842',DISCORD_GUILD_ID:'1548673048876683296',DISCORD_BOT_TOKEN:'fake-test-token'};
+const target='111111111111111111', moderator='222222222222222222', channel='1550329955664011376';
+const base={application_id:env.DISCORD_APPLICATION_ID,guild_id:env.DISCORD_GUILD_ID,channel_id:channel,id:'333333333333333333',token:'fake-interaction-token',member:{user:{id:target},roles:[]}};
+let calls=[], memberRoles=[], failPost=false, failPut=false, nonmod=false, pending=[];
+globalThis.fetch=async (url, options={})=>{
+  const path=new URL(url).pathname, method=options.method??'GET'; calls.push({path,method,body:options.body?JSON.parse(options.body):null});
+  if(method==='PATCH') return Response.json({});
+  if(path.endsWith('/roles')&&method==='GET') return Response.json([{id:'444444444444444444',name:'mod',managed:false,permissions:'0'},{id:'555555555555555555',name:'Member',managed:false,permissions:'1024'}]);
+  if(path.endsWith(`/members/${target}`)) return Response.json({user:{id:target,bot:false},roles:memberRoles});
+  if(method==='PUT') return new Response(null,{status:failPut?403:204});
+  if(method==='POST'&&path.endsWith('/messages')) return failPost ? new Response(null,{status:403}) : Response.json({id:'666666666666666666'});
+  throw Error('Unexpected request: '+method+' '+path);
+};
+const ctx={waitUntil:p=>pending.push(p)};
+async function run(i){calls=[];pending=[];const r=await handleIntroduction(i,env,ctx);const body=r?await r.json():null;await Promise.all(pending);return body;}
+const command={...base,type:2,member:{user:{id:moderator},roles:['444444444444444444']},data:{name:'restart-introduction',options:[{name:'member',type:6,value:target}]}};
+assert.equal((await run(command)).type,5);assert.equal(calls.filter(c=>c.method==='POST').length,1);assert.equal(calls.some(c=>c.method==='PUT'),false);assert.deepEqual(calls.find(c=>c.method==='POST').body.allowed_mentions,{parse:[],users:[target]});
+await run({...command,member:{user:{id:moderator},roles:[]}});assert.equal(calls.some(c=>c.method==='POST'||c.method==='PUT'),false);
+const id=await makeCapability(target,env);assert.ok(id.length<=100);
+const click={...base,type:3,data:{custom_id:id}};
+let modal=await run(click);assert.equal(modal.type,9);assert.equal(modal.data.components.length,5);assert.equal(calls.length,0);assert.deepEqual(modal.data.components.slice(1).map(c=>c.component.min_length),[5,2,2,2]);
+assert.equal((await run({...click,member:{user:{id:moderator},roles:[]}})).type,4);assert.equal(calls.length,0);
+assert.equal((await run({...click,data:{custom_id:id.slice(0,-1)+(id.endsWith('a')?'b':'a')}})).type,4);
+assert.equal((await run({...click,guild_id:'999999999999999999'})).type,4);
+const submit={...base,type:5,data:{custom_id:id,components:FIELDS.map(f=>({type:18,component:{type:4,custom_id:f.id,value:'valid test answer'}}))}};
+assert.equal((await run({...submit,data:{...submit.data,components:[]}})).type,4);assert.equal(calls.length,0);
+assert.equal((await run(submit)).type,5);assert.equal(calls.filter(c=>c.method==='PUT').length,1);assert.equal(calls.filter(c=>c.method==='POST').length,1);assert.ok(calls.findIndex(c=>c.method==='PUT')<calls.findIndex(c=>c.method==='POST'));
+memberRoles=['555555555555555555'];await run(submit);assert.equal(calls.some(c=>c.method==='PUT'||c.method==='POST'),false);memberRoles=[];
+failPut=true;await run(submit);assert.equal(calls.some(c=>c.method==='POST'),false);assert.match(calls.at(-1).body.content,/could not be completed/);failPut=false;
+assert.equal(await run({...base,type:2,data:{name:'ask'}}),null);
+const unsigned=await worker.fetch(new Request('https://test.invalid/',{method:'POST',body:'{}'}),env,ctx);assert.equal(unsigned.status,401);
+console.log('PASS: moderator-only prompt; target-only signed button; exact form schema; tamper/cross-server denial; invalid submission denial; success ordering; repeat submission; role failure; /ask dispatch preserved; unsigned request denial. No live Discord calls.');
+const signingKeys=await crypto.subtle.generateKey({name:'Ed25519'},true,['sign','verify']);
+const publicKey=Buffer.from(await crypto.subtle.exportKey('raw',signingKeys.publicKey)).toString('hex');
+async function signedInteraction(data){const body=JSON.stringify(data),timestamp=String(Math.floor(Date.now()/1000));const signature=Buffer.from(await crypto.subtle.sign('Ed25519',signingKeys.privateKey,new TextEncoder().encode(timestamp+body))).toString('hex');pending=[];const response=await worker.fetch(new Request('https://test.invalid/',{method:'POST',headers:{'X-Signature-Timestamp':timestamp,'X-Signature-Ed25519':signature},body}),{...env,DISCORD_PUBLIC_KEY:publicKey},ctx);await Promise.all(pending);return response.json();}
+assert.equal((await signedInteraction({...base,type:1})).type,1);
+assert.match((await signedInteraction({...base,type:2,data:{name:'ask',options:[]}})).data.content,/question/);
+assert.equal((await signedInteraction(command)).type,5);
+assert.equal((await signedInteraction(click)).type,9);
+console.log('PASS: full Worker Ed25519-signed command and modal routes; Discord ping; /ask preserved.');
+
+// Publication and notice checks use mocked Discord calls only.
+memberRoles=[];
+await run(command);
+assert.match(calls.find(c=>c.method==='POST').body.content,/posted publicly/);
+assert.match((await run(click)).data.components[0].content,/posted publicly/);
+await run(submit);
+let publication=calls.find(c=>c.method==='POST').body;
+assert.deepEqual(publication.embeds[0].fields.map(f=>f.value),FIELDS.map(()=> 'valid test answer'));
+assert.deepEqual(publication.embeds[0].fields.map(f=>f.name),FIELDS.map(f=>f.label));
+assert.deepEqual(publication.allowed_mentions,{parse:[],users:[target]});
+const longSubmit={...submit,data:{...submit.data,components:FIELDS.map(f=>({type:18,component:{type:4,custom_id:f.id,value:'x'.repeat(1000)}}))}};
+await run(longSubmit);
+publication=calls.find(c=>c.method==='POST').body;
+assert.ok(publication.content.length<2000);
+assert.ok(publication.embeds[0].fields.every(f=>f.value.length===1000));
+assert.ok(JSON.stringify(publication.embeds).length<6000);
+failPost=true; await run(submit); failPost=false;
+assert.equal(calls.filter(c=>c.method==='PUT').length,1);
+assert.match(calls.at(-1).body.content,/answers could not be posted/);
+console.log('PASS: public notice, four answers in one embed, maximum lengths, mention restrictions, and accurate publication failure.');
