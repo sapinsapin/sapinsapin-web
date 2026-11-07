@@ -9,6 +9,8 @@ DISCORD_GUILD_ID = "1548673048876683296"
 DISCORD_PUBLIC_KEY = "cebbf1f26b8e885308fb7f785835579892d094cd26c4d22d9f481f4a2ff8dd4f"
 SAPPY_MODEL_PROVIDER = "nyo"
 SAPPY_NYO_MODEL = "glm-5.3-flash"
+PAGE_ID = "576842565842965"
+ANNOUNCE_CHANNEL_ID = "1548673050046763081"
 
 [ai]
 binding = "AI"
@@ -16,3 +18,10 @@ binding = "AI"
 [[ai_search]]
 binding = "SAPPY_KNOWLEDGE"
 instance_name = "sappy-knowledge"
+
+[[kv_namespaces]]
+binding = "ANNOUNCED"
+id = "0c2a6a5f1141423b9a7bc023df6db997"
+
+[triggers]
+crons = ["*/10 * * * *"]

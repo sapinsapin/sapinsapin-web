@@ -1,4 +1,5 @@
 import { handleMetaWebhook } from './meta-webhook.js';
+import { checkPageAndAnnounce } from './page-announcements.js';
 const DISCORD_API = "https://discord.com/api/v10";
 
 const WORKERS_AI_MODEL = "@cf/google/gemma-4-26b-a4b-it";
@@ -2448,6 +2449,11 @@ async function answerDiscordInteraction(
 export { isProjectQuestion };
 
 export default {
+  // Runs every 10 minutes (see wrangler.toml [triggers]). Announces new Page posts.
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(checkPageAndAnnounce(env));
+  },
+
   async fetch(
     request,
     env,
