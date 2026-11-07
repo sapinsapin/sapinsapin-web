@@ -1,3 +1,4 @@
+import { handleMetaWebhook } from './meta-webhook.js';
 const DISCORD_API = "https://discord.com/api/v10";
 
 const WORKERS_AI_MODEL = "@cf/google/gemma-4-26b-a4b-it";
@@ -2492,6 +2493,14 @@ export default {
     }
 
     try {
+
+      // ───────────────────────────────────────
+      // META PAGE WEBHOOK (verify + signed receipt only; posts nothing yet)
+      // ───────────────────────────────────────
+
+      if (url.pathname === "/meta-webhook") {
+        return await handleMetaWebhook(request, env);
+      }
 
       // ───────────────────────────────────────
       // TEMPORARY SAFARI @SAPPY TEST
