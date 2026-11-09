@@ -113,6 +113,17 @@ const people = [
       { kind: 'Hugging Face', href: 'https://huggingface.co/zeraphim' },
     ],
   },
+  {
+    name: 'Arjhine A. Ty',
+    role: 'Core team',
+    blurb: '',
+    image: '/portraits/arjhine.webp',
+    links: [
+      { kind: 'Website', href: 'https://arjhinety.com' },
+      { kind: 'LinkedIn', href: 'https://www.linkedin.com/in/arjhinety/' },
+      { kind: 'Hugging Face', href: 'https://huggingface.co/arjhinety' },
+    ],
+  },
 ]
 
 /* Serialises structured data for a <script> tag. The escaping is the point:
