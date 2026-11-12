@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-11T05:44:57.179Z",
+  "generated_at": "2026-11-12T03:10:06.060Z",
   "sources_manifest_ref": "knowledge/rag-sources.yaml",
   "totals": {
     "models": 48,
@@ -766,6 +766,24 @@
         {
           "kind": "Hugging Face",
           "href": "https://huggingface.co/zeraphim"
+        }
+      ]
+    },
+    {
+      "name": "Arjhine A. Ty",
+      "role": "Core team",
+      "links": [
+        {
+          "kind": "Website",
+          "href": "https://arjhinety.com"
+        },
+        {
+          "kind": "LinkedIn",
+          "href": "https://www.linkedin.com/in/arjhinety/"
+        },
+        {
+          "kind": "Hugging Face",
+          "href": "https://huggingface.co/arjhinety"
         }
       ]
     }
