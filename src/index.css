@@ -752,8 +752,12 @@
     font-family: Fraunces, 'Fraunces Fallback', Georgia, serif; font-size: 1.05rem; letter-spacing: -.04em;
     color: rgb(var(--c-ube));
   }
+  /* Two lines are always reserved: a language with one task (Pangasinan) used
+     to make the card 14px shorter, so the map panel jumped as the pointer
+     crossed the layer list. */
   .map-readout-tasks {
     margin-top: .5rem; font-size: .6rem; font-weight: 600; letter-spacing: .02em;
+    line-height: 1.5; min-height: 3em;
     color: rgb(var(--c-ink) / .60);
   }
 
@@ -3423,27 +3427,6 @@ html { scroll-behavior: smooth; }
 .person-card img { transition: scale 900ms var(--ease-expo); }
 .person-card:hover img { scale: 1.025; }
 
-/* ----------------------------------------------------- nav scroll progress */
-/* A hairline along the bottom of the floating island shows how far down the
-   page the reader is. Scroll-driven where the browser supports it; purely
-   decorative, so nothing replaces it elsewhere. */
-.nav-progress { display: none; }
-@media (prefers-reduced-motion: no-preference) {
-  @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
-    .nav-progress {
-      display: block; position: absolute; left: 1rem; right: 1rem; bottom: -1px; height: 1px;
-      border-radius: 1px; pointer-events: none;
-      background: linear-gradient(90deg, var(--layer-1), var(--layer-2) 45%, var(--layer-4) 80%, var(--layer-5));
-      transform-origin: left; transform: scaleX(0);
-      opacity: 0; transition: opacity var(--d4) var(--ease-out);
-      animation: nav-progress linear both;
-      animation-timeline: scroll(root block);
-    }
-    [data-scrolled='true'] .nav-progress { opacity: .85; }
-  }
-}
-@keyframes nav-progress { to { transform: scaleX(1); } }
-
 /* ---------------------------------------------------------- the bottom edge */
 /* The page sinks softly into the ground at the bottom of the window instead
    of being sliced by it. Below the floating buttons, never over a control. */
@@ -3453,23 +3436,7 @@ html { scroll-behavior: smooth; }
 }
 @media (pointer: coarse) { .page-edge { height: 44px; } }
 
-/* ------------------------------------------------------------ pause motion */
-/* One control pauses every loop on the page (WCAG 2.2.2): the rolling words
-   and the cards' small animations. */
-html[data-motion='paused'] .loop,
-html[data-motion='paused'] .loop * { animation-play-state: paused !important; }
-.motion-toggle {
-  display: inline-flex; align-items: center; gap: .45rem; height: 2rem; padding: 0 .8rem;
-  border-radius: 999px; border: 1px solid var(--border-soft);
-  font-size: .7rem; font-weight: 600; letter-spacing: .01em; color: rgb(var(--c-ink) / .62);
-  background: rgb(var(--c-paper) / .6);
-  transition: color var(--d2) var(--ease-out), border-color var(--d2) var(--ease-out), transform var(--d3) var(--ease-out);
-}
-.motion-toggle:hover { color: rgb(var(--c-ink)); border-color: var(--border-strong); }
-.motion-toggle:active { transform: scale(.96); transition-duration: var(--d1); }
-.motion-toggle svg { width: .7rem; height: .7rem; }
-@media (pointer: coarse) { .motion-toggle { height: 2.75rem; padding: 0 1rem; } }
-@media (prefers-reduced-motion: reduce) { .motion-toggle { display: none; } }
+
 
 /* --------------------------------------------------------------- statement */
 /* One sentence, set large and quiet; only the facts in it are bright. */
@@ -3485,7 +3452,6 @@ html[data-motion='paused'] .loop * { animation-play-state: paused !important; }
 .statement-slot { color: rgb(var(--c-ink)); font-weight: 500; }
 .statement-slot.is-lang { color: rgb(var(--c-ube)); font-style: italic; }
 [data-theme='dark'] .statement-slot.is-lang { color: #b49ae8; }
-.statement-foot { margin-top: 2.25rem; display: flex; justify-content: center; }
 
 /* The rolling window. It reaches a little past its text on every side
    (padding cancelled by margin, so nothing around it moves), and its top and
@@ -3701,3 +3667,94 @@ html .footer-wordmark[data-spot]::after { display: none; }
   from { opacity: .15; transform: translateY(26px); filter: blur(6px); }
   to { opacity: 1; transform: none; filter: none; }
 }
+
+/* Thirty-day downloads, split between datasets and models. */
+.bento-split { display: grid; align-content: center; gap: 1.4rem; }
+.split-bar { display: flex; gap: 6px; height: 3.25rem; }
+.split-seg { flex-basis: 0; border-radius: .9rem; position: relative; overflow: hidden; }
+.split-seg.is-data { background: linear-gradient(135deg, var(--layer-1), var(--layer-2)); }
+.split-seg.is-model { background: linear-gradient(135deg, var(--layer-4), var(--layer-5)); }
+.split-seg::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / .28) 50%, transparent 70%);
+  transform: translateX(-120%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .split-seg::after { animation: split-sheen 3.4s var(--ease-io) infinite; }
+  .split-seg.is-model::after { animation-delay: .5s; }
+}
+@keyframes split-sheen { 0% { transform: translateX(-120%); } 55%, 100% { transform: translateX(120%); } }
+.split-legend { display: flex; flex-wrap: wrap; gap: .6rem 2rem; }
+.split-legend p { display: flex; align-items: center; gap: .55rem; font-size: .85rem; color: rgb(var(--c-ink) / .7); }
+.split-legend i { width: .6rem; height: .6rem; border-radius: 50%; }
+.split-legend i.is-data { background: var(--layer-1); }
+.split-legend i.is-model { background: var(--layer-5); }
+.split-legend b { font-weight: 600; color: rgb(var(--c-ink)); font-variant-numeric: tabular-nums; }
+
+/* ==========================================================================
+   Premium dark (2026-11)
+   A deeper, almost neutral ground (a trace of warmth keeps it from reading
+   as cold grey), surfaces that read as glass rather than grey boxes — a lit
+   top edge, white-alpha hairlines instead of tinted borders, depth from
+   shadow — and a film grain far below the threshold of noticing, which is
+   what stops large dark areas from banding into flat plastic.
+   Light mode is untouched; every rule here is scoped to the dark theme.
+   ========================================================================== */
+[data-theme='dark'] {
+  --c-paper: 10 9 9;
+  --c-surface: 19 18 17;
+  --hero-bg: #0e0d0d;
+  --surface-raised: #171615;
+  --surface-panel: #121111;
+  --surface-sunken: #0d0c0c;
+  --nav-bg-scrolled: rgb(16 15 15 / .66);
+  --footer-bg: #060606;
+  --border-soft: rgb(255 255 255 / .075);
+  --border-strong: rgb(255 255 255 / .14);
+  --grid-line: rgb(255 255 255 / .035);
+  --edge-highlight: inset 0 1px 0 rgb(255 255 255 / .065);
+  --shadow-card: 0 30px 60px -24px rgb(0 0 0 / .9), 0 2px 8px rgb(0 0 0 / .5);
+}
+
+/* Glass surfaces: a faint wash of light from the top edge down. */
+[data-theme='dark'] .bento-card,
+[data-theme='dark'] .dataset-card,
+[data-theme='dark'] .contribute-card,
+[data-theme='dark'] .person-card,
+[data-theme='dark'] .partner-card {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / .03), rgb(255 255 255 / 0) 38%),
+    var(--surface-panel);
+  box-shadow: var(--edge-highlight);
+}
+[data-theme='dark'] .bento-card:hover,
+[data-theme='dark'] .dataset-card:hover,
+[data-theme='dark'] .contribute-card:hover,
+[data-theme='dark'] .person-card:hover {
+  box-shadow: var(--edge-highlight), var(--shadow-card);
+}
+
+/* The floating nav: more glass, less tint. */
+[data-theme='dark'][data-scrolled='true'] .nav-shell,
+[data-theme='dark'] [data-scrolled='true'] .nav-shell {
+  backdrop-filter: blur(22px) saturate(1.5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  box-shadow: var(--edge-highlight), var(--shadow-nav-scrolled);
+}
+
+/* Film grain: one static tile, fixed, never repainted on scroll. */
+[data-theme='dark'] body::before {
+  content: ''; position: fixed; inset: 0; z-index: 70; pointer-events: none;
+  opacity: .045; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (forced-colors: active) { [data-theme='dark'] body::before { display: none; } }
+
+/* The statement's quiet words sit a step lower against the deeper ground. */
+[data-theme='dark'] .statement-say { color: rgb(var(--c-ink) / .34); }
+
+/* Downloads card: slimmer bars with a lit edge. */
+.split-bar { height: 2.5rem; }
+.split-seg { box-shadow: inset 0 1px 0 rgb(255 255 255 / .28); }
+[data-theme='dark'] .split-seg.is-model { background: linear-gradient(135deg, #8fb86a, #5f8a3f); }
+.bento-split { align-content: start; padding-top: 1.25rem; }

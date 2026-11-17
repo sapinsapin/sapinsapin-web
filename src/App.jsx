@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import NumberFlow from '@number-flow/react'
 import { datasets, models, catalogSnapshot, totals } from './data/catalog'
 import { ArrowDown, ArrowUp, ArrowUpRight, CheckIcon, Code, CopyIcon, Dataset, Discord, Facebook, Github, HuggingFace, LinkedIn, Mark, MarkMono } from './components/Icons'
@@ -267,36 +267,6 @@ function useMediaQuery(query) {
   return matches
 }
 
-/* One switch pauses every loop on the page (WCAG 2.2.2 asks for it on any
-   motion that runs past five seconds beside other content). Kept outside
-   React state so the statement, the bento cards and the toggle all read the
-   same value, and remembered per visitor. */
-const motionListeners = new Set()
-let motionPaused = (() => { try { return localStorage.getItem('sapinsapin-motion') === 'paused' } catch { return false } })()
-function setMotionPaused(next) {
-  motionPaused = next
-  document.documentElement.dataset.motion = next ? 'paused' : 'on'
-  try { localStorage.setItem('sapinsapin-motion', next ? 'paused' : 'on') } catch { /* private mode */ }
-  motionListeners.forEach((listener) => listener())
-}
-function useMotionPaused() {
-  return useSyncExternalStore(
-    (listener) => { motionListeners.add(listener); return () => motionListeners.delete(listener) },
-    () => motionPaused,
-    () => false,
-  )
-}
-
-function MotionToggle() {
-  const paused = useMotionPaused()
-  return <button type="button" className="motion-toggle" onClick={() => setMotionPaused(!paused)}>
-    {paused
-      ? <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.8v8.4L10 6z" fill="currentColor" /></svg>
-      : <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2h2v8H3zM7 2h2v8H7z" fill="currentColor" /></svg>}
-    {paused ? 'Play animations' : 'Pause animations'}
-  </button>
-}
-
 /* True while the element is on screen (not once-only like Reveal): loops use
    it to stop doing work the moment they scroll away. */
 function useInView(ref, rootMargin = '0px') {
@@ -491,7 +461,6 @@ function Nav({ theme, onToggleTheme }) {
         unscrolled bar and the scrolled island, so they live in .nav-shell
         rather than as utilities here — see index.css. */}
     <nav className="nav-shell flex items-center justify-between gap-2" aria-label="Main navigation">
-      <span className="nav-progress" aria-hidden="true" />
       <a href="#top" onClick={(event) => { event.preventDefault(); closeMenus(); scrollToTop() }} className="brand-lockup rounded-lg py-1.5 text-ink" aria-label="SapinSapin AI home">
         <Mark className="h-[1.85rem] w-[2rem]" />
         <span className="text-[.9rem] font-semibold tracking-[-.045em] whitespace-nowrap">SapinSapin <span className="font-normal text-ink/63">AI</span></span>
@@ -554,7 +523,7 @@ function Hero() {
           <a href="#demo" className="btn btn-ghost">Try the live demo <ArrowDown className="h-4 w-4" /></a>
         </div>
         <div className="hero-evidence hero-rise hero-rise-4 mt-10">
-          <span><b><CountUp value={totals.datasets} format={{ minimumIntegerDigits: 2 }} /></b> data collections</span><span><b><CountUp value={totals.models} /></b> public models</span><span><b><CountUp value={languageAnchors.length} /></b> language layers</span>
+          <span><b><CountUp value={totals.datasets} /></b> data collections</span><span><b><CountUp value={totals.models} /></b> public models</span><span><b><CountUp value={languageAnchors.length} /></b> language layers</span>
         </div>
       </div>
       <div className="relative z-10 mx-auto w-full max-w-[580px] lg:ml-auto"><PhilippinesMap /></div>
@@ -684,22 +653,19 @@ const speechLanguages = demoLanguages
 function Statement() {
   const ref = useRef(null)
   const inView = useInView(ref, '-10% 0px')
-  const paused = useMotionPaused()
   const reduce = useMediaQuery('(prefers-reduced-motion: reduce)')
   const visible = usePageVisible()
-  const active = inView && visible && !paused && !reduce
+  const active = inView && visible && !reduce
   const start = speechLanguages.indexOf('Cebuano')
   const words = start > 0 ? [...speechLanguages.slice(start), ...speechLanguages.slice(0, start)] : speechLanguages
 
   return <section ref={ref} className="statement section-shell" aria-labelledby="statement-title">
     <h2 id="statement-title" className="sr-only">What SapinSapin AI builds</h2>
     <p className="statement-say">
-      <span className="sr-only">Hear and be heard in {speechLanguages.join(', ')}. Speech recognition and synthesis for {speechLanguages.length} Philippine languages, with {totals.models} public models and {totals.datasets} datasets on the Hub.</span>
+      <span className="sr-only">Hear and be heard in {speechLanguages.join(', ')}. Speech recognition and synthesis for {speechLanguages.length} Philippine languages, built in the open.</span>
       <span aria-hidden="true" className="statement-line">Hear and be heard in <span className="statement-slot is-lang"><RollingWord words={words} active={active} /></span>.</span>
-      <span aria-hidden="true" className="statement-line">Speech recognition and synthesis for <span className="statement-slot">{speechLanguages.length}</span> Philippine languages,</span>
-      <span aria-hidden="true" className="statement-line">with <span className="statement-slot">{totals.models}</span> public models and <span className="statement-slot">{totals.datasets}</span> datasets on the Hub.</span>
+      <span aria-hidden="true" className="statement-line">Speech recognition and synthesis for <span className="statement-slot">{speechLanguages.length}</span> Philippine languages, built in the open.</span>
     </p>
-    <div className="statement-foot"><MotionToggle /></div>
   </section>
 }
 
@@ -732,11 +698,11 @@ function Impact() {
       </div>
       <div className="max-w-sm">
         <p className="text-sm leading-6 text-ink/65">Counts are taken from the public Hub cards and dataset documentation. “Documented” means the figure is stated on a public dataset card; access-controlled collections whose totals are not public are excluded, and a stated figure is not an independently verified one.</p>
-        <div className="mt-4"><MotionToggle /></div>
       </div>
     </div>
     <Reveal className="bento loop">
       <article data-spot className="bento-card bento-wide">
+        <span className="rim" aria-hidden="true" />
         <div className="bento-visual bento-wave" aria-hidden="true">
           <div className="wave-bars">{waveBars.map((h, i) => <i key={i} style={{ height: `${h}%` }} />)}</div>
           <div className="wave-bars wave-lit">{waveBars.map((h, i) => <i key={i} style={{ height: `${h}%` }} />)}</div>
@@ -749,6 +715,7 @@ function Impact() {
         </div>
       </article>
       <article data-spot className="bento-card">
+        <span className="rim" aria-hidden="true" />
         <div className="bento-visual bento-tokens" aria-hidden="true">
           {tokenRows.map((row, r) => <div key={r} className={`token-row ${r ? 'is-reverse' : ''}`}>
             {[...row, ...row].map((token, k) => <span key={k} className="token">{token}</span>)}
@@ -761,6 +728,7 @@ function Impact() {
         </div>
       </article>
       <article data-spot className="bento-card">
+        <span className="rim" aria-hidden="true" />
         <div className="bento-visual bento-layers" aria-hidden="true">
           {collectionLanguages.map((name, k) => <span key={name} className="layer" style={{ '--k': k, '--tone': layerTones[k % layerTones.length] }}><b>{name}</b></span>)}
         </div>
@@ -771,19 +739,21 @@ function Impact() {
         </div>
       </article>
       <article data-spot className="bento-card bento-wide">
-        <div className="bento-visual bento-sets" aria-hidden="true">
-          {[['Speech', 'is-speech'], ['Text', 'is-text']].map(([kind, tone]) => {
-            const group = datasets.filter((item) => item.kind === kind)
-            return <div key={kind} className="set-group">
-              <p className="set-label">{kind}<span>{group.length}</span></p>
-              <div className="set-row">{group.map((item) => <span key={item.id} className={`set ${tone}`}><i />{item.title}</span>)}</div>
-            </div>
-          })}
+        <span className="rim" aria-hidden="true" />
+        <div className="bento-visual bento-split" aria-hidden="true">
+          <div className="split-bar">
+            <span className="split-seg is-data" style={{ flexGrow: totals.datasetDownloads }} />
+            <span className="split-seg is-model" style={{ flexGrow: totals.modelDownloads }} />
+          </div>
+          <div className="split-legend">
+            <p><i className="is-data" />Datasets<b>{totals.datasetDownloads.toLocaleString('en-US')}</b></p>
+            <p><i className="is-model" />Models<b>{totals.modelDownloads.toLocaleString('en-US')}</b></p>
+          </div>
         </div>
         <div className="bento-copy">
-          <p className="bento-figure"><CountUp value={totals.datasets} /></p>
-          <p className="bento-label">datasets in the catalog</p>
-          <p className="bento-source">Hub sync · {catalogSnapshot}</p>
+          <p className="bento-figure"><CountUp value={totals.datasetDownloads + totals.modelDownloads} /></p>
+          <p className="bento-label">downloads (30d)</p>
+          <p className="bento-source">Datasets and models on the Hub · synced {catalogSnapshot}</p>
         </div>
       </article>
     </Reveal>
@@ -1227,7 +1197,6 @@ function App() {
   // frame and never through React state. Fine pointers only — a finger has
   // no hover for a light to follow.
   useEffect(() => {
-    document.documentElement.dataset.motion = motionPaused ? 'paused' : 'on'
     if (!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches) return undefined
     let frame = 0
     let last = null
