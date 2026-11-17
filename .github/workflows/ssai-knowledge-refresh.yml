@@ -193,6 +193,15 @@ jobs:
               --head "${{ steps.commit.outputs.branch }}" \
               --label "ssai-rag-candidate"
           fi
+          # Each candidate is regenerated in full from main, so a newer one
+          # supersedes every older open one. Close those, or they sit forever
+          # and trip the RAG Health "pending over 48 hours" check.
+          for old in $(gh pr list --repo "$GITHUB_REPOSITORY" --base main --state open \
+              --label ssai-rag-candidate --json number,headRefName \
+              --jq '.[] | select(.headRefName != "${{ steps.commit.outputs.branch }}") | .number'); do
+            gh pr close "$old" --repo "$GITHUB_REPOSITORY" --delete-branch \
+              --comment "Superseded by ${{ steps.commit.outputs.branch }}; each refresh regenerates the full candidate from main."
+          done
           # GITHUB_TOKEN does not trigger the ordinary pull_request workflow.
           # Dispatch CI explicitly for this generated candidate branch.
           gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "${{ steps.commit.outputs.branch }}"

@@ -14,7 +14,7 @@ import { languageAnchors } from './data/philippinesMapPaths'
 const hub = 'https://huggingface.co/sapinsapin'
 const github = 'https://github.com/sapinsapin'
 const facebook = 'https://www.facebook.com/sapinsapinai'
-const linkedin = 'https://www.linkedin.com/showcase/sapinsapin'
+const linkedin = 'https://www.linkedin.com/company/sapinsapin-ai/'
 const discord = 'https://discord.gg/DwgEMN5jx5'
 const space = 'https://huggingface.co/spaces/sapinsapin/halohalo-dashboard'
 
