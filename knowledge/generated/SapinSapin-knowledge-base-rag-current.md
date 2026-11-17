@@ -3,8 +3,8 @@ document_type: sappy-rag-knowledge-base
 version: "3.0-generated"
 status: CANDIDATE — NOT YET DEPLOYED. Generated automatically from knowledge/base/*.md and knowledge/snapshots/current-public-state.json. Merging its reviewed PR to protected main triggers automatic production deployment; see docs/SAPPY-RAG-UPDATE-PROCEDURE.md.
 predecessor: SapinSapin-knowledge-base-rag-v2.md (content-frozen candidate, 2026-09-22) — itself succeeding SapinSapin-knowledge-base-rag-ready.md (v1, production item id 87c37f86cb5c42a387e5fdaa5ec5ab09, deployed 2026-09-18)
-knowledge_snapshot_date: "2026-10-11"
-generated_at: "2026-10-11T09:27:54.268Z"
+knowledge_snapshot_date: "2026-11-17"
+generated_at: "2026-11-17T04:39:27.036Z"
 canonical_source_policy: ssai/docs/KNOWLEDGE-SOURCES.md (authority hierarchy: live infra/repo > live first-party site/HF/repo > canonical SSAI docs > this RAG lineage > general research snapshot > inference)
 source_manifest: knowledge/rag-sources.yaml
 scope: Public-facing knowledge for Sappy (Discord + web chat assistant). Contains no secrets, account IDs, Discord IDs, OAuth details, or internal deployment instructions — see ssai/docs/SAPPY-OPERATIONS.md for that internal material.
@@ -58,13 +58,14 @@ If a user asks whether SapinSapin AI's own models solve these problems well, ans
 
 ### Leadership and team
 
-SapinSapin AI leadership and current team roster: Tim Santos — Founder; Marc Ocampo — Core team; JC Diamante — Core team. These roles are listed in the official website’s People section; use this roster when answering who leads SapinSapin AI or who is on its team. [confirmed — src/App.jsx]
+SapinSapin AI leadership and current team roster: Tim Santos — Founder; Marc Ocampo — Core team; JC Diamante — Core team; Arjhine A. Ty — Core team. These roles are listed in the official website’s People section; use this roster when answering who leads SapinSapin AI or who is on its team. [confirmed — src/App.jsx]
 
 | Name | Role (per live site) | Links |
 |---|---|---|
 | Tim Santos | Founder | [LinkedIn](https://www.linkedin.com/in/internetoftim/), [Hugging Face](https://huggingface.co/internetoftim) |
 | Marc Ocampo | Core team | [Website](https://marcocampo.com), [LinkedIn](https://www.linkedin.com/in/marcxxv/), [Hugging Face](https://huggingface.co/marcxxv) |
 | JC Diamante | Core team | [Website](https://jcdiamante.com), [LinkedIn](https://www.linkedin.com/in/jcdiamante/), [Hugging Face](https://huggingface.co/zeraphim) |
+| Arjhine A. Ty | Core team | [Website](https://arjhinety.com), [LinkedIn](https://www.linkedin.com/in/arjhinety/), [Hugging Face](https://huggingface.co/arjhinety) |
 
 Do not name anyone else as a current formal team member. Other individuals sometimes mentioned in project discussion (e.g. contributors quoted in interviews) may hold views about the project without being on its team roster — attribute their statements to them by name rather than to "the SapinSapin AI team." [safe-answer rule]
 
@@ -87,7 +88,7 @@ A contributor perspective does not establish formal team membership. Some quoted
 
 ### Datasets and models — current public catalog
 
-Catalog totals as of 2026-10-11: 9 public datasets, 48 public models on huggingface.co/sapinsapin. **This count changes as the org publishes new work — always prefer the live Hugging Face org page over this number if the user needs a current total.** [confirmed via HF public API]
+Catalog totals as of 2026-11-17: 9 public datasets, 49 public models on huggingface.co/sapinsapin. **This count changes as the org publishes new work — always prefer the live Hugging Face org page over this number if the user needs a current total.** [confirmed via HF public API]
 
 | Dataset | Content | Languages (Hub tag codes) | License / access |
 |---|---|---|---|
@@ -103,14 +104,14 @@ Catalog totals as of 2026-10-11: 9 public datasets, 48 public models on huggingf
 
 **License rule: there is no single project-wide license.** Always name the specific dataset and its own license; if unstated, say "not stated on the public card — check huggingface.co/datasets/sapinsapin/<name>" rather than assuming MIT or "open" by default. Never tell a user a dataset can be used commercially without pointing them to that dataset's own card — commercial permission cannot be inferred from the project's existence or from other datasets' licenses.
 
-48 public model repositories exist on huggingface.co/sapinsapin as of 2026-10-11, grouped by task:
+49 public model repositories exist on huggingface.co/sapinsapin as of 2026-11-17, grouped by task:
 
 - **Untagged / other** (2 repositories): Additional generation/vision-language checkpoints not yet tagged with a Hub pipeline type — check the specific model card for its actual task.
 - **Text Generation** (4 repositories): Continually-pretrained or fine-tuned large language models adapted to Filipino/Philippine-language text (e.g. Llama 3.1 and gpt-oss checkpoints continued on Filipino news text, plus a Bikol-focused fine-tune).
 - **Text To Speech** (11 repositories): SpeechT5-based text-to-speech fine-tunes, mostly one model per Philippine language trained on the PLD dataset, plus a Filipino Speech Corpus fine-tune with a browser-deployable ONNX export.
 - **Automatic Speech Recognition** (29 repositories): Whisper- and OmniASR-based speech-recognition fine-tunes, mostly one model per Philippine language trained on the PLD dataset, plus Filipino Speech Corpus fine-tunes with browser-deployable ONNX exports.
 - **Audio To Audio** (1 repository): Voice-conversion models that re-speak existing audio in a different voice while preserving words and timing.
-- **Text Classification** (1 repository): Additional model repositories in this category — check individual cards for specifics.
+- **Text Classification** (2 repositories): Additional model repositories in this category — check individual cards for specifics.
 
 **Do not state exact parameter counts, benchmark scores, or "active"/production status for any specific model unless quoting its live model card.** A public repository existing on the Hub is not evidence of benchmarked quality or production deployment — describe what is public ("a public repository exists for X"), not what is proven.
 
@@ -249,5 +250,6 @@ Full source authority tiers, refresh strategy, and which sources may auto-update
 | [whisper-small-pld-pam](https://huggingface.co/sapinsapin/whisper-small-pld-pam) | automatic-speech-recognition | apache-2.0 |
 | [whisper-small-pld-tsg](https://huggingface.co/sapinsapin/whisper-small-pld-tsg) | automatic-speech-recognition | cc-by-nc-4.0 |
 | [whisper-small-pld-war](https://huggingface.co/sapinsapin/whisper-small-pld-war) | automatic-speech-recognition | apache-2.0 |
+| [wikalid](https://huggingface.co/sapinsapin/wikalid) | text-classification | Not stated in public API; check card |
 
 Model license labels above are public metadata, not a grant of commercial permission. Read the exact model card and license terms before use.
