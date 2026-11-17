@@ -260,3 +260,75 @@ test('the Filipino courtesy particle and magandang greetings stay in conversatio
     assert.match(body.answer, expected, question)
   }
 })
+
+// ── Observability: every model failure logs a secret-free reason code ──
+async function captureErrorLog(fn) {
+  const original = console.error
+  const lines = []
+  console.error = (...args) => { lines.push(args.map(a => typeof a === 'string' ? a : String(a)).join(' ')) }
+  try { return { result: await fn(), lines } } finally { console.error = original }
+}
+
+function modelLog(lines) {
+  const line = lines.find(l => l.includes('sappy_model_error'))
+  assert.ok(line, `expected a sappy_model_error log, got: ${lines.join(' | ')}`)
+  return JSON.parse(line.slice(line.indexOf('{')))
+}
+
+const GENERIC = 'Sappy is temporarily unavailable. Please try again later.'
+
+for (const [status, body, reason, code] of [
+  [401, { error: { message: 'Invalid API key rk_live_test_only', code: 'invalid_api_key' } }, 'auth_rejected', 'invalid_api_key'],
+  [402, { error: { message: 'Out of credits', type: 'credit_limit' } }, 'credits_exhausted', 'credit_limit'],
+  [500, { error: { message: 'upstream exploded: secret stack' } }, 'upstream_http', undefined],
+]) {
+  test(`NYO HTTP ${status} logs reason ${reason} without leaking key, message or body`, async () => {
+    globalThis.fetch = async () => Response.json(body, { status })
+    const { result: response, lines } = await captureErrorLog(() => worker.fetch(request(), env(), {}))
+    assert.equal(response.status, 503)
+    assert.equal((await response.json()).error, GENERIC)
+    const log = modelLog(lines)
+    assert.equal(log.reason, reason)
+    assert.equal(log.upstream_status, status)
+    assert.equal(log.upstream_code, code)
+    assert.equal(typeof log.latency_ms, 'number')
+    const all = lines.join('\n')
+    assert.doesNotMatch(all, /rk_live_test_only/)
+    assert.doesNotMatch(all, /Out of credits|exploded|Invalid API key/)
+    assert.doesNotMatch(all, /SapinSapin AI work on/)
+  })
+}
+
+test('an empty NYO answer logs empty_answer with the finish_reason', async () => {
+  globalThis.fetch = async () => Response.json({ choices: [{ message: { content: '' }, finish_reason: 'length' }] })
+  const { result: response, lines } = await captureErrorLog(() => worker.fetch(request(), env(), {}))
+  assert.equal(response.status, 503)
+  assert.equal((await response.json()).error, GENERIC)
+  const log = modelLog(lines)
+  assert.equal(log.reason, 'empty_answer')
+  assert.equal(log.finish_reason, 'length')
+  assert.equal(log.upstream_status, 200)
+})
+
+test('a NYO timeout logs reason timeout instead of an opaque exception', async () => {
+  globalThis.fetch = async () => { throw new DOMException('The operation timed out.', 'TimeoutError') }
+  const { result: response, lines } = await captureErrorLog(() => worker.fetch(request(), env(), {}))
+  assert.equal(response.status, 503)
+  assert.equal(modelLog(lines).reason, 'timeout')
+})
+
+test('a missing credential logs config_missing', async () => {
+  const { result: response, lines } = await captureErrorLog(() => worker.fetch(request(), env({ NYO_API_KEY: '' }), {}))
+  assert.equal(response.status, 503)
+  assert.equal(modelLog(lines).reason, 'config_missing')
+})
+
+test('a rate limit logs rate_limited with retry_after and stays a 429 "busy" answer', async () => {
+  globalThis.fetch = async () => new Response('{}', { status: 429, headers: { 'Retry-After': '13' } })
+  const { result: response, lines } = await captureErrorLog(() => worker.fetch(request(), env(), {}))
+  assert.equal(response.status, 429)
+  assert.equal((await response.json()).error, 'Sappy is busy. Please try again shortly.')
+  const log = modelLog(lines)
+  assert.equal(log.reason, 'rate_limited')
+  assert.equal(log.retry_after, '13')
+})

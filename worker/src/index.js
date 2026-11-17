@@ -1116,11 +1116,53 @@ function describeSappyModel(env, question = "") {
 // ─────────────────────────────────────────────
 
 class SappyModelError extends Error {
-  constructor(status = 503, retryAfter) {
+  /**
+   * @param {number} status        HTTP status returned to the caller (429 or 503).
+   * @param {string} [retryAfter]  Sanitised Retry-After seconds, if any.
+   * @param {object} [detail]      Operator-only diagnostics. Never contains
+   *                               keys, prompts, user text or upstream bodies:
+   *                               only a reason code, the upstream status, a
+   *                               short sanitised upstream error slug,
+   *                               finish_reason and latency.
+   */
+  constructor(status = 503, retryAfter, detail = {}) {
     super(`Sappy model unavailable (${status})`);
     this.status = status;
     this.retryAfter = retryAfter;
+    this.reason = detail.reason || "unknown";
+    this.upstreamStatus = detail.upstreamStatus;
+    this.upstreamCode = detail.upstreamCode;
+    this.finishReason = detail.finishReason;
+    this.latencyMs = detail.latencyMs;
   }
+
+  /** Structured, secret-free log record for `wrangler tail` / Workers Logs. */
+  toLog() {
+    return {
+      event: "sappy_model_error",
+      reason: this.reason,
+      status: this.status,
+      ...(this.upstreamStatus !== undefined ? { upstream_status: this.upstreamStatus } : {}),
+      ...(this.upstreamCode ? { upstream_code: this.upstreamCode } : {}),
+      ...(this.finishReason ? { finish_reason: this.finishReason } : {}),
+      ...(this.retryAfter ? { retry_after: this.retryAfter } : {}),
+      ...(this.latencyMs !== undefined ? { latency_ms: this.latencyMs } : {}),
+    };
+  }
+}
+
+// Reduce an upstream error code/type to a short slug so logs can say
+// "credit_limit" or "invalid_api_key" without ever echoing a message or body.
+function upstreamErrorSlug(payload) {
+  const raw = payload?.error?.code ?? payload?.error?.type ?? payload?.code ?? payload?.type;
+  if (typeof raw !== "string" && typeof raw !== "number") return undefined;
+  const slug = String(raw).toLowerCase().replace(/[^a-z0-9_.-]/g, "").slice(0, 40);
+  return slug || undefined;
+}
+
+function finishReasonSlug(value) {
+  if (typeof value !== "string") return undefined;
+  return value.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 24) || undefined;
 }
 
 async function runSappyModel(
@@ -1131,45 +1173,80 @@ async function runSappyModel(
     return extractModelAnswer(await env.AI.run(WORKERS_AI_MODEL, { messages }));
   }
   if (env.SAPPY_MODEL_PROVIDER !== "nyo" || !env.NYO_API_KEY || !env.SAPPY_NYO_MODEL) {
-    throw new SappyModelError();
+    throw new SappyModelError(503, undefined, { reason: "config_missing" });
   }
 
-  const response = await fetch(NYO_CHAT_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${env.NYO_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: env.SAPPY_NYO_MODEL,
-      messages,
-      // NYO reasoning tokens share this budget with the visible answer.
-      // glm-5.3-flash reasoning alone can consume 1400-1700+ tokens on
-      // detail-heavy RAG prompts; 2048 starved the answer (empty → 503,
-      // truncated → cut-off responses). 8192 verified to fit full
-      // reasoning + ~3000-token answers with finish_reason "stop".
-      max_tokens: 8192,
-      stream: false,
-    }),
-    signal: AbortSignal.timeout(45_000),
-  });
+  const started = Date.now();
+  let response;
+  try {
+    response = await fetch(NYO_CHAT_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.NYO_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: env.SAPPY_NYO_MODEL,
+        messages,
+        // NYO reasoning tokens share this budget with the visible answer.
+        // glm-5.3-flash reasoning alone can consume 1400-1700+ tokens on
+        // detail-heavy RAG prompts; 2048 starved the answer (empty → 503,
+        // truncated → cut-off responses). 8192 verified to fit full
+        // reasoning + ~3000-token answers with finish_reason "stop".
+        max_tokens: 8192,
+        stream: false,
+      }),
+      signal: AbortSignal.timeout(45_000),
+    });
+  } catch (error) {
+    const timedOut = error?.name === "TimeoutError" || error?.name === "AbortError";
+    throw new SappyModelError(503, undefined, {
+      reason: timedOut ? "timeout" : "network_error",
+      latencyMs: Date.now() - started,
+    });
+  }
+  const latencyMs = Date.now() - started;
 
   if (response.status === 422) {
     const refusal = await response.json().catch(() => null);
     if (refusal?.error?.type === "guardrail_rejected") {
       return String(refusal.error.message || "I can't help with that request.").slice(0, 300);
     }
+    throw new SappyModelError(503, undefined, {
+      reason: "upstream_http", upstreamStatus: 422, upstreamCode: upstreamErrorSlug(refusal), latencyMs,
+    });
   }
   if (!response.ok) {
     const retryAfter = response.headers.get("Retry-After");
+    const payload = await response.json().catch(() => null);
+    const status = response.status;
     throw new SappyModelError(
-      response.status === 429 ? 429 : 503,
-      retryAfter && /^\d{1,4}$/.test(retryAfter) ? retryAfter : undefined
+      status === 429 ? 429 : 503,
+      retryAfter && /^\d{1,4}$/.test(retryAfter) ? retryAfter : undefined,
+      {
+        reason: status === 429 ? "rate_limited"
+          : status === 401 || status === 403 ? "auth_rejected"
+          : status === 402 ? "credits_exhausted"
+          : "upstream_http",
+        upstreamStatus: status,
+        upstreamCode: upstreamErrorSlug(payload),
+        latencyMs,
+      }
     );
   }
-  const answer = (await response.json())?.choices?.[0]?.message?.content;
+  const payload = await response.json().catch(() => null);
+  if (!payload) {
+    throw new SappyModelError(503, undefined, { reason: "bad_json", upstreamStatus: response.status, latencyMs });
+  }
+  const choice = payload?.choices?.[0];
+  const answer = choice?.message?.content;
   if (typeof answer !== "string" || !answer.trim()) {
-    throw new SappyModelError();
+    throw new SappyModelError(503, undefined, {
+      reason: "empty_answer",
+      upstreamStatus: response.status,
+      finishReason: finishReasonSlug(choice?.finish_reason),
+      latencyMs,
+    });
   }
   return answer;
 }
@@ -2413,7 +2490,9 @@ async function answerDiscordInteraction(
   } catch (error) {
     console.error(
       "Sappy Discord answer error:",
-      error
+      error instanceof SappyModelError
+        ? JSON.stringify(error.toLog())
+        : error
     );
 
 
@@ -2759,7 +2838,9 @@ export default {
         },
       }, { headers: corsHeaders });
     } catch (error) {
-      console.error("Sappy error:", error instanceof SappyModelError ? error.message : error);
+      console.error("Sappy error:", error instanceof SappyModelError
+        ? JSON.stringify(error.toLog())
+        : error);
       return Response.json(
         { error: error instanceof SappyModelError && error.status === 429
           ? "Sappy is busy. Please try again shortly."

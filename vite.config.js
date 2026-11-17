@@ -1,3 +1,5 @@
+import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -8,12 +10,26 @@ const entry = (file) => fileURLToPath(new URL(file, import.meta.url))
 // index.html carries an SEO copy with a model count that would go stale the way
 // every hardcoded figure does. Replace the token at build time from the synced
 // snapshot so the meta/OG/Twitter/noscript text always matches the catalog.
+const fillCounts = (text) => text
+  .replaceAll('{{MODEL_COUNT}}', String(hubTotals.models))
+  .replaceAll('{{DATASET_COUNT}}', String(hubTotals.datasets))
+
+// public/llms.txt is copied verbatim by Vite, so the same tokens are filled in
+// the built copy after the bundle is written. It said "28 public models" for
+// weeks after the catalog passed 40 because it was hand-maintained.
+let outDir = 'dist'
 const syncCounts = () => ({
   name: 'sync-counts-in-html',
+  configResolved(config) { outDir = resolve(config.root, config.build.outDir) },
   transformIndexHtml(html) {
-    return html
-      .replaceAll('{{MODEL_COUNT}}', String(hubTotals.models))
-      .replaceAll('{{DATASET_COUNT}}', String(hubTotals.datasets))
+    return fillCounts(html)
+  },
+  closeBundle() {
+    const file = resolve(outDir, 'llms.txt')
+    if (!existsSync(file)) return
+    const filled = fillCounts(readFileSync(file, 'utf8'))
+    if (/\{\{[A-Z_]+\}\}/.test(filled)) throw new Error('llms.txt still has an unfilled {{TOKEN}}')
+    writeFileSync(file, filled)
   },
 })
 

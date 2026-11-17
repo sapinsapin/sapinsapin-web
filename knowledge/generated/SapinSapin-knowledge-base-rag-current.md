@@ -4,7 +4,7 @@ version: "3.0-generated"
 status: CANDIDATE — NOT YET DEPLOYED. Generated automatically from knowledge/base/*.md and knowledge/snapshots/current-public-state.json. Merging its reviewed PR to protected main triggers automatic production deployment; see docs/SAPPY-RAG-UPDATE-PROCEDURE.md.
 predecessor: SapinSapin-knowledge-base-rag-v2.md (content-frozen candidate, 2026-09-22) — itself succeeding SapinSapin-knowledge-base-rag-ready.md (v1, production item id 87c37f86cb5c42a387e5fdaa5ec5ab09, deployed 2026-09-18)
 knowledge_snapshot_date: "2026-11-17"
-generated_at: "2026-11-17T04:39:27.036Z"
+generated_at: "2026-11-17T05:50:35.150Z"
 canonical_source_policy: ssai/docs/KNOWLEDGE-SOURCES.md (authority hierarchy: live infra/repo > live first-party site/HF/repo > canonical SSAI docs > this RAG lineage > general research snapshot > inference)
 source_manifest: knowledge/rag-sources.yaml
 scope: Public-facing knowledge for Sappy (Discord + web chat assistant). Contains no secrets, account IDs, Discord IDs, OAuth details, or internal deployment instructions — see ssai/docs/SAPPY-OPERATIONS.md for that internal material.
@@ -126,6 +126,21 @@ Tim Santos also publishes SapinSapin-related model artifacts under his own perso
 - A public browser demo (the halohalo dashboard, a Gradio Space) that lets visitors test the project's speech models directly — the site itself notes that on free shared CPU hosting, responses can be slow [confirmed]
 - The sapinsapin.ai website, which live-syncs its dataset/model counts from the Hugging Face org at each deploy [confirmed]
 
+#### What the live demo can do (Ano ang kayang gawin ng demo)
+
+The "Try it in the browser" section of sapinsapin.ai calls the public halohalo Space (https://huggingface.co/spaces/sapinsapin/halohalo-dashboard) directly — no install and no account. [confirmed — site demo section]
+
+- **Transcribe speech** (speech recognition): record or upload audio, or pick a sample clip, and get text back.
+- **Speak text** (text-to-speech): type text and hear it read in a chosen voice.
+- **Convert a voice**: re-speak a recording in a different voice while keeping the words.
+- It runs the project's own speech models for nine Philippine languages and English (Bikol, Cebuano, Filipino, Hiligaynon, Ilocano, Pangasinan, Kapampangan, Tausug, Waray, and Philippine English).
+- It runs on free shared CPU with no GPU, so a request takes roughly ten to twenty seconds, the first request in a language waits on a model download, and requests are handled one at a time.
+- The text-generation models (for example the Filipino-news Llama 3.1 and gpt-oss checkpoints) are listed in the model catalog but are **not** run by the demo.
+
+#### Gated (access-controlled) datasets
+
+Some datasets, such as kumu-livestream-segmented and kumu-livestream-raw, are marked "Access controlled" on the site and gated on Hugging Face. [confirmed — Hub API `gated` flag, site dataset cards] To use one, sign in to Hugging Face, open the dataset's page, and request access by agreeing to the terms shown there (for the kumu sets: research-use and speaker-protection terms). Sappy cannot grant access, and should not promise that a request will be approved or say how long it takes.
+
 **Not established — do not state as fact:**
 - Deployed healthcare, government, or emergency-response systems
 - Formal legal, governance, or corporate structure
@@ -148,7 +163,19 @@ Tim Santos also publishes SapinSapin-related model artifacts under his own perso
 - **GitHub org `sapinsapin`** — hosts the website/Worker source and other project repositories. [confirmed]
 - **Sappy** — this assistant, answering questions about SapinSapin AI on Discord and the public website's chat widget. Sappy is a support/community tool built on top of this knowledge base; it is not itself a SapinSapin AI research model, and it does not represent every SapinSapin AI research output. [confirmed]
 
-If asked how to reach or follow the project: point to the official site (sapinsapin.ai), the Hugging Face org, and the GitHub org as the canonical public channels, rather than guessing at social handles not confirmed here.
+### How to contact or follow SapinSapin AI (Paano makipag-ugnayan o sumubaybay)
+
+These are the official channels listed in the footer and structured data of sapinsapin.ai. [confirmed — site footer and JSON-LD `sameAs`]
+
+- **Email:** contact@sapinsapin.ai
+- **Questions, proposals and contributions:** open an issue or discussion at https://github.com/sapinsapin/halohalo/issues
+- **Discord community:** https://discord.gg/DwgEMN5jx5 (Sappy also answers questions there)
+- **Facebook:** https://www.facebook.com/sapinsapinai
+- **LinkedIn:** https://www.linkedin.com/company/sapinsapin-ai/
+- **Hugging Face:** https://huggingface.co/sapinsapin (datasets, models and the live demo)
+- **GitHub:** https://github.com/sapinsapin (source code)
+
+If asked how to reach, follow, or join the project, give these links exactly as written. Do not invent other handles (for example X/Twitter, Instagram, TikTok or YouTube accounts), phone numbers or office addresses; none are listed on the official site.
 
 ## 06 — Partnerships and Participation (durable, but check periodically)
 

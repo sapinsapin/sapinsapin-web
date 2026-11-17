@@ -28,6 +28,7 @@ jobs:
         with:
           node-version: '22'
       - name: Verify source refresh ran successfully within 72 hours
+        id: source_refresh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -39,6 +40,7 @@ jobs:
           if (!healthy) throw new Error('No successful main source-refresh run in 72 hours.');
           JS
       - name: Detect stalled knowledge candidates
+        id: stalled_prs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -49,11 +51,13 @@ jobs:
           if (stale.length) throw new Error('Knowledge candidates pending over 48 hours: '+stale.map(p=>p.html_url).join(', '));
           JS
       - name: Verify production bytes, indexing and retrieval
+        id: production_index
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: node scripts/rag/deploy-rag.mjs health
       - name: Verify live Sappy retrieves and answers
+        id: live_answer
         run: |
           node --input-type=module - <<'JS'
           const base='https://sappy-ai.primary-bd7.workers.dev';
@@ -104,4 +108,30 @@ jobs:
         if: always()
         env:
           RESULT: ${{ job.status }}
-        run: echo "RAG health result — $RESULT. See source-refresh and production retrieval steps for details." >> "$GITHUB_STEP_SUMMARY"
+          SOURCE_REFRESH: ${{ steps.source_refresh.outcome }}
+          STALLED_PRS: ${{ steps.stalled_prs.outcome }}
+          PRODUCTION_INDEX: ${{ steps.production_index.outcome }}
+          LIVE_ANSWER: ${{ steps.live_answer.outcome }}
+        run: |
+          # Name the first failing stage so a red run says where to look.
+          failed=""
+          for pair in "source refresh (no successful knowledge refresh in 72h):$SOURCE_REFRESH" \
+                      "stalled knowledge PRs (candidate open over 48h):$STALLED_PRS" \
+                      "production bytes/indexing/retrieval (AI Search):$PRODUCTION_INDEX" \
+                      "live Sappy answer (Worker/model; see wrangler tail for sappy_model_error reason):$LIVE_ANSWER"; do
+            if [ "${pair##*:}" = "failure" ]; then failed="${pair%:*}"; break; fi
+          done
+          {
+            echo "### RAG health result — $RESULT"
+            echo ""
+            echo "| Stage | Outcome |"
+            echo "|---|---|"
+            echo "| Source refresh within 72h | ${SOURCE_REFRESH:-not run} |"
+            echo "| No stalled knowledge PRs | ${STALLED_PRS:-not run} |"
+            echo "| Production bytes, indexing, retrieval | ${PRODUCTION_INDEX:-not run} |"
+            echo "| Live Sappy answer | ${LIVE_ANSWER:-not run} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$failed" ]; then
+            echo "Failed stage: $failed" >> "$GITHUB_STEP_SUMMARY"
+            echo "::error title=RAG health failed::Failed stage: $failed"
+          fi

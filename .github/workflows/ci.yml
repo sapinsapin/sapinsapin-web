@@ -62,6 +62,8 @@ jobs:
         run: node scripts/rag/validate-rag.mjs
       - name: RAG reliability regression checks
         run: node --test scripts/rag/test/*.test.mjs
+      - name: Sappy Worker regression checks
+        run: node --test worker/test/*.test.mjs
       - name: Check catalog parity
         run: npm run check:catalog
       - name: Build
