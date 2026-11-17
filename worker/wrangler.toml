@@ -8,7 +8,9 @@ DISCORD_APPLICATION_ID = "1550091743003811842"
 DISCORD_GUILD_ID = "1548673048876683296"
 DISCORD_PUBLIC_KEY = "cebbf1f26b8e885308fb7f785835579892d094cd26c4d22d9f481f4a2ff8dd4f"
 SAPPY_MODEL_PROVIDER = "nyo"
-SAPPY_NYO_MODEL = "glm-5.3-flash"
+# glm-5.3-flash (default pool) returned HTTP 402 credit_limit from 2026-11-09;
+# the Nebius pool serves the same GLM model at the same price. Approved by Marc 2026-11-17.
+SAPPY_NYO_MODEL = "glm-5.3-flash-nebius"
 PAGE_ID = "576842565842965"
 ANNOUNCE_CHANNEL_ID = "1548673050046763081"
 
