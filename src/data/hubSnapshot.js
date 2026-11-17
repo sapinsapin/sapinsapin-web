@@ -2,7 +2,7 @@
 // Live state of https://huggingface.co/sapinsapin, read from the public Hub API.
 // `downloads` is the Hub's 30-day count, matching the org dashboard Space.
 export const syncedAt = "2026-11-17"
-export const hubTotals = {"models":49,"datasets":9,"modelDownloads":1723,"datasetDownloads":2877}
+export const hubTotals = {"models":49,"datasets":9,"modelDownloads":1723,"datasetDownloads":2857}
 export const hubModels = [
   {
     "name": "whisper-small-pld-ceb",
@@ -556,7 +556,7 @@ export const hubDatasets = [
   },
   {
     "id": "pld",
-    "downloads": 905,
+    "downloads": 886,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-08-08",
@@ -610,7 +610,7 @@ export const hubDatasets = [
   },
   {
     "id": "kumu-livestream-raw",
-    "downloads": 27,
+    "downloads": 26,
     "likes": 0,
     "updated": "2026-09-12",
     "created": "2026-08-11",
