@@ -401,7 +401,9 @@ function Nav({ theme, onToggleTheme }) {
       if (frame) return
       frame = requestAnimationFrame(() => {
         const y = Math.max(0, window.scrollY)
-        const isScrolled = y > 8
+        // Hysteresis: condense past 24px, expand only back under 4px, so a
+        // slow scroll near the top can never make the bar flicker between states.
+        const isScrolled = scrolled ? y > 4 : y > 24
         if (isScrolled !== scrolled) {
           scrolled = isScrolled
           document.documentElement.dataset.scrolled = String(isScrolled)
@@ -461,7 +463,9 @@ function Nav({ theme, onToggleTheme }) {
         unscrolled bar and the scrolled island, so they live in .nav-shell
         rather than as utilities here — see index.css. */}
     <nav className="nav-shell flex items-center justify-between gap-2" aria-label="Main navigation">
-      <a href="#top" onClick={(event) => { event.preventDefault(); closeMenus(); scrollToTop() }} className="brand-lockup rounded-lg py-1.5 text-ink" aria-label="SapinSapin AI home">
+      <span className="nav-glass" aria-hidden="true" />
+      <span className="nav-glow" aria-hidden="true" />
+      <a href="#top" onClick={(event) => { event.preventDefault(); closeMenus(); scrollToTop() }} className="nav-start brand-lockup rounded-lg py-1.5 text-ink" aria-label="SapinSapin AI home">
         <Mark className="h-[1.85rem] w-[2rem]" />
         <span className="text-[.9rem] font-semibold tracking-[-.045em] whitespace-nowrap">SapinSapin <span className="font-normal text-ink/63">AI</span></span>
       </a>
@@ -473,7 +477,7 @@ function Nav({ theme, onToggleTheme }) {
           is out of reach at any width; the bar simply stops pretending it has
           desktop room. */}
       <div ref={linksRef} className="nav-links hidden items-center gap-1 text-[.78rem] font-medium text-ink/70 lg:flex">{links}</div>
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="nav-end flex items-center gap-1.5 sm:gap-2">
         <ExternalLink href={github} className="nav-icon-link hidden sm:grid" label="SapinSapin AI on GitHub"><Github className="h-[1.1rem] w-[1.1rem]" /></ExternalLink>
         <ExternalLink href={discord} className="nav-icon-link hidden sm:grid" label="SapinSapin AI on Discord"><Discord className="h-[1.1rem] w-[1.1rem]" /></ExternalLink>
         <ExternalLink href={hub} className="nav-icon-link hidden sm:grid" label="SapinSapin AI on Hugging Face"><HuggingFace className="h-[1.1rem] w-[1.1rem]" /></ExternalLink>

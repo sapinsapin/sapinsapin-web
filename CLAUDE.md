@@ -384,6 +384,12 @@ headings, the demo halo). It is last on purpose: it has to beat
 the dark-mode and "Touch and small screens" blocks. Spring `linear()` curves are written
 inline after a keyword fallback, never through a custom property.
 
+- **The nav morph never lays out.** Bar to island is a constant full-width glass layer
+  (`.nav-glass`) clipped with `inset()`, its blur always on and never resized, while
+  `.nav-start`/`.nav-end` slide inward by the same distance with transforms (`--cut`,
+  `--shift`, one `--morph` curve). The shadow is a separate layer (`.nav-glow`) that only
+  fades. The scrolled state has hysteresis (on past 24px, off under 4px). Do not go back to
+  animating `max-width`, height, padding or `backdrop-filter`: that was the stutter.
 - **Pointer light.** One `pointermove` listener in `App()` writes `--mx`/`--my` on
   whichever `[data-spot]` element is under a fine pointer, at most once a frame. `[data-spot]`
   gives a card a soft spotlight (`isolation: isolate` + a `z-index: -1` pseudo-element, so no
