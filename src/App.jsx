@@ -694,10 +694,10 @@ function Statement() {
   return <section ref={ref} className="statement section-shell" aria-labelledby="statement-title">
     <h2 id="statement-title" className="sr-only">What SapinSapin AI builds</h2>
     <p className="statement-say">
-      <span className="sr-only">Hear and be heard in {speechLanguages.join(', ')}. Speech recognition and synthesis for {speechLanguages.length} Philippine languages, with {totals.models} open models and {totals.datasets} datasets on the Hub.</span>
+      <span className="sr-only">Hear and be heard in {speechLanguages.join(', ')}. Speech recognition and synthesis for {speechLanguages.length} Philippine languages, with {totals.models} public models and {totals.datasets} datasets on the Hub.</span>
       <span aria-hidden="true" className="statement-line">Hear and be heard in <span className="statement-slot is-lang"><RollingWord words={words} active={active} /></span>.</span>
       <span aria-hidden="true" className="statement-line">Speech recognition and synthesis for <span className="statement-slot">{speechLanguages.length}</span> Philippine languages,</span>
-      <span aria-hidden="true" className="statement-line">with <span className="statement-slot">{totals.models}</span> open models and <span className="statement-slot">{totals.datasets}</span> datasets on the Hub.</span>
+      <span aria-hidden="true" className="statement-line">with <span className="statement-slot">{totals.models}</span> public models and <span className="statement-slot">{totals.datasets}</span> datasets on the Hub.</span>
     </p>
     <div className="statement-foot"><MotionToggle /></div>
   </section>

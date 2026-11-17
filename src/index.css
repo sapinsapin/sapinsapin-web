@@ -3354,9 +3354,12 @@ html { scroll-behavior: smooth; }
   .language-map { animation: arrive-stage 1300ms var(--ease-expo) backwards .32s; }
 }
 .hero-line { display: block; }
+/* End states use filter: none, never blur(0): any filter other than none
+   makes the element the containing block for position: fixed descendants
+   (the model-row preview), the same trap as a transform. */
 @keyframes arrive {
   from { opacity: .001; transform: translateY(16px); filter: blur(8px); }
-  to { opacity: 1; transform: none; filter: blur(0); }
+  to { opacity: 1; transform: none; filter: none; }
 }
 @keyframes arrive-stage {
   from { opacity: .001; transform: translateY(36px) scale(.985); }
@@ -3375,7 +3378,7 @@ html { scroll-behavior: smooth; }
       transform 1100ms var(--ease-expo),
       filter 900ms var(--ease-out);
   }
-  .reveal.is-revealed > * { opacity: 1; transform: none; filter: blur(0); }
+  .reveal.is-revealed > * { opacity: 1; transform: none; filter: none; }
 }
 
 /* --------------------------------------------------------- pointer light */
@@ -3508,7 +3511,7 @@ html[data-motion='paused'] .loop * { animation-play-state: paused !important; }
 @keyframes roll-in {
   from { transform: translateY(.95em); opacity: 0; filter: blur(5px); }
   60% { filter: blur(0); }
-  to { transform: none; opacity: 1; filter: blur(0); }
+  to { transform: none; opacity: 1; filter: none; }
 }
 @keyframes roll-out {
   40% { filter: blur(0); }
@@ -3696,5 +3699,5 @@ html .footer-wordmark[data-spot]::after { display: none; }
 }
 @keyframes heading-in {
   from { opacity: .15; transform: translateY(26px); filter: blur(6px); }
-  to { opacity: 1; transform: none; filter: blur(0); }
+  to { opacity: 1; transform: none; filter: none; }
 }
