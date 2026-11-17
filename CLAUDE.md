@@ -33,7 +33,9 @@ npm run prepare:brand    # Social banners and profile pictures → brand/<platfo
 npm run check:csp        # Assert every inline script is hashed and both runtime origins are in connect-src
 ```
 
-There is no test suite and no lint script configured in `package.json`.
+There is no lint script. Tests are plain `node --test`: `node --test scripts/rag/test/*.test.mjs`
+(knowledge pipeline and health-check regressions) and `node --test worker/test/*.test.mjs`
+(the sappy-ai Worker); CI runs both.
 
 **Always run `npm run sync` before a deploy build.** It rewrites `src/data/hubSnapshot.js`,
 the single source for every count, download figure, task label, and date on the page, and
@@ -487,12 +489,25 @@ Auth is `wrangler login` (OAuth stored on this Mac in
 `~/Library/Preferences/.wrangler/config/default.toml`); if that state is missing, run
 `wrangler login` once and click Allow in the browser. The toml mirrors the deployed
 config exactly: the Workers AI binding (`[ai]` → `env.AI`), the AI Search instance
-(`SAPPY_KNOWLEDGE` → `sappy-knowledge`), and three plain vars (Discord application id,
-guild id, public key). Two things are Cloudflare **secrets** — they are not in the toml,
-they survive `wrangler deploy` untouched, and they are re-set with
-`echo <value> | npx wrangler secret put NAME`:
-`DISCORD_BOT_TOKEN` and `BOTGHOST_SHARED_SECRET`. Do not "helpfully" move a secret into
-the toml. Before the first deploy of a changed toml, run
+(`SAPPY_KNOWLEDGE` → `sappy-knowledge`), the `ANNOUNCED` KV namespace (Facebook Page
+announcement de-duplication), a 10-minute cron, and plain vars (Discord application id,
+guild id, public key; `PAGE_ID`, `ANNOUNCE_CHANNEL_ID`; `SAPPY_MODEL_PROVIDER` and
+`SAPPY_NYO_MODEL`). Answers come from NYO's chat-completions API with the model named in
+`SAPPY_NYO_MODEL` (`glm-5.3-flash-nebius` since 2026-11-17: the default `glm-5.3-flash`
+pool started returning HTTP 402 `credit_limit` on 2026-11-09). Six things are Cloudflare
+**secrets** — they are not in the toml, they survive `wrangler deploy` untouched, and
+they are re-set with `npx wrangler secret put NAME` (type the value at the hidden prompt
+so it never lands in shell history): `NYO_API_KEY`, `DISCORD_BOT_TOKEN`,
+`BOTGHOST_SHARED_SECRET`, `META_PAGE_TOKEN`, `META_APP_SECRET` and `META_VERIFY_TOKEN`.
+Do not "helpfully" move a secret into the toml.
+
+When Sappy answers `503 "temporarily unavailable"`, run `npx wrangler tail sappy-ai
+--format json` and send one question: every model failure logs one
+`sappy_model_error` JSON line with a `reason` (`config_missing`, `auth_rejected`,
+`credits_exhausted`, `rate_limited`, `upstream_http`, `empty_answer`, `bad_json`,
+`timeout`, `network_error`), the upstream status, a short upstream error code, the
+finish reason and latency. It never logs keys, prompts, user text or upstream bodies;
+keep it that way. Before the first deploy of a changed toml, run
 `wrangler deploy --dry-run` and diff its "has access to the following bindings" table
 against what is described here — a binding missing from the toml is silently detached.
 

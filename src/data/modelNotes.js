@@ -75,6 +75,7 @@ const specialSummaries = {
   'speecht5_tts-fsc-ONNX': 'The Filipino text-to-speech model above, exported to ONNX so it can run directly in the browser with Transformers.js — the lighter, device-side path to the same voice.',
   'whisper-small-fsc-ONNX': 'The Filipino recognizer above, exported to ONNX so it can run directly in the browser with Transformers.js — the lighter, device-side path to the same model.',
   'halo-lid': 'A small, fast fastText language identifier that tells the ten PLD languages apart (plus "other"), built to filter web text for Philippine-language content.',
+  wikalid: 'WikaLID — a small, CPU-only language identifier for 11 Philippine languages plus English, Spanish, Indonesian and Malay. It tags every word, so it reports how much English is mixed into Taglish, and holds uncertain text back for review instead of guessing. Released under its own preview licence.',
   'gpt-oss-20b-balitanlp-cpt-bf16': 'The Filipino-news gpt-oss-20b checkpoint re-exported in bf16 weights, for runtimes that do not load the original quantised format.',
 }
 

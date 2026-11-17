@@ -23,7 +23,7 @@
         "Founder"
       ],
       "must_not_mention": [
-        "Marc Ocampo \u2014 Founder",
+        "Marc Ocampo — Founder",
         "Marc founded"
       ]
     },
@@ -35,7 +35,7 @@
         "Core team"
       ],
       "must_not_mention": [
-        "Marc Ocampo \u2014 Founder",
+        "Marc Ocampo — Founder",
         "Marc founded SapinSapin"
       ]
     },
@@ -198,6 +198,62 @@
         "apache-2.0"
       ],
       "must_not_mention": []
+    },
+    {
+      "id": "contact-follow",
+      "question": "How can I contact or follow SapinSapin AI? Do you have Facebook, LinkedIn or Discord?",
+      "must_mention_any": [
+        "contact@sapinsapin.ai",
+        "discord.gg/DwgEMN5jx5",
+        "facebook.com/sapinsapinai",
+        "linkedin.com/company/sapinsapin-ai"
+      ],
+      "must_not_mention": [
+        "twitter.com/sapinsapin",
+        "instagram.com/sapinsapin"
+      ]
+    },
+    {
+      "id": "join-filipino",
+      "question": "Paano ako makakasali o makakatulong sa SapinSapin AI?",
+      "must_mention_any": [
+        "github.com/sapinsapin/halohalo/issues",
+        "open an issue",
+        "GitHub"
+      ]
+    },
+    {
+      "id": "demo-capabilities",
+      "question": "What can I do in the live demo on the website?",
+      "must_mention_any": [
+        "Transcribe speech",
+        "text-to-speech",
+        "Convert a voice",
+        "halohalo"
+      ]
+    },
+    {
+      "id": "gated-dataset-access",
+      "question": "How do I get access to the kumu-livestream dataset? It says access controlled.",
+      "must_mention_any": [
+        "request access",
+        "gated",
+        "Access controlled"
+      ]
+    },
+    {
+      "id": "arjhine-team-membership",
+      "question": "Is Arjhine A. Ty on the SapinSapin AI team?",
+      "must_mention_any": [
+        "Arjhine A. Ty"
+      ]
+    },
+    {
+      "id": "wikalid",
+      "question": "What is the wikalid model?",
+      "must_mention_any": [
+        "wikalid"
+      ]
     }
   ]
 }

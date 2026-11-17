@@ -24,6 +24,21 @@ The base models SapinSapin's fine-tunes build on (e.g. Llama 3.1, gpt-oss, Whisp
 - A public browser demo (the halohalo dashboard, a Gradio Space) that lets visitors test the project's speech models directly — the site itself notes that on free shared CPU hosting, responses can be slow [confirmed]
 - The sapinsapin.ai website, which live-syncs its dataset/model counts from the Hugging Face org at each deploy [confirmed]
 
+### What the live demo can do (Ano ang kayang gawin ng demo)
+
+The "Try it in the browser" section of sapinsapin.ai calls the public halohalo Space (https://huggingface.co/spaces/sapinsapin/halohalo-dashboard) directly — no install and no account. [confirmed — site demo section]
+
+- **Transcribe speech** (speech recognition): record or upload audio, or pick a sample clip, and get text back.
+- **Speak text** (text-to-speech): type text and hear it read in a chosen voice.
+- **Convert a voice**: re-speak a recording in a different voice while keeping the words.
+- It runs the project's own speech models for nine Philippine languages and English (Bikol, Cebuano, Filipino, Hiligaynon, Ilocano, Pangasinan, Kapampangan, Tausug, Waray, and Philippine English).
+- It runs on free shared CPU with no GPU, so a request takes roughly ten to twenty seconds, the first request in a language waits on a model download, and requests are handled one at a time.
+- The text-generation models (for example the Filipino-news Llama 3.1 and gpt-oss checkpoints) are listed in the model catalog but are **not** run by the demo.
+
+### Gated (access-controlled) datasets
+
+Some datasets, such as kumu-livestream-segmented and kumu-livestream-raw, are marked "Access controlled" on the site and gated on Hugging Face. [confirmed — Hub API `gated` flag, site dataset cards] To use one, sign in to Hugging Face, open the dataset's page, and request access by agreeing to the terms shown there (for the kumu sets: research-use and speaker-protection terms). Sappy cannot grant access, and should not promise that a request will be approved or say how long it takes.
+
 **Not established — do not state as fact:**
 - Deployed healthcare, government, or emergency-response systems
 - Formal legal, governance, or corporate structure

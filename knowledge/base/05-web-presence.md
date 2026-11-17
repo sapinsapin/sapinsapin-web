@@ -9,4 +9,16 @@
 - **GitHub org `sapinsapin`** — hosts the website/Worker source and other project repositories. [confirmed]
 - **Sappy** — this assistant, answering questions about SapinSapin AI on Discord and the public website's chat widget. Sappy is a support/community tool built on top of this knowledge base; it is not itself a SapinSapin AI research model, and it does not represent every SapinSapin AI research output. [confirmed]
 
-If asked how to reach or follow the project: point to the official site (sapinsapin.ai), the Hugging Face org, and the GitHub org as the canonical public channels, rather than guessing at social handles not confirmed here.
+## How to contact or follow SapinSapin AI (Paano makipag-ugnayan o sumubaybay)
+
+These are the official channels listed in the footer and structured data of sapinsapin.ai. [confirmed — site footer and JSON-LD `sameAs`]
+
+- **Email:** contact@sapinsapin.ai
+- **Questions, proposals and contributions:** open an issue or discussion at https://github.com/sapinsapin/halohalo/issues
+- **Discord community:** https://discord.gg/DwgEMN5jx5 (Sappy also answers questions there)
+- **Facebook:** https://www.facebook.com/sapinsapinai
+- **LinkedIn:** https://www.linkedin.com/company/sapinsapin-ai/
+- **Hugging Face:** https://huggingface.co/sapinsapin (datasets, models and the live demo)
+- **GitHub:** https://github.com/sapinsapin (source code)
+
+If asked how to reach, follow, or join the project, give these links exactly as written. Do not invent other handles (for example X/Twitter, Instagram, TikTok or YouTube accounts), phone numbers or office addresses; none are listed on the official site.
