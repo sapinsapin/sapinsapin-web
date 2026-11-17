@@ -4,6 +4,13 @@ name: Auto-merge bot PRs
 # changes. This workflow never checks out or executes code from the PR branch.
 on:
   workflow_dispatch:
+  # Bot PRs deadlocked without this: their CI is dispatched by GITHUB_TOKEN,
+  # and GitHub fires neither `workflow_run` nor a `status` event when that run
+  # finishes, so the `build` status below was never mirrored and the PR sat
+  # BLOCKED (knowledge-refresh PRs #44-#67, 2026-11-10 onward). A schedule is
+  # not suppressed the way GITHUB_TOKEN events are, so it sweeps them up.
+  schedule:
+    - cron: '17 * * * *'
   workflow_run:
     workflows: [CI]
     types: [completed]
@@ -29,7 +36,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
         run: |
           event_path="${GITHUB_EVENT_PATH:?GitHub did not provide the event payload path}"
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] || [ "$EVENT_NAME" = "schedule" ]; then
             prs=$(gh api "repos/$GH_REPO/pulls?state=open&base=main" --paginate \
               --jq '[.[] | select(.user.login == "dependabot[bot]" or (.user.login == "github-actions[bot]" and (.head.ref == "automation/hub-catalog" or (.head.ref | startswith("ssai-knowledge-refresh/"))))) | .number] | .[]')
           elif [ "$EVENT_NAME" = "workflow_run" ]; then
