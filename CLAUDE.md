@@ -373,6 +373,37 @@ back to a short color-only crossfade elsewhere; both respect `prefers-reduced-mo
 footer and the code sample stay dark in both themes and carry their own tokens and
 `::selection` colors.
 
+### Motion (the 2026-11 premium layer)
+
+All motion vocabulary lives in one unlayered block at the end of `index.css`, headed
+**"Premium motion layer"**: curve and duration tokens (`--ease-out`, `--ease-expo`,
+`--ease-io`, `--d1`–`--d4`), the button press (scale .96, spring release), drawn
+underlines, the hero arrival (blur-to-sharp, line by line, starting at opacity .001 so
+LCP still counts the headline), the scroll reveal, and the scroll-driven pieces (nav
+progress hairline, section headings, the demo halo). It is last on purpose: it has to beat
+the dark-mode and "Touch and small screens" blocks. Spring `linear()` curves are written
+inline after a keyword fallback, never through a custom property.
+
+- **Pointer light.** One `pointermove` listener in `App()` writes `--mx`/`--my` on
+  whichever `[data-spot]` element is under a fine pointer, at most once a frame. `[data-spot]`
+  gives a card a soft spotlight (`isolation: isolate` + a `z-index: -1` pseudo-element, so no
+  child is repositioned); `data-spot="rim"` plus a `<span className="rim">` child adds an
+  edge that catches the light (hero frame, demo panel). The footer wordmark uses the same
+  variables as a mask.
+- **The demo panel is never transformed.** Its arrival is a halo on `.demo-section::before`;
+  a transform on the panel would become the containing block for the console's sticky result
+  stage.
+- **Loops pause.** The statement's rolling language and the bento's card loops stop when
+  off screen, when the tab is hidden, under reduced motion, and from the "Pause animations"
+  button (`setMotionPaused`, stored per visitor, sets `html[data-motion]`). WCAG 2.2.2 needs
+  that button for any motion longer than five seconds; do not remove it.
+- **Every rolling word is a true statement.** The statement rolls through the Space
+  manifest's languages that have both voices and ASR models; the bento reads `totals`,
+  `datasets` and the manifest. Do not hand-write languages or figures into either.
+- Scroll-driven effects sit behind `@supports ((animation-timeline: view()) and
+  (animation-range: entry))` inside `prefers-reduced-motion: no-preference`; without support
+  the page is simply static.
+
 ### Mobile and touch
 
 Everything phone- and tablet-specific lives in one unlayered block near the bottom of

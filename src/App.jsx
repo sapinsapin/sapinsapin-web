@@ -1113,7 +1113,7 @@ function PersonCard({ person }) {
   return <article data-spot className="person-card">
     <div className="person-photo">
       {person.image
-        ? <img src={person.image} alt={`Portrait of ${person.name}`} loading="lazy" />
+        ? <img src={person.image} alt={`Portrait of ${person.name}`} width="384" height="384" loading="lazy" decoding="async" />
         : <span className="person-photo-mark" aria-hidden="true">{initials}</span>}
     </div>
     <div className="person-body">
