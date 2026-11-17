@@ -7,7 +7,7 @@ export function ArrowUp({ className = '' }) {
 }
 
 export function ArrowDown({ className = '' }) {
-  return <svg className={className} viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3.25v9.5M3.75 8.5 8 12.75l4.25-4.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+  return <svg className={className} data-dir="down" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3.25v9.5M3.75 8.5 8 12.75l4.25-4.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
 }
 
 /* Used only where a link leaves this document for another page of the site —

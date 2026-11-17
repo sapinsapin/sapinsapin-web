@@ -267,6 +267,69 @@ function useMediaQuery(query) {
   return matches
 }
 
+/* True while the element is on screen (not once-only like Reveal): loops use
+   it to stop doing work the moment they scroll away. */
+function useInView(ref, rootMargin = '0px') {
+  const [inView, setInView] = useState(false)
+  useEffect(() => {
+    const node = ref.current
+    if (!node || !('IntersectionObserver' in window)) { setInView(true); return undefined }
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { rootMargin })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [ref, rootMargin])
+  return inView
+}
+
+function usePageVisible() {
+  const [visible, setVisible] = useState(() => document.visibilityState !== 'hidden')
+  useEffect(() => {
+    const onChange = () => setVisible(document.visibilityState !== 'hidden')
+    document.addEventListener('visibilitychange', onChange)
+    return () => document.removeEventListener('visibilitychange', onChange)
+  }, [])
+  return visible
+}
+
+/* A window one line tall. The next word comes up from below as the old one
+   leaves through the top, glyph by glyph in a wave, softening as it nears the
+   edge, while the window eases to the new word's width. Decorative: callers
+   give assistive tech a plain sentence and this stays aria-hidden. */
+function RollingWord({ words, active, interval = 2600 }) {
+  const [state, setState] = useState({ i: 0, prev: null, n: 0 })
+  const sizer = useRef(null)
+  const [width, setWidth] = useState(null)
+
+  useEffect(() => {
+    if (!active || words.length < 2) return undefined
+    const timer = setInterval(() => setState(({ i, n }) => ({ i: (i + 1) % words.length, prev: i, n: n + 1 })), interval)
+    return () => clearInterval(timer)
+  }, [active, words.length, interval])
+
+  useLayoutEffect(() => {
+    if (sizer.current) setWidth(sizer.current.getBoundingClientRect().width)
+  }, [state.i, words])
+
+  // The display face swaps in after first paint; re-measure when it does.
+  useEffect(() => {
+    const node = sizer.current
+    if (!node || !('ResizeObserver' in window)) return undefined
+    const observer = new ResizeObserver(() => setWidth(node.getBoundingClientRect().width))
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  const glyphs = (text, phase, key) => <span key={key} className={`roll-word is-${phase}`}>
+    {[...text].map((ch, k) => <span key={k} className="roll-g" style={{ '--k': k }}>{ch === ' ' ? ' ' : ch}</span>)}
+  </span>
+
+  return <span className="roll" style={width ? { width: `${width}px` } : undefined} aria-hidden="true">
+    <span ref={sizer} className="roll-sizer">{words[state.i]}</span>
+    {state.prev !== null && glyphs(words[state.prev], 'out', `o${state.n}`)}
+    {glyphs(words[state.i], state.n ? 'in' : 'rest', `i${state.n}`)}
+  </span>
+}
+
 /* Marks whichever section is crossing the middle of the viewport. */
 function useActiveSection() {
   const [activeId, setActiveId] = useState(null)
@@ -338,7 +401,9 @@ function Nav({ theme, onToggleTheme }) {
       if (frame) return
       frame = requestAnimationFrame(() => {
         const y = Math.max(0, window.scrollY)
-        const isScrolled = y > 8
+        // Hysteresis: condense past 24px, expand only back under 4px, so a
+        // slow scroll near the top can never make the bar flicker between states.
+        const isScrolled = scrolled ? y > 4 : y > 24
         if (isScrolled !== scrolled) {
           scrolled = isScrolled
           document.documentElement.dataset.scrolled = String(isScrolled)
@@ -398,7 +463,9 @@ function Nav({ theme, onToggleTheme }) {
         unscrolled bar and the scrolled island, so they live in .nav-shell
         rather than as utilities here — see index.css. */}
     <nav className="nav-shell flex items-center justify-between gap-2" aria-label="Main navigation">
-      <a href="#top" onClick={(event) => { event.preventDefault(); closeMenus(); scrollToTop() }} className="brand-lockup rounded-lg py-1.5 text-ink" aria-label="SapinSapin AI home">
+      <span className="nav-glass" aria-hidden="true" />
+      <span className="nav-glow" aria-hidden="true" />
+      <a href="#top" onClick={(event) => { event.preventDefault(); closeMenus(); scrollToTop() }} className="nav-start brand-lockup rounded-lg py-1.5 text-ink" aria-label="SapinSapin AI home">
         <Mark className="h-[1.85rem] w-[2rem]" />
         <span className="text-[.9rem] font-semibold tracking-[-.045em] whitespace-nowrap">SapinSapin <span className="font-normal text-ink/63">AI</span></span>
       </a>
@@ -410,7 +477,7 @@ function Nav({ theme, onToggleTheme }) {
           is out of reach at any width; the bar simply stops pretending it has
           desktop room. */}
       <div ref={linksRef} className="nav-links hidden items-center gap-1 text-[.78rem] font-medium text-ink/70 lg:flex">{links}</div>
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="nav-end flex items-center gap-1.5 sm:gap-2">
         <ExternalLink href={github} className="nav-icon-link hidden sm:grid" label="SapinSapin AI on GitHub"><Github className="h-[1.1rem] w-[1.1rem]" /></ExternalLink>
         <ExternalLink href={discord} className="nav-icon-link hidden sm:grid" label="SapinSapin AI on Discord"><Discord className="h-[1.1rem] w-[1.1rem]" /></ExternalLink>
         <ExternalLink href={hub} className="nav-icon-link hidden sm:grid" label="SapinSapin AI on Hugging Face"><HuggingFace className="h-[1.1rem] w-[1.1rem]" /></ExternalLink>
@@ -442,11 +509,12 @@ function Nav({ theme, onToggleTheme }) {
 
 function Hero() {
   return <section id="top" className="relative overflow-hidden px-4 pb-0 pt-3 sm:px-6 sm:pt-4 lg:px-9">
-    <div className="hero-frame page-shell relative grid items-center gap-8 overflow-hidden rounded-[2rem] px-6 py-8 sm:px-10 sm:py-10 lg:grid-cols-[1fr_.95fr] lg:gap-12 lg:px-16">
+    <div data-spot="rim" className="hero-frame page-shell relative grid items-center gap-8 overflow-hidden rounded-[2rem] px-6 py-8 sm:px-10 sm:py-10 lg:grid-cols-[1fr_.95fr] lg:gap-12 lg:px-16">
       <div className="hero-wash" aria-hidden="true" />
+      <span className="rim" aria-hidden="true" />
       <div className="relative z-10 max-w-2xl">
         <div className="hero-badge hero-rise hero-rise-1"><span className="hero-pulse" aria-hidden="true" /> Open research infrastructure</div>
-        <h1 className="hero-rise hero-rise-2 mt-6 font-display text-[clamp(2.9rem,5.6vw,6.1rem)] font-medium leading-[.92] tracking-[-.068em] text-ink">Every voice<br />belongs in the<br /><em className="font-normal text-ube">future.</em></h1>
+        <h1 className="mt-6 font-display text-[clamp(2.9rem,5.6vw,6.1rem)] font-medium leading-[.92] tracking-[-.068em] text-ink"><span className="hero-line">Every voice</span><span className="hero-line">belongs in the</span><span className="hero-line"><em className="font-normal text-ube">future.</em></span></h1>
         <p className="hero-rise hero-rise-3 mt-6 max-w-xl text-[1rem] leading-7 text-ink/72 sm:text-lg sm:leading-8 [text-wrap:pretty]">SapinSapin AI builds open speech and language foundations so Philippine AI can be made with — and for — the people who speak it.</p>
         <div className="hero-rise hero-rise-3 mt-8 flex flex-wrap gap-3">
           {/* Same-page anchor, so it takes the in-page arrow — ArrowUpRight is
@@ -459,7 +527,7 @@ function Hero() {
           <a href="#demo" className="btn btn-ghost">Try the live demo <ArrowDown className="h-4 w-4" /></a>
         </div>
         <div className="hero-evidence hero-rise hero-rise-4 mt-10">
-          <span><b><CountUp value={totals.datasets} format={{ minimumIntegerDigits: 2 }} /></b> data collections</span><span><b><CountUp value={totals.models} /></b> public models</span><span><b><CountUp value={languageAnchors.length} /></b> language layers</span>
+          <span><b><CountUp value={totals.datasets} /></b> data collections</span><span><b><CountUp value={totals.models} /></b> public models</span><span><b><CountUp value={languageAnchors.length} /></b> language layers</span>
         </div>
       </div>
       <div className="relative z-10 mx-auto w-full max-w-[580px] lg:ml-auto"><PhilippinesMap /></div>
@@ -518,8 +586,9 @@ function DeferredConsole() {
 }
 
 function Demo() {
-  return <section id="demo" className="section-shell scroll-mt-24 pt-20 sm:pt-36">
-    <div className="demo-panel">
+  return <section id="demo" className="demo-section section-shell scroll-mt-24 pt-20 sm:pt-36">
+    <div data-spot="rim" className="demo-panel">
+      <span className="rim" aria-hidden="true" />
       <div className="demo-intro">
         <div>
           <Eyebrow>Try it in the browser</Eyebrow>
@@ -577,14 +646,122 @@ function Problem() {
   </section>
 }
 
+/* The project in one sentence, set large and quiet, with the language it is
+   speaking rolling through every Philippine language the demo can both hear
+   and speak — so each word that appears is a true statement, read from the
+   synced Space manifest rather than written by hand. */
+const speechLanguages = demoLanguages
+  .filter(({ name, voices, models: asr }) => !/english/i.test(name) && voices?.length && asr?.length)
+  .map(({ name }) => name)
+
+function Statement() {
+  const ref = useRef(null)
+  const inView = useInView(ref, '-10% 0px')
+  const reduce = useMediaQuery('(prefers-reduced-motion: reduce)')
+  const visible = usePageVisible()
+  const active = inView && visible && !reduce
+  const start = speechLanguages.indexOf('Cebuano')
+  const words = start > 0 ? [...speechLanguages.slice(start), ...speechLanguages.slice(0, start)] : speechLanguages
+
+  return <section ref={ref} className="statement section-shell" aria-labelledby="statement-title">
+    <h2 id="statement-title" className="sr-only">What SapinSapin AI builds</h2>
+    <p className="statement-say">
+      <span className="sr-only">Hear and be heard in {speechLanguages.join(', ')}. Speech recognition and synthesis for {speechLanguages.length} Philippine languages, built in the open.</span>
+      <span aria-hidden="true" className="statement-line">Hear and be heard in <span className="statement-slot is-lang"><RollingWord words={words} active={active} /></span>.</span>
+      <span aria-hidden="true" className="statement-line">Speech recognition and synthesis for <span className="statement-slot">{speechLanguages.length}</span> Philippine languages, built in the open.</span>
+    </p>
+  </section>
+}
+
+/* Deterministic bar heights, so the waveform is the same on every load and
+   in every screenshot rather than a random flicker. */
+const waveBars = Array.from({ length: 64 }, (_, i) => {
+  const v = Math.abs(Math.sin(i * 0.62) * Math.cos(i * 0.17 + 0.6)) * 0.75 + Math.abs(Math.sin(i * 1.9)) * 0.25
+  return Math.round(14 + v * 82)
+})
+
+/* Common short words of the languages in the two text corpora (BantayWika:
+   Filipino, Cebuano, Ilocano; halohalo: Tagalog, Hiligaynon, Bikol). Shown as
+   the kind of unit a tokenizer counts — decoration, not a sample of the data. */
+const tokenRows = [
+  ['ang', 'mga', 'nga', 'ti', 'kag', 'asin', 'sa', 'ug', 'ken', 'sang', 'na', 'kini', 'dagiti', 'ay', 'an'],
+  ['ng', 'kag', 'iti', 'nga', 'ang', 'ug', 'sa', 'mga', 'asin', 'ti', 'sang', 'ken', 'na', 'an', 'kini'],
+]
+
+const layerTones = ['var(--layer-1)', 'var(--layer-2)', 'var(--layer-3)', 'var(--layer-4)', 'var(--layer-5)']
+
 function Impact() {
-  const stats = [
-    { value: 513.3, format: { minimumFractionDigits: 1, maximumFractionDigits: 1 }, label: 'documented speech hours', source: 'PLD + Filipino Speech Corpus' },
-    { value: 25265710, label: 'tokens of pretraining text', source: 'BantayWika + halohalo' },
-    { value: 10, label: 'languages in the collection', source: 'PLD — nine Philippine, plus English' },
-    { value: totals.datasets, label: 'datasets in the catalog', source: `Hub sync · ${catalogSnapshot}` },
-  ]
-  return <section className="section-shell pt-20 sm:pt-36"><div className="layer-band"><div className="mb-11 flex flex-col justify-between gap-5 md:flex-row md:items-end"><SectionHeading eyebrow="Impact, made inspectable" title={<>Built in public.<br />Measured honestly.</>} /><p className="max-w-sm text-sm leading-6 text-ink/65">Counts are taken from the public Hub cards and dataset documentation. “Documented” means the figure is stated on a public dataset card; access-controlled collections whose totals are not public are excluded, and a stated figure is not an independently verified one.</p></div><Reveal as="dl" className="grid divide-y divide-ink/10 border-y border-ink/10 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">{stats.map(({ value, format, label, source }) => <div className="px-0 py-7 sm:px-6 lg:px-7" key={label}><dt className="font-display text-4xl tracking-[-.06em] text-ube sm:text-5xl"><CountUp value={value} format={format} /></dt><dd className="mt-2 text-sm font-semibold tracking-[-.02em] text-ink">{label}</dd><dd className="mt-1 text-xs leading-5 text-ink/60">{source}</dd></div>)}</Reveal></div></section>
+  const ref = useRef(null)
+  const inView = useInView(ref, '0px')
+  const collectionLanguages = demoLanguages.map(({ name }) => name)
+  return <section ref={ref} className={`section-shell pt-20 sm:pt-36 ${inView ? '' : 'is-offscreen'}`} aria-labelledby="impact-title">
+    <div className="mb-11 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+      <div className="max-w-3xl">
+        <Eyebrow>Impact, made inspectable</Eyebrow>
+        <h2 id="impact-title" className="mt-5 font-display text-[clamp(2.25rem,4vw,4rem)] font-medium leading-[1.01] tracking-[-.055em] text-ink">Built in public.<br />Measured honestly.</h2>
+      </div>
+      <div className="max-w-sm">
+        <p className="text-sm leading-6 text-ink/65">Counts are taken from the public Hub cards and dataset documentation. “Documented” means the figure is stated on a public dataset card; access-controlled collections whose totals are not public are excluded, and a stated figure is not an independently verified one.</p>
+      </div>
+    </div>
+    <Reveal className="bento loop">
+      <article data-spot className="bento-card bento-wide">
+        <span className="rim" aria-hidden="true" />
+        <div className="bento-visual bento-wave" aria-hidden="true">
+          <div className="wave-bars">{waveBars.map((h, i) => <i key={i} style={{ height: `${h}%` }} />)}</div>
+          <div className="wave-bars wave-lit">{waveBars.map((h, i) => <i key={i} style={{ height: `${h}%` }} />)}</div>
+          <div className="wave-head"><i /></div>
+        </div>
+        <div className="bento-copy">
+          <p className="bento-figure"><CountUp value={513.3} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} /></p>
+          <p className="bento-label">documented speech hours</p>
+          <p className="bento-source">PLD + Filipino Speech Corpus</p>
+        </div>
+      </article>
+      <article data-spot className="bento-card">
+        <span className="rim" aria-hidden="true" />
+        <div className="bento-visual bento-tokens" aria-hidden="true">
+          {tokenRows.map((row, r) => <div key={r} className={`token-row ${r ? 'is-reverse' : ''}`}>
+            {[...row, ...row].map((token, k) => <span key={k} className="token">{token}</span>)}
+          </div>)}
+        </div>
+        <div className="bento-copy">
+          <p className="bento-figure"><CountUp value={25265710} /></p>
+          <p className="bento-label">tokens of pretraining text</p>
+          <p className="bento-source">BantayWika + halohalo</p>
+        </div>
+      </article>
+      <article data-spot className="bento-card">
+        <span className="rim" aria-hidden="true" />
+        <div className="bento-visual bento-layers" aria-hidden="true">
+          {collectionLanguages.map((name, k) => <span key={name} className="layer" style={{ '--k': k, '--tone': layerTones[k % layerTones.length] }}><b>{name}</b></span>)}
+        </div>
+        <div className="bento-copy">
+          <p className="bento-figure"><CountUp value={collectionLanguages.length} /></p>
+          <p className="bento-label">languages in the collection</p>
+          <p className="bento-source">PLD — nine Philippine, plus English</p>
+        </div>
+      </article>
+      <article data-spot className="bento-card bento-wide">
+        <span className="rim" aria-hidden="true" />
+        <div className="bento-visual bento-split" aria-hidden="true">
+          <div className="split-bar">
+            <span className="split-seg is-data" style={{ flexGrow: totals.datasetDownloads }} />
+            <span className="split-seg is-model" style={{ flexGrow: totals.modelDownloads }} />
+          </div>
+          <div className="split-legend">
+            <p><i className="is-data" />Datasets<b>{totals.datasetDownloads.toLocaleString('en-US')}</b></p>
+            <p><i className="is-model" />Models<b>{totals.modelDownloads.toLocaleString('en-US')}</b></p>
+          </div>
+        </div>
+        <div className="bento-copy">
+          <p className="bento-figure"><CountUp value={totals.datasetDownloads + totals.modelDownloads} /></p>
+          <p className="bento-label">downloads (30d)</p>
+          <p className="bento-source">Datasets and models on the Hub · synced {catalogSnapshot}</p>
+        </div>
+      </article>
+    </Reveal>
+  </section>
 }
 
 function DatasetCard({ item, index }) {
@@ -593,7 +770,7 @@ function DatasetCard({ item, index }) {
   const rest = languages.length - shown.length
   const unstated = (value) => (value === '{{VERIFY}}' ? <span className="meta-unstated">Not stated on the Hub</span> : value)
 
-  return <article className={`dataset-card ${item.featured ? 'dataset-featured' : ''}`}>
+  return <article data-spot className={`dataset-card ${item.featured ? 'dataset-featured' : ''}`}>
     <div className="dataset-head">
       <p className="dataset-kicker">{item.kind}</p>
       <span className="dataset-index">{String(index + 1).padStart(2, '0')}</span>
@@ -886,7 +1063,7 @@ function Contribute() {
     { icon: Code, number: '02', title: 'Contribute code', text: 'Explore the public repositories, open an issue, improve a pipeline, or share a reproducible experiment.', cta: 'Open GitHub', href: github },
     { icon: MarkMono, number: '03', title: 'Contribute data', text: 'If you work with a Philippine language as a researcher, annotator, native speaker, or engineer, start a conversation in a project issue.', cta: 'Start a conversation', href: 'https://github.com/sapinsapin/halohalo/issues' },
   ]
-  return <section id="contribute" className="section-shell scroll-mt-24 pt-20 sm:pt-40"><div className="contribute-intro"><div><Eyebrow>It takes a village</Eyebrow><h2 className="mt-5 max-w-3xl font-display text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[.96] tracking-[-.065em] text-ink">Help make Philippine AI <em className="text-ube">more possible.</em></h2><div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3"><ExternalLink href="https://github.com/sapinsapin/halohalo/issues" className="btn btn-primary" label="Join the SapinSapin AI community on GitHub">Join us <ArrowUpRight className="h-4 w-4" /></ExternalLink><a href="mailto:contact@sapinsapin.ai" className="text-link">Prefer email? contact@sapinsapin.ai</a></div></div><div className="max-w-md"><p className="text-[1.05rem] leading-7 text-ink/70">This work is designed to be used, questioned, and improved in public.</p><CodeBlock /></div></div><Reveal className="mt-4 grid gap-4 md:grid-cols-3">{cards.map(({ icon: Icon, number, title, text, cta, href }) => <article key={title} className="contribute-card"><div className="flex items-center justify-between"><Icon className="h-7 w-7 text-ube" /><span className="text-xs text-ink/60">{number}</span></div><h3 className="mt-12 text-xl font-semibold tracking-[-.045em] text-ink">{title}</h3><p className="mt-3 min-h-[72px] text-sm leading-6 text-ink/68">{text}</p><ExternalLink href={href} className="text-link mt-8" label={cta}>{cta} <ArrowUpRight className="h-4 w-4" /></ExternalLink></article>)}</Reveal></section>
+  return <section id="contribute" className="section-shell scroll-mt-24 pt-20 sm:pt-40"><div className="contribute-intro"><div><Eyebrow>It takes a village</Eyebrow><h2 className="mt-5 max-w-3xl font-display text-[clamp(2.5rem,5vw,5rem)] font-medium leading-[.96] tracking-[-.065em] text-ink">Help make Philippine AI <em className="text-ube">more possible.</em></h2><div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3"><ExternalLink href="https://github.com/sapinsapin/halohalo/issues" className="btn btn-primary" label="Join the SapinSapin AI community on GitHub">Join us <ArrowUpRight className="h-4 w-4" /></ExternalLink><a href="mailto:contact@sapinsapin.ai" className="text-link">Prefer email? contact@sapinsapin.ai</a></div></div><div className="max-w-md"><p className="text-[1.05rem] leading-7 text-ink/70">This work is designed to be used, questioned, and improved in public.</p><CodeBlock /></div></div><Reveal className="mt-4 grid gap-4 md:grid-cols-3">{cards.map(({ icon: Icon, number, title, text, cta, href }) => <article key={title} data-spot className="contribute-card"><div className="flex items-center justify-between"><Icon className="h-7 w-7 text-ube" /><span className="text-xs text-ink/60">{number}</span></div><h3 className="mt-12 text-xl font-semibold tracking-[-.045em] text-ink">{title}</h3><p className="mt-3 min-h-[72px] text-sm leading-6 text-ink/68">{text}</p><ExternalLink href={href} className="text-link mt-8" label={cta}>{cta} <ArrowUpRight className="h-4 w-4" /></ExternalLink></article>)}</Reveal></section>
 }
 
 /* A team card: portrait up top, name and role beneath, links at the foot —
@@ -907,10 +1084,10 @@ function PersonCard({ person }) {
     return <ArrowUpRight className="h-3.5 w-3.5" />
   }
 
-  return <article className="person-card">
+  return <article data-spot className="person-card">
     <div className="person-photo">
       {person.image
-        ? <img src={person.image} alt={`Portrait of ${person.name}`} loading="lazy" />
+        ? <img src={person.image} alt={`Portrait of ${person.name}`} width="384" height="384" loading="lazy" decoding="async" />
         : <span className="person-photo-mark" aria-hidden="true">{initials}</span>}
     </div>
     <div className="person-body">
@@ -994,7 +1171,7 @@ function BackToTop() {
 }
 
 function Footer() {
-  return <footer className="site-footer mt-20 sm:mt-40"><div className="section-shell py-14 sm:py-20"><div className="grid gap-12 lg:grid-cols-[1.25fr_.75fr_.75fr]"><div><div className="flex items-center gap-2.5"><Mark className="h-[2.1rem] w-[2.3rem]" /><p className="font-semibold tracking-[-.04em]">SapinSapin AI</p></div><p className="footer-body mt-5 max-w-sm text-sm leading-6">Open foundations for Philippine-language AI. Built with care for the layers that make a language live.</p><p className="footer-label mt-8">Contact</p><div className="footer-links"><a href="mailto:contact@sapinsapin.ai">contact@sapinsapin.ai</a></div><p className="footer-label mt-8">Follow</p><div className="footer-social"><ExternalLink href={facebook} label="SapinSapin AI on Facebook"><Facebook className="h-4 w-4" /></ExternalLink><ExternalLink href={linkedin} label="SapinSapin AI on LinkedIn"><LinkedIn className="h-4 w-4" /></ExternalLink><ExternalLink href={discord} label="SapinSapin AI on Discord"><Discord className="h-4 w-4" /></ExternalLink></div></div><div><p className="footer-label">Find us</p><div className="footer-links"><ExternalLink href={github}>GitHub <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href={hub}>Hugging Face <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href="https://github.com/sapinsapin/halohalo/issues">Contact / contribute <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href="https://github.com/faeldon/philippines-json-maps">Map attribution <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink></div></div><div><p className="footer-label">Licensing</p><p className="footer-body mt-4 text-sm leading-6">No single project-wide license is implied. Individual datasets and models have their own terms, including MIT and other licenses. Check each linked card before use.</p></div></div><div className="footer-rule mt-14 flex flex-col justify-between gap-3 pt-5 text-[11px] sm:flex-row"><p>© 2026 SapinSapin AI</p><p>Catalog data synced {catalogSnapshot} · Designed for open research</p></div></div></footer>
+  return <footer className="site-footer mt-20 sm:mt-40"><div className="section-shell py-14 sm:py-20"><div className="grid gap-12 lg:grid-cols-[1.25fr_.75fr_.75fr]"><div><div className="flex items-center gap-2.5"><Mark className="h-[2.1rem] w-[2.3rem]" /><p className="font-semibold tracking-[-.04em]">SapinSapin AI</p></div><p className="footer-body mt-5 max-w-sm text-sm leading-6">Open foundations for Philippine-language AI. Built with care for the layers that make a language live.</p><p className="footer-label mt-8">Contact</p><div className="footer-links"><a href="mailto:contact@sapinsapin.ai">contact@sapinsapin.ai</a></div><p className="footer-label mt-8">Follow</p><div className="footer-social"><ExternalLink href={facebook} label="SapinSapin AI on Facebook"><Facebook className="h-4 w-4" /></ExternalLink><ExternalLink href={linkedin} label="SapinSapin AI on LinkedIn"><LinkedIn className="h-4 w-4" /></ExternalLink><ExternalLink href={discord} label="SapinSapin AI on Discord"><Discord className="h-4 w-4" /></ExternalLink></div></div><div><p className="footer-label">Find us</p><div className="footer-links"><ExternalLink href={github}>GitHub <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href={hub}>Hugging Face <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href="https://github.com/sapinsapin/halohalo/issues">Contact / contribute <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink><ExternalLink href="https://github.com/faeldon/philippines-json-maps">Map attribution <ArrowUpRight className="h-3.5 w-3.5" /></ExternalLink></div></div><div><p className="footer-label">Licensing</p><p className="footer-body mt-4 text-sm leading-6">No single project-wide license is implied. Individual datasets and models have their own terms, including MIT and other licenses. Check each linked card before use.</p></div></div><div data-spot="mark" className="footer-wordmark" aria-hidden="true"><span className="wordmark-ghost">SapinSapin</span><span className="wordmark-lit">SapinSapin</span></div><div className="footer-rule mt-6 flex flex-col justify-between gap-3 pt-5 text-[11px] sm:flex-row"><p>© 2026 SapinSapin AI</p><p>Catalog data synced {catalogSnapshot} · Designed for open research</p></div></div></footer>
 }
 
 function App() {
@@ -1017,6 +1194,27 @@ function App() {
     const target = document.getElementById(decodeURIComponent(hash.slice(1)))
     if (!target) return
     requestAnimationFrame(() => target.scrollIntoView({ block: 'center' }))
+  }, [])
+
+  // The pointer light: one listener for the whole page, writing the pointer's
+  // position into whichever [data-spot] surface it is over, at most once a
+  // frame and never through React state. Fine pointers only — a finger has
+  // no hover for a light to follow.
+  useEffect(() => {
+    if (!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches) return undefined
+    let frame = 0
+    let last = null
+    const paint = () => {
+      frame = 0
+      const target = last?.target?.closest?.('[data-spot]')
+      if (!target) return
+      const box = target.getBoundingClientRect()
+      target.style.setProperty('--mx', `${last.clientX - box.left}px`)
+      target.style.setProperty('--my', `${last.clientY - box.top}px`)
+    }
+    const onMove = (event) => { last = event; if (!frame) frame = requestAnimationFrame(paint) }
+    document.addEventListener('pointermove', onMove, { passive: true })
+    return () => { document.removeEventListener('pointermove', onMove); cancelAnimationFrame(frame) }
   }, [])
 
   const datasetsSchema = {
@@ -1052,9 +1250,10 @@ function App() {
   return <>
     <a href="#work" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2 focus:text-paper">Skip to content</a>
     <Nav theme={theme} onToggleTheme={toggleTheme} />
-    <main aria-label="SapinSapin AI — Open foundations for Philippine-language AI"><Hero /><Demo /><Problem /><Impact /><Datasets /><Models /><Openness /><People /><Contribute /><PartnersAndFaq /><References /></main>
+    <main aria-label="SapinSapin AI — Open foundations for Philippine-language AI"><Hero /><Statement /><Demo /><Problem /><Impact /><Datasets /><Models /><Openness /><People /><Contribute /><PartnersAndFaq /><References /></main>
     <Footer />
     <BackToTop />
+    <div className="page-edge" aria-hidden="true" />
     {/* The Ask Sappy chat is page chrome rather than demo furniture, so it cannot
         ride the demo's approach gate — a visitor who never scrolls to the demo should
         still be able to ask. DeferredOrb defers it a beat past paint and keeps the
