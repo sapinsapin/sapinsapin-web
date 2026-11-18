@@ -2,7 +2,7 @@
 // Live state of https://huggingface.co/sapinsapin, read from the public Hub API.
 // `downloads` is the Hub's 30-day count, matching the org dashboard Space.
 export const syncedAt = "2026-11-18"
-export const hubTotals = {"models":49,"datasets":9,"modelDownloads":1747,"datasetDownloads":2851}
+export const hubTotals = {"models":49,"datasets":10,"modelDownloads":1747,"datasetDownloads":2933}
 export const hubModels = [
   {
     "name": "whisper-small-pld-ceb",
@@ -31,7 +31,7 @@ export const hubModels = [
     "task": "Text generation",
     "downloads": 111,
     "likes": 1,
-    "updated": "2026-04-16",
+    "updated": "2026-11-18",
     "created": "2025-12-19",
     "base": "openai/gpt-oss-20b",
     "data": "LanceBunag/BalitaNLP",
@@ -547,7 +547,7 @@ export const hubModels = [
 export const hubDatasets = [
   {
     "id": "filipinospeechcorpus",
-    "downloads": 1091,
+    "downloads": 1042,
     "likes": 3,
     "updated": "2026-08-11",
     "created": "2026-03-21",
@@ -556,7 +556,7 @@ export const hubDatasets = [
   },
   {
     "id": "pld",
-    "downloads": 886,
+    "downloads": 867,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-08-08",
@@ -582,6 +582,15 @@ export const hubDatasets = [
     "license": "mit"
   },
   {
+    "id": "chika",
+    "downloads": 146,
+    "likes": 0,
+    "updated": "2026-11-18",
+    "created": "2026-11-14",
+    "gated": true,
+    "license": null
+  },
+  {
     "id": "halo-bcl",
     "downloads": 65,
     "likes": 0,
@@ -592,7 +601,7 @@ export const hubDatasets = [
   },
   {
     "id": "kumu-livestream-segmented",
-    "downloads": 33,
+    "downloads": 35,
     "likes": 0,
     "updated": "2026-08-11",
     "created": "2026-08-06",
@@ -610,7 +619,7 @@ export const hubDatasets = [
   },
   {
     "id": "kumu-livestream-raw",
-    "downloads": 26,
+    "downloads": 28,
     "likes": 0,
     "updated": "2026-09-12",
     "created": "2026-08-11",
