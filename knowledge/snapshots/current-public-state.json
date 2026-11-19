@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-17T04:39:26.997Z",
+  "generated_at": "2026-11-19T03:42:25.126Z",
   "sources_manifest_ref": "knowledge/rag-sources.yaml",
   "totals": {
     "models": 49,
-    "datasets": 9
+    "datasets": 10
   },
   "datasets": [
     {
@@ -126,6 +126,24 @@
         "fil",
         "en"
       ]
+    },
+    {
+      "id": "sapinsapin/chika",
+      "name": "chika",
+      "gated": "manual-gate",
+      "private": false,
+      "lastModified": "2026-11-19T01:47:30.000Z",
+      "license": "other",
+      "license_name": "source-specific-rights-unresolved",
+      "languages": [
+        "fil",
+        "tgl",
+        "hil",
+        "eng",
+        "ceb",
+        "bik",
+        "ilo"
+      ]
     }
   ],
   "models": [
@@ -162,7 +180,7 @@
       "pipeline_tag": "text-generation",
       "gated": false,
       "private": false,
-      "lastModified": "2026-04-16T14:26:05.000Z",
+      "lastModified": "2026-11-18T19:38:23.000Z",
       "license": "apache-2.0"
     },
     {
