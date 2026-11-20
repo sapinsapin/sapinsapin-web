@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-19T03:42:25.126Z",
+  "generated_at": "2026-11-20T03:35:47.986Z",
   "sources_manifest_ref": "knowledge/rag-sources.yaml",
   "totals": {
     "models": 49,
@@ -132,7 +132,7 @@
       "name": "chika",
       "gated": "manual-gate",
       "private": false,
-      "lastModified": "2026-11-19T01:47:30.000Z",
+      "lastModified": "2026-11-19T08:39:21.000Z",
       "license": "other",
       "license_name": "source-specific-rights-unresolved",
       "languages": [
