@@ -2,7 +2,7 @@
 // Live state of https://huggingface.co/sapinsapin, read from the public Hub API.
 // `downloads` is the Hub's 30-day count, matching the org dashboard Space.
 export const syncedAt = "2026-11-19"
-export const hubTotals = {"models":49,"datasets":10,"modelDownloads":2066,"datasetDownloads":2933}
+export const hubTotals = {"models":49,"datasets":10,"modelDownloads":2066,"datasetDownloads":3918}
 export const hubModels = [
   {
     "name": "gpt-oss-20b-balitanlp-cpt",
@@ -546,8 +546,17 @@ export const hubModels = [
 ]
 export const hubDatasets = [
   {
+    "id": "chika",
+    "downloads": 1139,
+    "likes": 0,
+    "updated": "2026-11-19",
+    "created": "2026-11-14",
+    "gated": true,
+    "license": null
+  },
+  {
     "id": "filipinospeechcorpus",
-    "downloads": 1042,
+    "downloads": 1038,
     "likes": 3,
     "updated": "2026-08-11",
     "created": "2026-03-21",
@@ -556,7 +565,7 @@ export const hubDatasets = [
   },
   {
     "id": "pld",
-    "downloads": 867,
+    "downloads": 881,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-08-08",
@@ -565,7 +574,7 @@ export const hubDatasets = [
   },
   {
     "id": "halo-tgl",
-    "downloads": 370,
+    "downloads": 353,
     "likes": 0,
     "updated": "2026-03-27",
     "created": "2025-12-25",
@@ -582,17 +591,8 @@ export const hubDatasets = [
     "license": "mit"
   },
   {
-    "id": "chika",
-    "downloads": 146,
-    "likes": 0,
-    "updated": "2026-11-19",
-    "created": "2026-11-14",
-    "gated": true,
-    "license": null
-  },
-  {
     "id": "halo-bcl",
-    "downloads": 65,
+    "downloads": 68,
     "likes": 0,
     "updated": "2026-03-27",
     "created": "2025-12-26",
@@ -601,20 +601,11 @@ export const hubDatasets = [
   },
   {
     "id": "kumu-livestream-segmented",
-    "downloads": 35,
+    "downloads": 34,
     "likes": 0,
     "updated": "2026-08-11",
     "created": "2026-08-06",
     "gated": true,
-    "license": null
-  },
-  {
-    "id": "BantayWika",
-    "downloads": 30,
-    "likes": 0,
-    "updated": "2026-03-14",
-    "created": "2026-03-13",
-    "gated": false,
     "license": null
   },
   {
@@ -624,6 +615,15 @@ export const hubDatasets = [
     "updated": "2026-09-12",
     "created": "2026-08-11",
     "gated": true,
+    "license": null
+  },
+  {
+    "id": "BantayWika",
+    "downloads": 27,
+    "likes": 0,
+    "updated": "2026-03-14",
+    "created": "2026-03-13",
+    "gated": false,
     "license": null
   },
   {
