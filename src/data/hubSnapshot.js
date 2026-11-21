@@ -549,7 +549,7 @@ export const hubDatasets = [
     "id": "chika",
     "downloads": 5900,
     "likes": 0,
-    "updated": "2026-11-19",
+    "updated": "2026-11-21",
     "created": "2026-11-14",
     "gated": true,
     "license": null
