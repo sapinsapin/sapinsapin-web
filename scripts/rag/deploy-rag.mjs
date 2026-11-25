@@ -131,7 +131,18 @@ async function runRetrievalQa() {
 const digest = content => createHash('sha256').update(content).digest('hex')
 
 async function verifyBytes(id, expected) {
-  if (digest(await downloadItem(id)) !== digest(expected)) throw new Error('Indexed item download does not match expected content bytes.')
+  const actual = await downloadItem(id)
+  if (digest(actual) === digest(expected)) return
+  // Say *how* they differ. The knowledge file is public, so a short excerpt
+  // around the first differing byte is safe to log and turns a bare "does not
+  // match" into something a person can act on.
+  let at = 0
+  while (at < actual.length && at < expected.length && actual[at] === expected[at]) at += 1
+  const excerpt = (buf) => JSON.stringify(buf.subarray(Math.max(0, at - 60), at + 100).toString('utf8'))
+  console.error(`Byte mismatch for item ${id}: remote ${actual.length} bytes sha256 ${digest(actual).slice(0, 12)}, expected ${expected.length} bytes sha256 ${digest(expected).slice(0, 12)}, first difference at byte ${at}.`)
+  console.error(`  remote:   ${excerpt(actual)}`)
+  console.error(`  expected: ${excerpt(expected)}`)
+  throw new Error('Indexed item download does not match expected content bytes.')
 }
 
 async function health() {
@@ -141,7 +152,14 @@ async function health() {
   if (items.length !== 1) throw new Error('Expected exactly one production item.')
   const item = await apiJson(`/items/${encodeURIComponent(items[0].id)}`)
   if (item.status !== 'completed' || item.chunks_count <= 0) throw new Error('Production item is not completely indexed.')
-  await verifyBytes(item.id, await readFile(sourcePath))
+  try {
+    await verifyBytes(item.id, await readFile(sourcePath))
+  } catch (error) {
+    // Seen 19-25 Nov 2026: a refresh merged, its deploy failed retrieval QA
+    // and rolled back, and this check then stayed red every day with no hint.
+    console.error('Production is behind main. The usual cause is that the last "SSAI RAG Production Deployment" run failed retrieval QA and restored the previous item — open that run for the failing question and its top chunks.')
+    throw error
+  }
   await runRetrievalQa()
   console.log('Production health passed: exact committed bytes, completed indexing, and retrieval QA.')
 }

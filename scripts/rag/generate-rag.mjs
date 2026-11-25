@@ -96,6 +96,21 @@ function buildTeamRosterTable(team) {
   ].join('\n')
 }
 
+// A one-sentence answer to "who leads / who is on the team", placed in the
+// identity section. The roster table alone lives in a single chunk that a
+// small catalog change can push out of the top search results (19-25 Nov
+// 2026: one new dataset row re-chunked the file and every deploy failed the
+// who-leads retrieval QA). The identity section ranks for nearly every
+// question, so a roster sentence there keeps the answer retrievable. Built
+// from the same snapshot as the table, so the two cannot disagree.
+function buildTeamLeadershipLine(team) {
+  const founders = team.filter((p) => /founder/i.test(p.role)).map((p) => p.name)
+  const others = team.filter((p) => !/founder/i.test(p.role))
+  const lead = founders.length ? `SapinSapin AI is led by ${founders.join(' and ')} (Founder)` : 'SapinSapin AI does not list a founder on its site'
+  const rest = others.length ? `; its current team roster also lists ${others.map((p) => `${p.name} (${p.role})`).join(', ')}` : ''
+  return `**Who leads SapinSapin AI and who is on the team:** ${lead}${rest}, per the People section of the official website. See the team section below for links. [confirmed — src/App.jsx]`
+}
+
 function buildInternetoftimNote(snapshot) {
   const list = snapshot.internetoftim_personal_models
   if (!Array.isArray(list)) {
@@ -142,6 +157,7 @@ async function main() {
 
   const placeholders = {
     '{{TEAM_ROSTER_TABLE}}': buildTeamRosterTable(snapshot.team),
+    '{{TEAM_LEADERSHIP_LINE}}': buildTeamLeadershipLine(snapshot.team),
     '{{CATALOG_SUMMARY_LINE}}': `Catalog totals as of ${snapshotDate}: ${snapshot.totals.datasets} public datasets, ${snapshot.totals.models} public models on huggingface.co/sapinsapin. **This count changes as the org publishes new work \u2014 always prefer the live Hugging Face org page over this number if the user needs a current total.** [confirmed via HF public API]`,
     '{{DATASET_TABLE}}': buildDatasetTable(snapshot, blurbs),
     '{{MODEL_FAMILIES_SUMMARY}}': `${snapshot.totals.models} public model repositories exist on huggingface.co/sapinsapin as of ${snapshotDate}, grouped by task:\n\n${buildModelFamiliesSummary(snapshot, blurbs)}`,
