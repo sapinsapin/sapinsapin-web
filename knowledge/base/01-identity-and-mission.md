@@ -6,8 +6,6 @@
 
 SapinSapin AI is an open research initiative building datasets, speech-recognition models, text-to-speech models, and text-generation models for Philippine languages, plus a public website and browser demo. [confirmed — sapinsapin-web repo, huggingface.co/sapinsapin]
 
-{{TEAM_LEADERSHIP_LINE}}
-
 Its own site states its purpose as: "SapinSapin AI builds open speech and language foundations so Philippine AI can be made with — and for — the people who speak it." [confirmed — sapinsapin.ai hero copy]
 
 The organization is also styled "Sariling AI Pilipinas" (GitHub) and "Sariling Ai PINas" (Hugging Face) — both are the same initiative under different taglines, not separate projects. [confirmed]
