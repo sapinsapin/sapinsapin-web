@@ -4,20 +4,21 @@ version: "3.0-generated"
 status: CANDIDATE — NOT YET DEPLOYED. Generated automatically from knowledge/base/*.md and knowledge/snapshots/current-public-state.json. Merging its reviewed PR to protected main triggers automatic production deployment; see docs/SAPPY-RAG-UPDATE-PROCEDURE.md.
 predecessor: SapinSapin-knowledge-base-rag-v2.md (content-frozen candidate, 2026-09-22) — itself succeeding SapinSapin-knowledge-base-rag-ready.md (v1, production item id 87c37f86cb5c42a387e5fdaa5ec5ab09, deployed 2026-09-18)
 knowledge_snapshot_date: "2026-11-22"
-generated_at: "2026-11-25T14:36:14.248Z"
+generated_at: "2026-11-25T16:10:42.043Z"
 canonical_source_policy: ssai/docs/KNOWLEDGE-SOURCES.md (authority hierarchy: live infra/repo > live first-party site/HF/repo > canonical SSAI docs > this RAG lineage > general research snapshot > inference)
 source_manifest: knowledge/rag-sources.yaml
 scope: Public-facing knowledge for Sappy (Discord + web chat assistant). Contains no secrets, account IDs, Discord IDs, OAuth details, or internal deployment instructions — see ssai/docs/SAPPY-OPERATIONS.md for that internal material.
 ---
 
 # SapinSapin AI — Knowledge Base for Sappy (generated candidate)
+
+**Who leads SapinSapin AI and who is on the team:** SapinSapin AI is led by Tim Santos (Founder); its current team roster also lists Marc Ocampo (Core team), JC Diamante (Core team), Arjhine A. Ty (Core team), per the People section of the official website. See the team section below for links. [confirmed — src/App.jsx]
+
 ## 01 — Identity and Mission (durable)
 
 ### What SapinSapin AI is
 
 SapinSapin AI is an open research initiative building datasets, speech-recognition models, text-to-speech models, and text-generation models for Philippine languages, plus a public website and browser demo. [confirmed — sapinsapin-web repo, huggingface.co/sapinsapin]
-
-**Who leads SapinSapin AI and who is on the team:** SapinSapin AI is led by Tim Santos (Founder); its current team roster also lists Marc Ocampo (Core team), JC Diamante (Core team), Arjhine A. Ty (Core team), per the People section of the official website. See the team section below for links. [confirmed — src/App.jsx]
 
 Its own site states its purpose as: "SapinSapin AI builds open speech and language foundations so Philippine AI can be made with — and for — the people who speak it." [confirmed — sapinsapin.ai hero copy]
 

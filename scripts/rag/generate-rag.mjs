@@ -96,13 +96,15 @@ function buildTeamRosterTable(team) {
   ].join('\n')
 }
 
-// A one-sentence answer to "who leads / who is on the team", placed in the
-// identity section. The roster table alone lives in a single chunk that a
+// A one-sentence answer to "who leads / who is on the team", placed directly
+// under the document title. The roster table lives in a single chunk that a
 // small catalog change can push out of the top search results (19-25 Nov
 // 2026: one new dataset row re-chunked the file and every deploy failed the
-// who-leads retrieval QA). The identity section ranks for nearly every
-// question, so a roster sentence there keeps the answer retrievable. Built
-// from the same snapshot as the table, so the two cannot disagree.
+// who-leads retrieval QA). Measured on 26 Nov 2026, the opening chunk (front
+// matter + title + first paragraph) ranks top 3 for that question, while
+// section 01's own chunk ranks 12th of 14; a line placed in section 01 fell
+// outside the opening chunk and did not help. Built from the same snapshot
+// as the roster table, so the two cannot disagree.
 function buildTeamLeadershipLine(team) {
   const founders = team.filter((p) => /founder/i.test(p.role)).map((p) => p.name)
   const others = team.filter((p) => !/founder/i.test(p.role))
@@ -157,7 +159,6 @@ async function main() {
 
   const placeholders = {
     '{{TEAM_ROSTER_TABLE}}': buildTeamRosterTable(snapshot.team),
-    '{{TEAM_LEADERSHIP_LINE}}': buildTeamLeadershipLine(snapshot.team),
     '{{CATALOG_SUMMARY_LINE}}': `Catalog totals as of ${snapshotDate}: ${snapshot.totals.datasets} public datasets, ${snapshot.totals.models} public models on huggingface.co/sapinsapin. **This count changes as the org publishes new work \u2014 always prefer the live Hugging Face org page over this number if the user needs a current total.** [confirmed via HF public API]`,
     '{{DATASET_TABLE}}': buildDatasetTable(snapshot, blurbs),
     '{{MODEL_FAMILIES_SUMMARY}}': `${snapshot.totals.models} public model repositories exist on huggingface.co/sapinsapin as of ${snapshotDate}, grouped by task:\n\n${buildModelFamiliesSummary(snapshot, blurbs)}`,
@@ -189,6 +190,9 @@ async function main() {
     '---',
     '',
     '# SapinSapin AI \u2014 Knowledge Base for Sappy (generated candidate)',
+    '',
+    buildTeamLeadershipLine(snapshot.team),
+    '',
     '',
   ].join('\n')
 
