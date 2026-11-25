@@ -110,8 +110,20 @@ jobs:
           $prs
           EOF
 
+  flag-stuck-bot-prs:
+    if: always() && github.repository == 'sapinsapin/sapinsapin-web'
+    needs: merge-dependabot-updates
+    runs-on: ubuntu-24.04
+    # Status events arrive in bursts (CI + Vercel report within seconds). Two
+    # runs at once both saw "no flag issue yet" and each filed one, which is
+    # why every stuck PR got a duplicate issue (#48-#69). Queue only this job:
+    # a group keeps just the newest pending run, which is harmless for a sweep
+    # but would drop merge attempts if it sat on the merge job.
+    concurrency:
+      group: flag-stuck-bot-prs
+      cancel-in-progress: false
+    steps:
       - name: Flag bot pull requests stuck for more than 2 days
-        if: always()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
@@ -119,11 +131,27 @@ jobs:
           cutoff=$(date -u -d '2 days ago' +%Y-%m-%dT%H:%M:%SZ)
           stuck=$(gh api "repos/$GH_REPO/pulls?state=open&base=main" --paginate \
             --jq "[.[] | select((.user.login == \"dependabot[bot]\" or .user.login == \"github-actions[bot]\") and .created_at < \"$cutoff\") | .number] | .[]")
+          # Exact-title match against the issue list itself: `--search` reads
+          # an index that lags by seconds, so it could not see an issue the
+          # previous run had just filed.
+          open_flags=$(gh issue list --repo "$GH_REPO" --state open --limit 200 --json number,title \
+            --jq '.[] | select(.title | test("^Bot PR #[0-9]+ has been open for more than 2 days$")) | "\(.number) \(.title)"')
           for pr in $stuck; do
             title="Bot PR #$pr has been open for more than 2 days"
-            existing=$(gh issue list --repo "$GH_REPO" --state open --search "\"$title\" in:title" --json number --jq 'length')
-            if [ "$existing" -eq 0 ]; then
+            if ! printf '%s\n' "$open_flags" | grep -Fq " $title"; then
               gh issue create --repo "$GH_REPO" --title "$title" \
                 --body "The auto-merge workflow has not been able to merge #$pr. Open its latest Auto-merge run for the reason, then merge or close it by hand."
+            fi
+          done
+          # A flag is only useful while its PR is still open. Close it (and any
+          # duplicate) once the PR has been merged or closed, so the issue list
+          # shows real work rather than history.
+          printf '%s\n' "$open_flags" | while read -r issue rest; do
+            [ -n "$issue" ] || continue
+            pr=$(printf '%s' "$rest" | sed -E 's/^Bot PR #([0-9]+) .*/\1/')
+            state=$(gh pr view "$pr" --repo "$GH_REPO" --json state --jq '.state' 2>/dev/null || echo UNKNOWN)
+            if [ "$state" = "MERGED" ] || [ "$state" = "CLOSED" ]; then
+              gh issue close "$issue" --repo "$GH_REPO" --reason completed \
+                --comment "PR #$pr is now ${state,,}; closing this flag automatically."
             fi
           done
