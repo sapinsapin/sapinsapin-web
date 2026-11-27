@@ -3,8 +3,8 @@ document_type: sappy-rag-knowledge-base
 version: "3.0-generated"
 status: CANDIDATE — NOT YET DEPLOYED. Generated automatically from knowledge/base/*.md and knowledge/snapshots/current-public-state.json. Merging its reviewed PR to protected main triggers automatic production deployment; see docs/SAPPY-RAG-UPDATE-PROCEDURE.md.
 predecessor: SapinSapin-knowledge-base-rag-v2.md (content-frozen candidate, 2026-09-22) — itself succeeding SapinSapin-knowledge-base-rag-ready.md (v1, production item id 87c37f86cb5c42a387e5fdaa5ec5ab09, deployed 2026-09-18)
-knowledge_snapshot_date: "2026-11-22"
-generated_at: "2026-11-25T16:10:42.043Z"
+knowledge_snapshot_date: "2026-11-27"
+generated_at: "2026-11-27T04:21:31.010Z"
 canonical_source_policy: ssai/docs/KNOWLEDGE-SOURCES.md (authority hierarchy: live infra/repo > live first-party site/HF/repo > canonical SSAI docs > this RAG lineage > general research snapshot > inference)
 source_manifest: knowledge/rag-sources.yaml
 scope: Public-facing knowledge for Sappy (Discord + web chat assistant). Contains no secrets, account IDs, Discord IDs, OAuth details, or internal deployment instructions — see ssai/docs/SAPPY-OPERATIONS.md for that internal material.
@@ -91,7 +91,7 @@ A contributor perspective does not establish formal team membership. Some quoted
 
 ### Datasets and models — current public catalog
 
-Catalog totals as of 2026-11-22: 10 public datasets, 49 public models on huggingface.co/sapinsapin. **This count changes as the org publishes new work — always prefer the live Hugging Face org page over this number if the user needs a current total.** [confirmed via HF public API]
+Catalog totals as of 2026-11-27: 11 public datasets, 50 public models on huggingface.co/sapinsapin. **This count changes as the org publishes new work — always prefer the live Hugging Face org page over this number if the user needs a current total.** [confirmed via HF public API]
 
 | Dataset | Content | Languages (Hub tag codes) | License / access |
 |---|---|---|---|
@@ -104,14 +104,15 @@ Catalog totals as of 2026-11-22: 10 public datasets, 49 public models on hugging
 | `halohalo` | A combined FineWeb-compatible web corpus merging the cleaned halo-tgl, halo-hil, and halo-bcl corpora. | Not stated | Not stated on the public card |
 | `kumu-livestream-raw` | Unsegmented Taglish livestream source recordings. | tl, fil, en | Not stated on the public card — behind an automatic Hugging Face access gate (agree-to-terms, not manually reviewed) |
 | `kumu-livestream-segmented` | Taglish code-switched livestream speech, segmented for ASR/TTS research. | tl, fil, en | Not stated on the public card — behind an automatic Hugging Face access gate (agree-to-terms, not manually reviewed) |
+| `kuya-j-distill` | Published on the Hub and not yet described here — the dataset card is the source of record. | ceb, hil, war, ilo, pam, bcl, fil, en | CC-BY-4.0 |
 | `pld` | Prompted 16 kHz speech, the flagship collection, recorded across nine Philippine languages plus English. | bcl, ceb, eng, fil, hil, ilo, pag, pam, tsg, war | `up-dsp-research` |
 
 **License rule: there is no single project-wide license.** Always name the specific dataset and its own license; if unstated, say "not stated on the public card — check huggingface.co/datasets/sapinsapin/<name>" rather than assuming MIT or "open" by default. Never tell a user a dataset can be used commercially without pointing them to that dataset's own card — commercial permission cannot be inferred from the project's existence or from other datasets' licenses.
 
-49 public model repositories exist on huggingface.co/sapinsapin as of 2026-11-22, grouped by task:
+50 public model repositories exist on huggingface.co/sapinsapin as of 2026-11-27, grouped by task:
 
 - **Untagged / other** (2 repositories): Additional generation/vision-language checkpoints not yet tagged with a Hub pipeline type — check the specific model card for its actual task.
-- **Text Generation** (4 repositories): Continually-pretrained or fine-tuned large language models adapted to Filipino/Philippine-language text (e.g. Llama 3.1 and gpt-oss checkpoints continued on Filipino news text, plus a Bikol-focused fine-tune).
+- **Text Generation** (5 repositories): Continually-pretrained or fine-tuned large language models adapted to Filipino/Philippine-language text (e.g. Llama 3.1 and gpt-oss checkpoints continued on Filipino news text, plus a Bikol-focused fine-tune).
 - **Text To Speech** (11 repositories): SpeechT5-based text-to-speech fine-tunes, mostly one model per Philippine language trained on the PLD dataset, plus a Filipino Speech Corpus fine-tune with a browser-deployable ONNX export.
 - **Automatic Speech Recognition** (29 repositories): Whisper- and OmniASR-based speech-recognition fine-tunes, mostly one model per Philippine language trained on the PLD dataset, plus Filipino Speech Corpus fine-tunes with browser-deployable ONNX exports.
 - **Audio To Audio** (1 repository): Voice-conversion models that re-speak existing audio in a different voice while preserving words and timing.
@@ -237,6 +238,7 @@ Full source authority tiers, refresh strategy, and which sources may auto-update
 | [gpt-oss-20b-balitanlp-cpt](https://huggingface.co/sapinsapin/gpt-oss-20b-balitanlp-cpt) | text-generation | apache-2.0 |
 | [gpt-oss-20b-balitanlp-cpt-bf16](https://huggingface.co/sapinsapin/gpt-oss-20b-balitanlp-cpt-bf16) | text-generation | apache-2.0 |
 | [halo-lid](https://huggingface.co/sapinsapin/halo-lid) | text-classification | cc-by-nc-4.0 |
+| [kuya-j-gemma4-e2b](https://huggingface.co/sapinsapin/kuya-j-gemma4-e2b) | text-generation | gemma |
 | [llama31-8b-balitanlp-cpt](https://huggingface.co/sapinsapin/llama31-8b-balitanlp-cpt) | text-generation | llama3.1 |
 | [llama31-8b-balitanlp-IT](https://huggingface.co/sapinsapin/llama31-8b-balitanlp-IT) | Not tagged | Not stated in public API; check card |
 | [omniASR_W2V_1B_SSL-ctc-char-pld_ceb](https://huggingface.co/sapinsapin/omniASR_W2V_1B_SSL-ctc-char-pld_ceb) | automatic-speech-recognition | cc-by-nc-4.0 |
