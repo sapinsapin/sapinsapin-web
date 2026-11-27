@@ -2,7 +2,7 @@
 // Live state of https://huggingface.co/sapinsapin, read from the public Hub API.
 // `downloads` is the Hub's 30-day count, matching the org dashboard Space.
 export const syncedAt = "2026-11-27"
-export const hubTotals = {"models":50,"datasets":11,"modelDownloads":2134,"datasetDownloads":19425}
+export const hubTotals = {"models":50,"datasets":11,"modelDownloads":2134,"datasetDownloads":24592}
 export const hubModels = [
   {
     "name": "gpt-oss-20b-balitanlp-cpt",
@@ -152,7 +152,7 @@ export const hubModels = [
     "task": "Text generation",
     "downloads": 44,
     "likes": 0,
-    "updated": "2026-11-26",
+    "updated": "2026-11-27",
     "created": "2026-11-26",
     "base": "google/gemma-4-E2B-it",
     "data": null,
@@ -558,7 +558,7 @@ export const hubModels = [
 export const hubDatasets = [
   {
     "id": "chika",
-    "downloads": 16679,
+    "downloads": 21878,
     "likes": 0,
     "updated": "2026-11-21",
     "created": "2026-11-14",
@@ -567,7 +567,7 @@ export const hubDatasets = [
   },
   {
     "id": "filipinospeechcorpus",
-    "downloads": 1025,
+    "downloads": 1019,
     "likes": 3,
     "updated": "2026-08-11",
     "created": "2026-03-21",
@@ -576,7 +576,7 @@ export const hubDatasets = [
   },
   {
     "id": "pld",
-    "downloads": 795,
+    "downloads": 761,
     "likes": 0,
     "updated": "2026-09-26",
     "created": "2026-08-08",
@@ -585,7 +585,7 @@ export const hubDatasets = [
   },
   {
     "id": "halo-tgl",
-    "downloads": 368,
+    "downloads": 373,
     "likes": 0,
     "updated": "2026-03-27",
     "created": "2025-12-25",
@@ -594,7 +594,7 @@ export const hubDatasets = [
   },
   {
     "id": "halo-hil",
-    "downloads": 349,
+    "downloads": 327,
     "likes": 0,
     "updated": "2026-09-23",
     "created": "2025-12-28",
@@ -611,17 +611,8 @@ export const hubDatasets = [
     "license": null
   },
   {
-    "id": "kumu-livestream-segmented",
-    "downloads": 37,
-    "likes": 0,
-    "updated": "2026-08-11",
-    "created": "2026-08-06",
-    "gated": true,
-    "license": null
-  },
-  {
     "id": "kumu-livestream-raw",
-    "downloads": 33,
+    "downloads": 38,
     "likes": 0,
     "updated": "2026-09-12",
     "created": "2026-08-11",
@@ -629,8 +620,17 @@ export const hubDatasets = [
     "license": null
   },
   {
+    "id": "kumu-livestream-segmented",
+    "downloads": 35,
+    "likes": 0,
+    "updated": "2026-08-11",
+    "created": "2026-08-06",
+    "gated": true,
+    "license": null
+  },
+  {
     "id": "BantayWika",
-    "downloads": 32,
+    "downloads": 34,
     "likes": 0,
     "updated": "2026-03-14",
     "created": "2026-03-13",
@@ -639,7 +639,7 @@ export const hubDatasets = [
   },
   {
     "id": "halohalo",
-    "downloads": 18,
+    "downloads": 19,
     "likes": 0,
     "updated": "2026-03-28",
     "created": "2026-03-28",
@@ -648,7 +648,7 @@ export const hubDatasets = [
   },
   {
     "id": "kuya-j-distill",
-    "downloads": 0,
+    "downloads": 19,
     "likes": 0,
     "updated": "2026-11-26",
     "created": "2026-11-18",
