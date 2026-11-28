@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-27T04:21:30.971Z",
+  "generated_at": "2026-11-28T04:01:47.018Z",
   "sources_manifest_ref": "knowledge/rag-sources.yaml",
   "totals": {
     "models": 50,
@@ -613,7 +613,7 @@
       "pipeline_tag": "text-generation",
       "gated": false,
       "private": false,
-      "lastModified": "2026-11-26T07:39:51.000Z",
+      "lastModified": "2026-11-27T17:21:05.000Z",
       "license": "gemma"
     }
   ],
